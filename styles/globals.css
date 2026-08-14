@@ -1,0 +1,6 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root{color-scheme:dark} html{scroll-behavior:smooth} body{margin:0;background:#070707;color:#f5f5f5;font-family:Arial,Helvetica,sans-serif} a{text-decoration:none}
+.container{@apply max-w-7xl mx-auto px-5}.card{@apply border border-white/10 bg-white/[0.03] rounded-3xl}.btn-gold{@apply inline-flex items-center justify-center rounded-full bg-gold px-5 py-3 font-semibold text-black transition hover:opacity-90}.btn-outline{@apply inline-flex items-center justify-center rounded-full border border-gold px-5 py-3 font-semibold text-gold transition hover:bg-gold hover:text-black}
