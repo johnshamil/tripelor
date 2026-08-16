@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CalendarDays, BedDouble, Utensils, Users, MapPin, MessageCircle } from "lucide-react";
+import { CalendarDays, BedDouble, Utensils, Users, MapPin, MessageCircle, Mail } from "lucide-react";
 
 const WHATSAPP_NUMBER = "9609429403";
 
@@ -24,8 +24,11 @@ export default function BookingPage() {
   const [rooms, setRooms] = useState("1");
   const [mealPlan, setMealPlan] = useState("Bed & Breakfast");
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
+  const [sending, setSending] = useState(false);
+  const [status, setStatus] = useState("");
 
   const nights = useMemo(() => {
     if (!checkIn || !checkOut) return 0;
@@ -35,21 +38,68 @@ export default function BookingPage() {
     return diff > 0 ? diff : 0;
   }, [checkIn, checkOut]);
 
-  function requestBooking() {
+  function validateBooking() {
     if (!checkIn || !checkOut) {
-      alert("Please select your check-in and check-out dates.");
-      return;
+      setStatus("Please select your check-in and check-out dates.");
+      return false;
     }
-
     if (nights <= 0) {
-      alert("Check-out date must be after the check-in date.");
-      return;
+      setStatus("Check-out date must be after the check-in date.");
+      return false;
     }
-
     if (!fullName.trim()) {
-      alert("Please enter your full name.");
-      return;
+      setStatus("Please enter your full name.");
+      return false;
     }
+    if (!email.trim() || !email.includes("@")) {
+      setStatus("Please enter a valid email address.");
+      return false;
+    }
+    return true;
+  }
+
+  async function sendBookingEmail() {
+    setStatus("");
+    if (!validateBooking()) return;
+
+    setSending(true);
+    try {
+      const response = await fetch("/api/booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          destination,
+          checkIn: formatDate(checkIn),
+          checkOut: formatDate(checkOut),
+          nights,
+          adults,
+          children,
+          roomType,
+          rooms,
+          mealPlan,
+          specialRequests: specialRequests.trim(),
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result?.error || "Unable to send booking request.");
+      }
+
+      setStatus("Booking request sent successfully. Tripelor will contact you shortly.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Unable to send booking request.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  function openWhatsApp() {
+    setStatus("");
+    if (!validateBooking()) return;
 
     const message = [
       "Hello Tripelor,",
@@ -57,6 +107,7 @@ export default function BookingPage() {
       "I would like to request a booking.",
       "",
       `Name: ${fullName.trim()}`,
+      `Email: ${email.trim()}`,
       `Phone / WhatsApp: ${phone.trim() || "Not provided"}`,
       `Destination: ${destination}`,
       `Check-in: ${formatDate(checkIn)}`,
@@ -81,7 +132,7 @@ export default function BookingPage() {
         <p className="text-sm uppercase tracking-[0.3em] text-gold">Book Your Stay</p>
         <h1 className="mt-2 text-4xl font-bold md:text-5xl">Plan your perfect Tripelor escape</h1>
         <p className="mt-4 max-w-2xl text-gray-400">
-          Choose your travel dates, room preference, guests and meal plan. Your booking request will open directly in WhatsApp for confirmation.
+          Choose your travel dates, room preference, guests and meal plan. Submit the form and Tripelor will receive your booking request by email.
         </p>
 
         <form className="card mt-10 grid gap-6 p-6 md:p-8" onSubmit={(e) => e.preventDefault()}>
@@ -159,17 +210,26 @@ export default function BookingPage() {
             </select>
           </label>
 
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-3">
             <input value={fullName} onChange={(e)=>setFullName(e.target.value)} placeholder="Full name" className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold" />
+            <input value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="Email address" type="email" className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold" />
             <input value={phone} onChange={(e)=>setPhone(e.target.value)} placeholder="Phone / WhatsApp" className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold" />
           </div>
 
           <textarea value={specialRequests} onChange={(e)=>setSpecialRequests(e.target.value)} rows={4} placeholder="Special requests, airport transfer, honeymoon setup, excursions, etc." className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold" />
 
-          <button type="button" onClick={requestBooking} className="btn-gold w-full gap-2 md:w-auto">
-            <MessageCircle className="h-5 w-5" /> Request Booking on WhatsApp
-          </button>
-          <p className="text-xs text-gray-500">WhatsApp will open with your booking details already filled in. You can review the message before sending it to Tripelor.</p>
+          {status && <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-gray-200">{status}</div>}
+
+          <div className="flex flex-col gap-3 md:flex-row">
+            <button type="button" onClick={sendBookingEmail} disabled={sending} className="btn-gold w-full gap-2 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto">
+              <Mail className="h-5 w-5" /> {sending ? "Sending..." : "Send Booking Request"}
+            </button>
+            <button type="button" onClick={openWhatsApp} className="btn-outline w-full gap-2 md:w-auto">
+              <MessageCircle className="h-5 w-5" /> Send on WhatsApp
+            </button>
+          </div>
+
+          <p className="text-xs text-gray-500">Booking requests are enquiries only. Availability and final price will be confirmed by Tripelor.</p>
         </form>
       </div>
     </section>
