@@ -5,9 +5,19 @@ import { CalendarDays, BedDouble, Utensils, Users, MapPin, MessageCircle } from 
 
 const WHATSAPP_NUMBER = "9609429403";
 
+function formatDate(date: string) {
+  if (!date) return "";
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${date}T00:00:00`));
+}
+
 export default function BookingPage() {
   const [destination, setDestination] = useState("Maldives");
-  const [guests, setGuests] = useState("2 Adults");
+  const [adults, setAdults] = useState("2");
+  const [children, setChildren] = useState("0");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [roomType, setRoomType] = useState("Deluxe Room");
@@ -19,8 +29,8 @@ export default function BookingPage() {
 
   const nights = useMemo(() => {
     if (!checkIn || !checkOut) return 0;
-    const start = new Date(checkIn).getTime();
-    const end = new Date(checkOut).getTime();
+    const start = new Date(`${checkIn}T00:00:00`).getTime();
+    const end = new Date(`${checkOut}T00:00:00`).getTime();
     const diff = Math.ceil((end - start) / 86400000);
     return diff > 0 ? diff : 0;
   }, [checkIn, checkOut]);
@@ -42,23 +52,23 @@ export default function BookingPage() {
     }
 
     const message = [
-      "Hello Tripelor! 👋",
+      "Hello Tripelor,",
       "",
       "I would like to request a booking.",
       "",
-      `👤 Name: ${fullName}`,
-      `📱 Guest Phone/WhatsApp: ${phone || "Not provided"}`,
-      `📍 Destination: ${destination}`,
-      `📅 Check-in: ${checkIn}`,
-      `📅 Check-out: ${checkOut}`,
-      `🌙 Stay: ${nights} night${nights === 1 ? "" : "s"}`,
-      `👥 Guests: ${guests}`,
-      `🛏️ Room Type: ${roomType}`,
-      `🚪 Number of Rooms: ${rooms}`,
-      `🍽️ Meal Plan: ${mealPlan}`,
-      `📝 Special Requests: ${specialRequests.trim() || "None"}`,
+      `Name: ${fullName.trim()}`,
+      `Phone / WhatsApp: ${phone.trim() || "Not provided"}`,
+      `Destination: ${destination}`,
+      `Check-in: ${formatDate(checkIn)}`,
+      `Check-out: ${formatDate(checkOut)}`,
+      `Adults: ${adults}`,
+      `Children: ${children}`,
+      `Room: ${roomType}`,
+      `Rooms: ${rooms}`,
+      `Meal Plan: ${mealPlan}`,
+      `Special Request: ${specialRequests.trim() || "None"}`,
       "",
-      "Please confirm availability and send me the best price. Thank you!",
+      "Please confirm availability and price.",
     ].join("\n");
 
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
@@ -75,31 +85,17 @@ export default function BookingPage() {
         </p>
 
         <form className="card mt-10 grid gap-6 p-6 md:p-8" onSubmit={(e) => e.preventDefault()}>
-          <div className="grid gap-5 md:grid-cols-2">
-            <label className="grid gap-2">
-              <span className="flex items-center gap-2 text-sm font-medium"><MapPin className="h-4 w-4 text-gold"/>Destination</span>
-              <select value={destination} onChange={(e)=>setDestination(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold">
-                <option>Maldives</option>
-                <option>Dubai</option>
-                <option>Bali</option>
-                <option>Thailand</option>
-                <option>Italy</option>
-                <option>Japan</option>
-              </select>
-            </label>
-
-            <label className="grid gap-2">
-              <span className="flex items-center gap-2 text-sm font-medium"><Users className="h-4 w-4 text-gold"/>Guests</span>
-              <select value={guests} onChange={(e)=>setGuests(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold">
-                <option>1 Adult</option>
-                <option>2 Adults</option>
-                <option>2 Adults + 1 Child</option>
-                <option>2 Adults + 2 Children</option>
-                <option>3 Adults</option>
-                <option>4 Adults</option>
-              </select>
-            </label>
-          </div>
+          <label className="grid gap-2">
+            <span className="flex items-center gap-2 text-sm font-medium"><MapPin className="h-4 w-4 text-gold"/>Destination</span>
+            <select value={destination} onChange={(e)=>setDestination(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold">
+              <option>Maldives</option>
+              <option>Dubai</option>
+              <option>Bali</option>
+              <option>Thailand</option>
+              <option>Italy</option>
+              <option>Japan</option>
+            </select>
+          </label>
 
           <div className="grid gap-5 md:grid-cols-2">
             <label className="grid gap-2">
@@ -113,6 +109,21 @@ export default function BookingPage() {
           </div>
 
           {nights > 0 && <div className="rounded-xl border border-gold/30 bg-gold/10 px-4 py-3 text-sm text-gold">Stay length: {nights} night{nights === 1 ? "" : "s"}</div>}
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <label className="grid gap-2">
+              <span className="flex items-center gap-2 text-sm font-medium"><Users className="h-4 w-4 text-gold"/>Adults</span>
+              <select value={adults} onChange={(e)=>setAdults(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold">
+                {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </label>
+            <label className="grid gap-2">
+              <span className="flex items-center gap-2 text-sm font-medium"><Users className="h-4 w-4 text-gold"/>Children</span>
+              <select value={children} onChange={(e)=>setChildren(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold">
+                {[0,1,2,3,4,5,6].map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </label>
+          </div>
 
           <div className="grid gap-5 md:grid-cols-2">
             <label className="grid gap-2">
