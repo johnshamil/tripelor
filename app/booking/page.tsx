@@ -66,16 +66,31 @@ export default function BookingPage() {
   const nightlyRate = PROPERTY_RATES[propertyName]?.[mealPlan];
   const estimatedTotal = packageName && packagePrice ? packagePrice * Number(rooms) : (nightlyRate && nights > 0 ? nightlyRate * nights * Number(rooms) : 0);
   const location = propertyName === "Uhoo's Lavish Oasis" ? "V. Felidhoo, Maldives" : "Maldives";
+  const packageMaxCheckout = packageName && checkIn ? addDays(checkIn, 5) : undefined;
+  const checkoutMin = checkIn ? addDays(checkIn, 1) : undefined;
 
   function handleCheckIn(value: string) {
     setCheckIn(value);
     if (packageName && value) setCheckOut(addDays(value, 5));
   }
 
+  function handleCheckOut(value: string) {
+    if (packageName && checkIn) {
+      const maxDate = addDays(checkIn, 5);
+      if (value > maxDate) {
+        setCheckOut(maxDate);
+        setStatus("Package stays can be a maximum of 5 nights.");
+        return;
+      }
+    }
+    setCheckOut(value);
+    setStatus("");
+  }
+
   function validate() {
     if (!checkIn || !checkOut) { setStatus("Please select your check-in and check-out dates."); return false; }
     if (nights <= 0) { setStatus("Check-out date must be after the check-in date."); return false; }
-    if (packageName && nights !== 5) { setStatus("This package is for 5 nights. Please select a 5-night stay."); return false; }
+    if (packageName && nights > 5) { setStatus("Package stays can be a maximum of 5 nights."); return false; }
     if (!fullName.trim()) { setStatus("Please enter your full name."); return false; }
     if (!email.trim() || !email.includes("@")) { setStatus("Please enter a valid email address."); return false; }
     if (!phone.trim()) { setStatus("Please enter your phone number."); return false; }
@@ -134,9 +149,9 @@ export default function BookingPage() {
         <div className="rounded-xl border border-gold/30 bg-gold/10 px-4 py-3 text-sm text-gold">{propertyName} · BB ${PROPERTY_RATES[propertyName]["Bed & Breakfast"]} · HB ${PROPERTY_RATES[propertyName]["Half Board"]} · FB ${PROPERTY_RATES[propertyName]["Full Board"]} per room/night</div>
       </>}
 
-      <div className="grid gap-5 md:grid-cols-2"><label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><CalendarDays className="h-4 w-4 text-gold"/>Check-in</span><input type="date" value={checkIn} onChange={e => handleCheckIn(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold"/></label><label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><CalendarDays className="h-4 w-4 text-gold"/>Check-out</span><input type="date" value={checkOut} onChange={e => setCheckOut(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold"/></label></div>
+      <div className="grid gap-5 md:grid-cols-2"><label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><CalendarDays className="h-4 w-4 text-gold"/>Check-in</span><input type="date" value={checkIn} onChange={e => handleCheckIn(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold"/></label><label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><CalendarDays className="h-4 w-4 text-gold"/>Check-out</span><input type="date" value={checkOut} min={checkoutMin} max={packageMaxCheckout} onChange={e => handleCheckOut(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3 outline-none focus:border-gold"/></label></div>
 
-      {packageName && <p className="-mt-3 text-xs text-gray-500">Selecting check-in automatically sets check-out 5 nights later.</p>}
+      {packageName && <p className="-mt-3 text-xs text-gray-500">Selecting check-in automatically sets check-out 5 nights later. The check-out date cannot be more than 5 nights after check-in.</p>}
 
       <label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><BedDouble className="h-4 w-4 text-gold"/>Number of rooms</span><select value={rooms} onChange={e => setRooms(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3">{[1,2,3,4].map(n => <option key={n} value={n}>{n} Room{n > 1 ? "s" : ""}</option>)}</select></label>
 
