@@ -38,8 +38,6 @@ export async function POST(request: Request) {
       return Response.json({ error: "Name, email, check-in and check-out are required." }, { status: 400 });
     }
 
-    // Room bookings are locked atomically in the database before any email is sent.
-    // Package bookings are not inventory-locked until a specific guesthouse is selected.
     if (!packageName && propertyName) {
       if (!checkInISO || !checkOutISO || !roomType || !rooms) {
         return Response.json({ error: "Unable to verify room availability. Please select your stay and dates again." }, { status: 400 });
@@ -100,7 +98,7 @@ export async function POST(request: Request) {
       </div>`;
 
     const { response: adminResponse, result: adminResult } = await sendResend(apiKey, {
-      from: "Tripelor Bookings <onboarding@resend.dev>",
+      from: "Tripelor Bookings <bookings@tripelor.com>",
       to: [BOOKING_EMAIL],
       reply_to: email,
       subject,
@@ -134,8 +132,9 @@ export async function POST(request: Request) {
 
     try {
       const { response: customerResponse, result: customerResult } = await sendResend(apiKey, {
-        from: "Tripelor Bookings <onboarding@resend.dev>",
+        from: "Tripelor Bookings <bookings@tripelor.com>",
         to: [email],
+        reply_to: BOOKING_EMAIL,
         subject: `Tripelor booking request received - ${escapeHtml(bookingTitle)}`,
         html: customerHtml,
       });
