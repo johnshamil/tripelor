@@ -115,6 +115,8 @@ export default function BookingPage() {
           destination: packageName ? "Maldives" : location,
           checkIn: formatDate(checkIn),
           checkOut: formatDate(checkOut),
+          checkInISO: checkIn,
+          checkOutISO: checkOut,
           nights,
           adults: packageName ? null : adults,
           children: packageName ? null : children,
