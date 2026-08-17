@@ -1,12 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Globe2, ShieldCheck, Sparkles, MapPin, Utensils } from "lucide-react";
-
-const destinations = [
-  { name: "Maldives", text: "Crystal-clear lagoons, private islands, and unforgettable escapes.", image: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?q=80&w=1400&auto=format&fit=crop" },
-  { name: "Dubai", text: "Luxury, shopping, city lights, and world-class experiences.", image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1400&auto=format&fit=crop" },
-  { name: "Bali", text: "Tropical serenity, culture, wellness, and breathtaking nature.", image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=1400&auto=format&fit=crop" },
-];
+import { Globe2, ShieldCheck, Sparkles, MapPin, Utensils } from "lucide-react";
 
 export default function Home() {
   return (
@@ -18,19 +12,9 @@ export default function Home() {
           <div className="max-w-3xl py-24">
             <p className="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-gold">Discover. Escape. Remember.</p>
             <h1 className="text-5xl font-bold leading-tight md:text-7xl">Travel beautifully with <span className="text-gold">Tripelor</span></h1>
-            <p className="mt-6 max-w-2xl text-lg text-gray-200">Curated holidays, romantic escapes, island getaways, and unforgettable journeys designed around you.</p>
-            <div className="mt-8 flex flex-wrap gap-4"><Link href="/tours" className="btn-gold">Explore Packages</Link><Link href="/contact" className="btn-outline">Plan My Trip</Link></div>
+            <p className="mt-6 max-w-2xl text-lg text-gray-200">Relaxing island stays and memorable experiences, thoughtfully arranged for you.</p>
+            <div className="mt-8 flex flex-wrap gap-4"><Link href="/stays/uhoos-lavish-oasis" className="btn-gold">View Our Stay</Link><Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" className="btn-outline">Book Your Stay</Link></div>
           </div>
-        </div>
-      </section>
-
-      <section className="container py-20">
-        <div className="mb-10 flex items-end justify-between gap-6">
-          <div><p className="text-sm uppercase tracking-[0.3em] text-gold">Featured</p><h2 className="mt-2 text-4xl font-bold">Popular destinations</h2></div>
-          <Link href="/destinations" className="hidden items-center gap-2 text-gold sm:flex">View all <ArrowRight className="h-4 w-4" /></Link>
-        </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          {destinations.map(d => <article key={d.name} className="card overflow-hidden"><div className="relative h-72"><Image src={d.image} alt={d.name} fill className="object-cover" /></div><div className="p-6"><h3 className="text-2xl font-semibold">{d.name}</h3><p className="mt-2 text-gray-400">{d.text}</p><Link href="/contact" className="mt-5 inline-flex items-center gap-2 text-gold">Enquire now <ArrowRight className="h-4 w-4" /></Link></div></article>)}
         </div>
       </section>
 
@@ -49,7 +33,7 @@ export default function Home() {
                 <div className="flex items-center justify-between rounded-xl border border-white/10 px-4 py-3"><span className="flex items-center gap-2"><Utensils className="h-4 w-4 text-gold"/>Full Board</span><strong className="text-gold">USD 115</strong></div>
               </div>
               <p className="mt-3 text-xs text-gray-500">Rates are per room, per night.</p>
-              <div className="mt-7 flex flex-wrap gap-3"><Link href="/stays/uhoos-lavish-oasis" className="btn-outline">View Stay</Link><Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&destination=Maldives&mealPlan=Bed%20%26%20Breakfast" className="btn-gold">Book Now</Link></div>
+              <div className="mt-7 flex flex-wrap gap-3"><Link href="/stays/uhoos-lavish-oasis" className="btn-outline">View Stay</Link><Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" className="btn-gold">Book Now</Link></div>
             </div>
           </div>
         </div>
@@ -57,13 +41,13 @@ export default function Home() {
 
       <section className="border-b border-white/10 bg-white/[0.02]">
         <div className="container grid gap-8 py-16 md:grid-cols-3">
-          <div className="card p-6"><Sparkles className="h-8 w-8 text-gold" /><h3 className="mt-4 text-xl font-semibold">Curated for you</h3><p className="mt-2 text-gray-400">Trips tailored to your budget, dates, and travel style.</p></div>
-          <div className="card p-6"><Globe2 className="h-8 w-8 text-gold" /><h3 className="mt-4 text-xl font-semibold">Global journeys</h3><p className="mt-2 text-gray-400">From island retreats to iconic cities and cultural adventures.</p></div>
-          <div className="card p-6"><ShieldCheck className="h-8 w-8 text-gold" /><h3 className="mt-4 text-xl font-semibold">Trusted support</h3><p className="mt-2 text-gray-400">Personal guidance before, during, and after your journey.</p></div>
+          <div className="card p-6"><Sparkles className="h-8 w-8 text-gold" /><h3 className="mt-4 text-xl font-semibold">Curated for you</h3><p className="mt-2 text-gray-400">A comfortable island stay tailored to your dates and meal preference.</p></div>
+          <div className="card p-6"><Globe2 className="h-8 w-8 text-gold" /><h3 className="mt-4 text-xl font-semibold">Local island experience</h3><p className="mt-2 text-gray-400">Enjoy Felidhoo, Vaavu Atoll and authentic Maldivian island life.</p></div>
+          <div className="card p-6"><ShieldCheck className="h-8 w-8 text-gold" /><h3 className="mt-4 text-xl font-semibold">Trusted support</h3><p className="mt-2 text-gray-400">Personal guidance before, during, and after your stay.</p></div>
         </div>
       </section>
 
-      <section className="container py-20 text-center"><p className="text-sm uppercase tracking-[0.3em] text-gold">Your next journey</p><h2 className="mx-auto mt-3 max-w-3xl text-4xl font-bold md:text-5xl">Tell us where you want to go. We’ll make it unforgettable.</h2><Link href="/contact" className="btn-gold mt-8">Start Planning</Link></section>
+      <section className="container py-20 text-center"><p className="text-sm uppercase tracking-[0.3em] text-gold">Your island escape</p><h2 className="mx-auto mt-3 max-w-3xl text-4xl font-bold md:text-5xl">Ready for your stay at Uhoo&apos;s Lavish Oasis?</h2><Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" className="btn-gold mt-8">Book Your Stay</Link></section>
     </>
   );
 }
