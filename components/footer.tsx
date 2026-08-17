@@ -1,3 +1,14 @@
+import Link from "next/link";
+import { Mail, MapPin, Phone } from "lucide-react";
 
-import Link from "next/link"; import {Mail,MapPin,Phone} from "lucide-react";
-export default function Footer(){return <footer className="mt-16 border-t border-white/10"><div className="container grid gap-10 py-12 md:grid-cols-4"><div><div className="text-2xl font-bold text-gold">Tripelor</div><p className="mt-3 text-sm text-gray-400">Beautiful journeys, thoughtfully designed.</p></div><div><h3 className="font-semibold">Explore</h3><div className="mt-3 flex flex-col gap-2 text-sm text-gray-400"><Link href="/destinations">Destinations</Link><Link href="/tours">Packages</Link><Link href="/about">About</Link></div></div><div><h3 className="font-semibold">Contact</h3><div className="mt-3 space-y-2 text-sm text-gray-400"><div className="flex items-center gap-2"><Mail className="h-4 w-4"/> hello@tripelor.com</div><div className="flex items-center gap-2"><Phone className="h-4 w-4"/> +960 9XX XXXX</div><div className="flex items-center gap-2"><MapPin className="h-4 w-4"/> Maldives</div></div></div><div><h3 className="font-semibold">Follow</h3><p className="mt-3 text-sm text-gray-400">Instagram · Facebook · TikTok</p></div></div><div className="border-t border-white/10 py-6 text-center text-xs text-gray-500">© {new Date().getFullYear()} Tripelor. All rights reserved.</div></footer>}
+export default function Footer() {
+  return <footer className="mt-16 border-t border-white/10">
+    <div className="container grid gap-10 py-12 md:grid-cols-4">
+      <div><div className="text-2xl font-bold text-gold">Tripelor</div><p className="mt-3 text-sm text-gray-400">Beautiful island stays, thoughtfully arranged.</p></div>
+      <div><h3 className="font-semibold">Explore</h3><div className="mt-3 flex flex-col gap-2 text-sm text-gray-400"><Link href="/stays/uhoos-lavish-oasis">Uhoo&apos;s Lavish Oasis</Link><Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast">Book Your Stay</Link><Link href="/about">About</Link></div></div>
+      <div><h3 className="font-semibold">Contact</h3><div className="mt-3 space-y-2 text-sm text-gray-400"><div className="flex items-center gap-2"><Mail className="h-4 w-4"/> hello@tripelor.com</div><div className="flex items-center gap-2"><Phone className="h-4 w-4"/> +960 9XX XXXX</div><div className="flex items-center gap-2"><MapPin className="h-4 w-4"/> V. Felidhoo, Maldives</div></div></div>
+      <div><h3 className="font-semibold">Follow</h3><p className="mt-3 text-sm text-gray-400">Instagram · Facebook · TikTok</p></div>
+    </div>
+    <div className="border-t border-white/10 py-6 text-center text-xs text-gray-500">© {new Date().getFullYear()} Tripelor. All rights reserved.</div>
+  </footer>;
+}
