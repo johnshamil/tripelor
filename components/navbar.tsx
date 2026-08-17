@@ -1,4 +1,18 @@
-
 "use client";
-import Link from "next/link"; import {Menu,Plane,X} from "lucide-react"; import {useState} from "react";
-export default function Navbar(){const[open,setOpen]=useState(false);const links=[["/","Home"],["/destinations","Destinations"],["/tours","Packages"],["/about","About"],["/contact","Contact"]];return <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur"><div className="container flex h-16 items-center justify-between"><Link href="/" className="flex items-center gap-2"><Plane className="h-5 w-5 text-gold"/><span className="text-xl font-bold tracking-wide">Tripelor</span></Link><nav className="hidden items-center gap-7 md:flex">{links.map(([href,label])=><Link key={href} href={href} className="text-sm text-gray-300 hover:text-gold">{label}</Link>)}<Link href="/booking" className="btn-gold">Book Now</Link></nav><button onClick={()=>setOpen(!open)} className="md:hidden" aria-label="Toggle menu">{open?<X/>:<Menu/>}</button></div>{open&&<div className="border-t border-white/10 bg-black md:hidden"><div className="container flex flex-col gap-4 py-5">{links.map(([href,label])=><Link key={href} href={href} onClick={()=>setOpen(false)} className="text-gray-300">{label}</Link>)}<Link href="/booking" onClick={()=>setOpen(false)} className="btn-gold">Book Now</Link></div></div>}</header>}
+import Link from "next/link";
+import { Menu, Plane, X } from "lucide-react";
+import { useState } from "react";
+
+export default function Navbar() {
+  const [open, setOpen] = useState(false);
+  const links = [["/", "Home"], ["/stays/uhoos-lavish-oasis", "Our Stay"], ["/about", "About"], ["/contact", "Contact"]];
+
+  return <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur">
+    <div className="container flex h-16 items-center justify-between">
+      <Link href="/" className="flex items-center gap-2"><Plane className="h-5 w-5 text-gold"/><span className="text-xl font-bold tracking-wide">Tripelor</span></Link>
+      <nav className="hidden items-center gap-7 md:flex">{links.map(([href,label]) => <Link key={href} href={href} className="text-sm text-gray-300 hover:text-gold">{label}</Link>)}<Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" className="btn-gold">Book Now</Link></nav>
+      <button onClick={() => setOpen(!open)} className="md:hidden" aria-label="Toggle menu">{open ? <X/> : <Menu/>}</button>
+    </div>
+    {open && <div className="border-t border-white/10 bg-black md:hidden"><div className="container flex flex-col gap-4 py-5">{links.map(([href,label]) => <Link key={href} href={href} onClick={() => setOpen(false)} className="text-gray-300">{label}</Link>)}<Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" onClick={() => setOpen(false)} className="btn-gold">Book Now</Link></div></div>}
+  </header>;
+}
