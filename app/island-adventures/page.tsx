@@ -1,24 +1,55 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Waves, Sun, Fish, Ship, Map, CheckCircle2, Moon, Sparkles, Utensils } from "lucide-react";
-
-const adventures = [
-  { icon: Waves, title: "Snorkeling Adventure", text: "Slip into crystal-clear Maldivian waters and discover colorful reef fish, corals and the beautiful underwater world around the islands." },
-  { icon: Sun, title: "Sandbank Escape", text: "Spend time on a tiny stretch of white sand surrounded by turquoise ocean — perfect for swimming, relaxing and unforgettable holiday photos." },
-  { icon: Fish, title: "Dolphin Cruise", text: "Cruise across the open sea while looking for playful dolphins. Enjoy the ocean breeze, beautiful views and one of the Maldives' most exciting wildlife experiences." },
-  { icon: Ship, title: "Fishing Experience", text: "Experience traditional Maldivian fishing on the open water and enjoy a fun, relaxed trip with the chance to make a great catch." },
-  { icon: Map, title: "Island Hopping", text: "Explore another local island, meet the community, walk through island streets and experience more of authentic Maldivian life beyond your guesthouse." },
-];
+import { CheckCircle2 } from "lucide-react";
 
 const packages = [
-  { name:"Maldives Reef & Relax Escape", label:"Relax & Snorkel", price:320, image:"https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1400&auto=format&fit=crop", description:"Five relaxing nights with Half Board meals and a snorkeling experience in warm, crystal-clear tropical water.", items:["5-night stay","Half Board meal plan","Snorkeling experience"], meal:"Half Board" },
-  { name:"5-Night Island Adventure", label:"Full Adventure", price:540, image:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1400&auto=format&fit=crop", description:"See and do more with tropical reef snorkeling, a sandbank escape, dolphin cruise, fishing and island hopping.", items:["5-night Maldives island experience","Snorkeling trip","Sandbank trip","Dolphin cruise","Fishing experience","Island hopping experience"] },
-  { name:"Maldives Ocean Discovery Escape", label:"Full Board Adventure", price:850, image:"https://images.unsplash.com/photo-1530789253388-582c481c54b0?q=80&w=1400&auto=format&fit=crop", description:"Five unforgettable nights with Full Board dining and three signature island experiences — snorkel the reef by day, discover another island and head out for an authentic Maldivian night fishing adventure.", items:["5-night stay","Full Board meal plan","Snorkeling experience","Night fishing trip","Island hopping experience"], meal:"Full Board" },
+  {
+    name:"Maldives Reef & Relax Escape",
+    slug:"reef-relax-escape",
+    label:"Relax & Snorkel",
+    price:320,
+    image:"https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1400&auto=format&fit=crop",
+    preview:[
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=900&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1530053969600-caed2596d242?q=80&w=900&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=900&auto=format&fit=crop"
+    ],
+    description:"Five relaxing nights with Half Board meals and a snorkeling experience in warm, crystal-clear tropical water.",
+    items:["5-night stay","Half Board meal plan","Snorkeling experience"],
+    meal:"Half Board"
+  },
+  {
+    name:"5-Night Island Adventure",
+    slug:"5-night-island-adventure",
+    label:"Full Adventure",
+    price:540,
+    image:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1400&auto=format&fit=crop",
+    preview:[
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=900&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?q=80&w=900&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1540202404-a2f29016b523?q=80&w=900&auto=format&fit=crop"
+    ],
+    description:"See and do more with tropical reef snorkeling, a sandbank escape, dolphin cruise, fishing and island hopping.",
+    items:["5-night Maldives island experience","Snorkeling trip","Sandbank trip","Dolphin cruise","Fishing experience","Island hopping experience"]
+  },
+  {
+    name:"Maldives Ocean Discovery Escape",
+    slug:"ocean-discovery-escape",
+    label:"Full Board Adventure",
+    price:850,
+    image:"https://images.unsplash.com/photo-1530789253388-582c481c54b0?q=80&w=1400&auto=format&fit=crop",
+    preview:[
+      "https://images.unsplash.com/photo-1530789253388-582c481c54b0?q=80&w=900&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?q=80&w=900&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1504512485720-7d83a16ee930?q=80&w=900&auto=format&fit=crop"
+    ],
+    description:"Five unforgettable nights with Full Board dining, snorkeling, night fishing and island hopping.",
+    items:["5-night stay","Full Board meal plan","Snorkeling experience","Night fishing trip","Island hopping experience"],
+    meal:"Full Board"
+  },
 ];
 
 export default function IslandAdventuresPage(){return <main>
-<section className="relative min-h-[62vh] overflow-hidden"><Image src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?q=80&w=2200&auto=format&fit=crop" alt="Maldives island adventure" fill priority className="object-cover"/><div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-black/30"/><div className="container relative flex min-h-[62vh] items-center"><div className="max-w-3xl py-20"><p className="text-sm font-semibold uppercase tracking-[0.3em] text-gold">Tripelor Experiences</p><h1 className="mt-3 text-5xl font-bold md:text-7xl">Maldives <span className="text-gold">Island Packages</span></h1><p className="mt-6 max-w-2xl text-lg text-gray-200">Choose your perfect five-night escape — from a relaxing reef getaway to a complete Full Board ocean adventure.</p></div></div></section>
-<section className="container py-16"><div className="mb-10 text-center"><p className="text-sm uppercase tracking-[0.3em] text-gold">Choose your escape</p><h2 className="mt-3 text-4xl font-bold">Three ways to experience paradise</h2></div><div className="grid gap-8 lg:grid-cols-3">{packages.map(pkg=><article key={pkg.name} className="card overflow-hidden"><div className="relative h-60"><Image src={pkg.image} alt={pkg.name} fill className="object-cover"/></div><div className="p-7"><p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">{pkg.label} Package</p><h3 className="mt-2 text-3xl font-bold">{pkg.name}</h3><p className="mt-4 leading-7 text-gray-400">{pkg.description}</p><div className="mt-6 space-y-3">{pkg.items.map(x=><div key={x} className="flex gap-3"><CheckCircle2 className="h-5 w-5 shrink-0 text-gold"/><span>{x}</span></div>)}</div><div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6"><strong className="text-4xl text-gold">USD {pkg.price}</strong><Link href={`/booking?package=${encodeURIComponent(pkg.name+" - USD "+pkg.price)}${pkg.meal?`&mealPlan=${encodeURIComponent(pkg.meal)}`:""}`} className="btn-gold">Book Package</Link></div></div></article>)}</div></section>
-<section className="border-y border-white/10 bg-white/[0.02]"><div className="container py-16"><div className="mx-auto max-w-3xl text-center"><Sparkles className="mx-auto h-9 w-9 text-gold"/><p className="mt-4 text-sm uppercase tracking-[0.3em] text-gold">Full Island Adventure</p><h2 className="mt-3 text-4xl font-bold">Five experiences, endless memories</h2><p className="mt-5 text-lg leading-8 text-gray-400">Explore the ocean and islands through some of the Maldives' most memorable experiences.</p></div><div className="mt-12 grid gap-6 md:grid-cols-2">{adventures.map(({icon:Icon,title,text})=><article key={title} className="card p-7"><Icon className="h-8 w-8 text-gold"/><h3 className="mt-4 text-2xl font-semibold">{title}</h3><p className="mt-3 leading-7 text-gray-400">{text}</p></article>)}</div></div></section>
-<section className="container py-16"><div className="card mx-auto max-w-5xl p-8 md:p-10"><div className="grid gap-8 md:grid-cols-2"><div><Ship className="h-8 w-8 text-gold"/><p className="mt-4 text-sm uppercase tracking-[0.25em] text-gold">Maldives Ocean Discovery Escape</p><h2 className="mt-2 text-3xl font-bold">From reef mornings to fishing under the stars</h2><p className="mt-4 leading-7 text-gray-400">Enjoy five nights with Full Board meals while discovering the Maldives from sea to shore. Snorkel colorful reefs, visit another island and finish one of your evenings on the ocean with a traditional night fishing experience beneath the tropical sky.</p></div><div className="flex flex-col justify-center"><div className="flex items-center gap-2 text-gray-400"><Moon className="h-5 w-5 text-gold"/>5 nights</div><div className="mt-3 flex items-center gap-2 text-gray-400"><Utensils className="h-5 w-5 text-gold"/>Full Board</div><div className="mt-3 flex items-center gap-2 text-gray-400"><Waves className="h-5 w-5 text-gold"/>Snorkeling included</div><div className="mt-3 flex items-center gap-2 text-gray-400"><Fish className="h-5 w-5 text-gold"/>Night fishing included</div><div className="mt-3 flex items-center gap-2 text-gray-400"><Map className="h-5 w-5 text-gold"/>Island hopping included</div><strong className="mt-5 text-4xl text-gold">USD 850</strong><Link href="/booking?package=Maldives%20Ocean%20Discovery%20Escape%20-%20USD%20850&mealPlan=Full%20Board" className="btn-gold mt-6">Request This Package</Link></div></div></div></section>
+<section className="relative min-h-[58vh] overflow-hidden"><Image src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?q=80&w=2200&auto=format&fit=crop" alt="Maldives island adventure" fill priority className="object-cover"/><div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-black/30"/><div className="container relative flex min-h-[58vh] items-center"><div className="max-w-3xl py-20"><p className="text-sm font-semibold uppercase tracking-[0.3em] text-gold">Tripelor Experiences</p><h1 className="mt-3 text-5xl font-bold md:text-7xl">Maldives <span className="text-gold">Island Packages</span></h1><p className="mt-6 max-w-2xl text-lg text-gray-200">Choose a package, view the photos, read the full experience and see exactly what is included before you book.</p></div></div></section>
+<section className="container py-16"><div className="mb-10 text-center"><p className="text-sm uppercase tracking-[0.3em] text-gold">Explore Packages</p><h2 className="mt-3 text-4xl font-bold">Find the escape that feels right for you</h2></div><div className="grid gap-8 lg:grid-cols-3">{packages.map(pkg=><article key={pkg.name} className="card overflow-hidden"><div className="relative h-60"><Image src={pkg.image} alt={pkg.name} fill className="object-cover"/></div><div className="grid grid-cols-3 gap-1 p-2">{pkg.preview.map((photo,i)=><div key={photo} className="relative h-20 overflow-hidden rounded-lg"><Image src={photo} alt={`${pkg.name} preview ${i+1}`} fill className="object-cover"/></div>)}</div><div className="p-7 pt-4"><p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">{pkg.label} Package</p><h3 className="mt-2 text-3xl font-bold">{pkg.name}</h3><p className="mt-4 leading-7 text-gray-400">{pkg.description}</p><div className="mt-6 space-y-3">{pkg.items.slice(0,4).map(x=><div key={x} className="flex gap-3"><CheckCircle2 className="h-5 w-5 shrink-0 text-gold"/><span>{x}</span></div>)}</div><div className="mt-7 border-t border-white/10 pt-6"><strong className="text-4xl text-gold">USD {pkg.price}</strong><div className="mt-5 flex flex-wrap gap-3"><Link href={`/island-adventures/${pkg.slug}`} className="btn-outline">View Details & Photos</Link><Link href={`/booking?package=${encodeURIComponent(pkg.name+" - USD "+pkg.price)}${pkg.meal?`&mealPlan=${encodeURIComponent(pkg.meal)}`:""}`} className="btn-gold">Book Package</Link></div></div></div></article>)}</div></section>
 </main>}
