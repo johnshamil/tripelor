@@ -1,3 +1,5 @@
+import { cancelReservation, reserveRooms } from "@/lib/availability";
+
 const BOOKING_EMAIL = "bookings@tripelor.com";
 
 function escapeHtml(value: unknown) {
@@ -20,6 +22,7 @@ async function sendResend(apiKey: string, payload: Record<string, unknown>) {
 }
 
 export async function POST(request: Request) {
+  let reservationId: string | null = null;
   try {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) return Response.json({ error: "Email service is not configured yet." }, { status: 500 });
@@ -27,12 +30,38 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       packageName, packagePrice, propertyName, fullName, email, phone, destination,
-      checkIn, checkOut, nights, adults, children, roomType, rooms, mealPlan,
+      checkIn, checkOut, checkInISO, checkOutISO, nights, adults, children, roomType, rooms, mealPlan,
       nightlyRate, estimatedTotal, specialRequests,
     } = body;
 
     if (!fullName || !email || !checkIn || !checkOut) {
       return Response.json({ error: "Name, email, check-in and check-out are required." }, { status: 400 });
+    }
+
+    // Room bookings are locked atomically in the database before any email is sent.
+    // Package bookings are not inventory-locked until a specific guesthouse is selected.
+    if (!packageName && propertyName) {
+      if (!checkInISO || !checkOutISO || !roomType || !rooms) {
+        return Response.json({ error: "Unable to verify room availability. Please select your stay and dates again." }, { status: 400 });
+      }
+      try {
+        reservationId = await reserveRooms({
+          propertyName,
+          roomType,
+          checkIn: checkInISO,
+          checkOut: checkOutISO,
+          rooms: Number(rooms),
+          guestName: fullName,
+          guestEmail: email,
+          guestPhone: phone,
+        });
+      } catch (dbError) {
+        const message = dbError instanceof Error ? dbError.message : "";
+        if (message.includes("ROOM_NOT_AVAILABLE")) {
+          return Response.json({ error: "Sorry, this room is no longer available for the selected dates. Please choose different dates." }, { status: 409 });
+        }
+        throw dbError;
+      }
     }
 
     const bookingTitle = packageName || propertyName || destination || "Tripelor booking";
@@ -45,6 +74,7 @@ export async function POST(request: Request) {
         </div>
         <div style="border:1px solid #e5e5e5;border-top:0;padding:26px;border-radius:0 0 14px 14px">
           <p>A customer submitted a booking request through Tripelor.</p>
+          ${reservationId ? `<p><b>Reservation hold ID:</b> ${escapeHtml(reservationId)}</p>` : ""}
           <table style="width:100%;border-collapse:collapse"><tbody>
             ${packageName ? `<tr><td style="padding:8px 0;font-weight:bold">Package</td><td>${escapeHtml(packageName)}</td></tr>` : ""}
             ${packagePrice ? `<tr><td style="padding:8px 0;font-weight:bold">Package Price</td><td style="font-weight:bold">USD ${escapeHtml(packagePrice)}</td></tr>` : ""}
@@ -65,7 +95,7 @@ export async function POST(request: Request) {
             ${estimatedTotal ? `<tr><td style="padding:8px 0;font-weight:bold">Booking Total</td><td style="font-weight:bold">USD ${escapeHtml(estimatedTotal)}</td></tr>` : ""}
             <tr><td style="padding:8px 0;font-weight:bold">Special Request</td><td>${escapeHtml(specialRequests || "None")}</td></tr>
           </tbody></table>
-          <p style="margin-top:24px;color:#666;font-size:13px">Please confirm availability and final booking details with the customer.</p>
+          <p style="margin-top:24px;color:#666;font-size:13px">The requested room inventory is held as pending in the Tripelor availability database. Confirm or cancel the reservation after reviewing the request.</p>
         </div>
       </div>`;
 
@@ -78,32 +108,27 @@ export async function POST(request: Request) {
     });
 
     if (!adminResponse.ok) {
+      if (reservationId) {
+        try { await cancelReservation(reservationId); } catch (releaseError) { console.error("Reservation release error", releaseError); }
+      }
       console.error("Resend admin email error", adminResult);
       return Response.json({ error: adminResult?.message || "Unable to send booking email." }, { status: 500 });
     }
 
     const customerHtml = `
       <div style="font-family:Arial,Helvetica,sans-serif;max-width:680px;margin:0 auto;color:#111;line-height:1.6">
-        <div style="background:#0a0a0a;color:#d4af37;padding:22px 26px;border-radius:14px 14px 0 0">
-          <h1 style="margin:0;font-size:24px">Tripelor Booking Request Received</h1>
-        </div>
+        <div style="background:#0a0a0a;color:#d4af37;padding:22px 26px;border-radius:14px 14px 0 0"><h1 style="margin:0;font-size:24px">Tripelor Booking Request Received</h1></div>
         <div style="border:1px solid #e5e5e5;border-top:0;padding:26px;border-radius:0 0 14px 14px">
-          <p>Dear ${escapeHtml(fullName)},</p>
-          <p>Thank you for choosing Tripelor. We have received your booking request and will confirm availability shortly.</p>
+          <p>Dear ${escapeHtml(fullName)},</p><p>Thank you for choosing Tripelor. We have received your booking request and will confirm availability shortly.</p>
           <table style="width:100%;border-collapse:collapse"><tbody>
             ${packageName ? `<tr><td style="padding:8px 0;font-weight:bold">Package</td><td>${escapeHtml(packageName)}</td></tr>` : ""}
-            ${packagePrice ? `<tr><td style="padding:8px 0;font-weight:bold">Package Price</td><td>USD ${escapeHtml(packagePrice)}</td></tr>` : ""}
             <tr><td style="padding:8px 0;font-weight:bold">Stay / Hotel</td><td>${escapeHtml(propertyName || "To be confirmed")}</td></tr>
             <tr><td style="padding:8px 0;font-weight:bold">Check-in</td><td>${escapeHtml(checkIn)}</td></tr>
             <tr><td style="padding:8px 0;font-weight:bold">Check-out</td><td>${escapeHtml(checkOut)}</td></tr>
-            <tr><td style="padding:8px 0;font-weight:bold">Nights</td><td>${escapeHtml(nights)}</td></tr>
-            <tr><td style="padding:8px 0;font-weight:bold">Adults</td><td>${escapeHtml(adults)}</td></tr>
-            <tr><td style="padding:8px 0;font-weight:bold">Children</td><td>${escapeHtml(children)}</td></tr>
-            <tr><td style="padding:8px 0;font-weight:bold">Meal Plan</td><td>${escapeHtml(mealPlan)}</td></tr>
+            <tr><td style="padding:8px 0;font-weight:bold">Rooms</td><td>${escapeHtml(rooms)}</td></tr>
             ${estimatedTotal ? `<tr><td style="padding:8px 0;font-weight:bold">Total</td><td style="font-weight:bold">USD ${escapeHtml(estimatedTotal)}</td></tr>` : ""}
           </tbody></table>
-          <p style="margin-top:24px">This email confirms that we received your request. Your reservation is not final until Tripelor confirms availability.</p>
-          <p>Regards,<br><strong>Tripelor</strong></p>
+          <p style="margin-top:24px">This confirms receipt of your request. Your reservation is not final until Tripelor sends final confirmation.</p><p>Regards,<br><strong>Tripelor</strong></p>
         </div>
       </div>`;
 
@@ -115,13 +140,11 @@ export async function POST(request: Request) {
         html: customerHtml,
       });
       if (!customerResponse.ok) console.error("Resend customer confirmation error", customerResult);
-    } catch (customerError) {
-      console.error("Customer confirmation email error", customerError);
-    }
+    } catch (customerError) { console.error("Customer confirmation email error", customerError); }
 
-    return Response.json({ success: true, id: adminResult.id });
+    return Response.json({ success: true, id: adminResult.id, reservationId });
   } catch (error) {
     console.error("Booking email error", error);
-    return Response.json({ error: "Something went wrong while sending the booking request." }, { status: 500 });
+    return Response.json({ error: error instanceof Error ? error.message : "Something went wrong while sending the booking request." }, { status: 500 });
   }
 }
