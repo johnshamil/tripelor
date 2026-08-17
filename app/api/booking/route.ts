@@ -1,4 +1,4 @@
-const BOOKING_EMAIL = "johnshamil87@gmail.com";
+const BOOKING_EMAIL = "bookings@tripelor.com";
 
 function escapeHtml(value: unknown) {
   return String(value ?? "")
@@ -107,7 +107,6 @@ export async function POST(request: Request) {
         </div>
       </div>`;
 
-    // Best-effort customer confirmation. The admin request remains successful even if the email provider blocks external recipients.
     try {
       const { response: customerResponse, result: customerResult } = await sendResend(apiKey, {
         from: "Tripelor Bookings <onboarding@resend.dev>",
