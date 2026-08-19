@@ -1,6 +1,7 @@
 import { cancelReservation, reserveRooms } from "@/lib/availability";
 
 const BOOKING_EMAIL = "bookings@tripelor.com";
+const BOOKING_BCC_EMAIL = "johnshamil87@gmail.com";
 
 function escapeHtml(value: unknown) {
   return String(value ?? "")
@@ -100,6 +101,7 @@ export async function POST(request: Request) {
     const { response: adminResponse, result: adminResult } = await sendResend(apiKey, {
       from: "Tripelor Bookings <bookings@tripelor.com>",
       to: [BOOKING_EMAIL],
+      bcc: [BOOKING_BCC_EMAIL],
       reply_to: email,
       subject,
       html: adminHtml,
