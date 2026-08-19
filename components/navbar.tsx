@@ -5,7 +5,7 @@ import { useState } from "react";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const links = [["/", "Home"], ["/stays/uhoos-lavish-oasis", "Our Stay"], ["/about", "About"], ["/contact", "Contact"]];
+  const links = [["/", "Home"], ["/stays/uhoos-lavish-oasis", "Our Stay"], ["/speedboat", "Speedboat"], ["/about", "About"], ["/contact", "Contact"]];
 
   return <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur">
     <div className="container flex h-16 items-center justify-between">
