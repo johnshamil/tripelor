@@ -44,7 +44,7 @@ export async function POST(req: Request) {
         review_title: b.title ? String(b.title) : null,
         review_text: String(b.review),
         stay_date: b.stayDate ? String(b.stayDate) : null,
-        status: "pending",
+        status: "approved",
       }),
       cache: "no-store",
     });
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     if (resendKey) {
       const html = `<div style="font-family:Arial,sans-serif;max-width:700px;margin:auto">
         <h1>New Tripelor Guest Review</h1>
-        <p><b>Status:</b> Pending approval</p>
+        <p><b>Status:</b> Published automatically</p>
         <hr>
         <p><b>Property:</b> ${esc(b.property)}</p>
         <p><b>Guest:</b> ${esc(b.name)}</p>
