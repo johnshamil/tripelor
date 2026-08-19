@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { Send, ShieldCheck, Star } from "lucide-react";
+import { Send, Star } from "lucide-react";
 
 export default function ReviewsPage() {
   const [status, setStatus] = useState("idle");
@@ -24,7 +24,7 @@ export default function ReviewsPage() {
       const x = await r.json();
       if (!r.ok) throw new Error(x.error || "Unable to submit review.");
       setStatus("success");
-      setNotice("Thank you! Your review has been submitted and is awaiting approval.");
+      setNotice("Thank you! Your review has been published.");
       form.reset();
       setRating(5);
     } catch (err) {
@@ -38,7 +38,7 @@ export default function ReviewsPage() {
       <p className="text-sm uppercase tracking-[.3em] text-gold">Guest experiences</p>
       <h1 className="mt-2 text-4xl font-bold md:text-6xl">Write a Review</h1>
       <p className="mt-5 max-w-3xl text-lg text-gray-400">
-        Share your Tripelor stay experience. Reviews are checked before they appear publicly.
+        Share your Tripelor stay experience with future travelers.
       </p>
 
       <div className="mt-12 grid gap-8 lg:grid-cols-[.7fr_1.3fr]">
@@ -46,11 +46,10 @@ export default function ReviewsPage() {
           <Star className="h-8 w-8 text-gold" />
           <h2 className="mt-4 text-2xl font-bold">Your experience matters</h2>
           <p className="mt-3 leading-7 text-gray-400">
-            Tell future travelers about your stay, service, comfort and favorite moments.
+            Tell future travelers about your stay, service, comfort, food and favorite moments.
           </p>
-          <div className="mt-6 flex gap-3 rounded-xl border border-gold/20 bg-gold/5 p-4 text-sm text-gray-300">
-            <ShieldCheck className="h-5 w-5 shrink-0 text-gold" />
-            Reviews are submitted as pending and are only published after Tripelor approval.
+          <div className="mt-6 rounded-xl border border-gold/20 bg-gold/5 p-4 text-sm text-gray-300">
+            Reviews are published when submitted so guests can share their genuine experience in their own words.
           </div>
         </aside>
 
