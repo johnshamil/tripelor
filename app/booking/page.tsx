@@ -8,6 +8,11 @@ const PROPERTY_RATES: Record<string, Record<string, number>> = {
   "Masfalhi View Inn": { "Bed & Breakfast": 80, "Half Board": 90, "Full Board": 100 },
 };
 
+const PROPERTY_ROOM_COUNTS: Record<string, number> = {
+  "Uhoo's Lavish Oasis": 2,
+  "Masfalhi View Inn": 6,
+};
+
 const PACKAGE_PRICES: Record<string, number> = {
   "Maldives Reef & Relax Escape": 320,
   "5-Night Island Adventure": 540,
@@ -57,6 +62,13 @@ export default function BookingPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!packageName) {
+      const maxRooms = PROPERTY_ROOM_COUNTS[propertyName] ?? 1;
+      if (Number(rooms) > maxRooms) setRooms("1");
+    }
+  }, [propertyName, rooms, packageName]);
+
   const nights = useMemo(() => {
     if (!checkIn || !checkOut) return 0;
     const d = Math.ceil((new Date(`${checkOut}T00:00:00`).getTime() - new Date(`${checkIn}T00:00:00`).getTime()) / 86400000);
@@ -68,6 +80,7 @@ export default function BookingPage() {
   const location = propertyName === "Uhoo's Lavish Oasis" ? "V. Felidhoo, Maldives" : "Maldives";
   const packageMaxCheckout = packageName && checkIn ? addDays(checkIn, 5) : undefined;
   const checkoutMin = checkIn ? addDays(checkIn, 1) : undefined;
+  const maxRooms = packageName ? 4 : (PROPERTY_ROOM_COUNTS[propertyName] ?? 1);
 
   function handleCheckIn(value: string) {
     setCheckIn(value);
@@ -155,7 +168,7 @@ export default function BookingPage() {
 
       {packageName && <p className="-mt-3 text-xs text-gray-500">Selecting check-in automatically sets check-out 5 nights later. The check-out date cannot be more than 5 nights after check-in.</p>}
 
-      <label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><BedDouble className="h-4 w-4 text-gold"/>Number of rooms</span><select value={rooms} onChange={e => setRooms(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3">{[1,2,3,4].map(n => <option key={n} value={n}>{n} Room{n > 1 ? "s" : ""}</option>)}</select></label>
+      <label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><BedDouble className="h-4 w-4 text-gold"/>Number of rooms</span><select value={rooms} onChange={e => setRooms(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3">{Array.from({ length: maxRooms }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n} Room{n > 1 ? "s" : ""}</option>)}</select></label>
 
       {packageName && estimatedTotal > 0 && <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm">Package total for {rooms} room{rooms === "1" ? "" : "s"}: <span className="font-semibold text-gold">USD {estimatedTotal}</span></div>}
 
