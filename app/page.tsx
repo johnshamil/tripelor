@@ -1,283 +1,44 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Globe2,
-  ShieldCheck,
-  Sparkles,
-  MapPin,
-  Utensils,
-  Send,
-  SearchCheck,
-  BadgeCheck,
-  CreditCard,
-  Palmtree,
-  Star,
-} from "lucide-react";
+import { Globe2, ShieldCheck, Sparkles, MapPin, Utensils, Send, SearchCheck, BadgeCheck, CreditCard, Palmtree, Star } from "lucide-react";
 
-const stays = [
-  {
-    name: "Uhoo's Lavish Oasis",
-    slug: "uhoos-lavish-oasis",
-    location: "V. Felidhoo, Maldives",
-    image: "/uhoos/WhatsApp%20Image%202026-08-17%20at%2015.30.23.jpeg",
-    description:
-      "Comfortable rooms, warm island hospitality and flexible meal plans for a relaxed Felidhoo getaway.",
-    rates: { "Bed & Breakfast": 85, "Half Board": 95, "Full Board": 115 },
-  },
-  {
-    name: "Masfalhi View Inn",
-    slug: "masfalhi-view-inn",
-    location: "Maldives",
-    image: "/images%20(3).jpeg",
-    description:
-      "A comfortable local island guesthouse stay with flexible meal plans and friendly Maldivian hospitality.",
-    rates: { "Bed & Breakfast": 80, "Half Board": 90, "Full Board": 100 },
-  },
+const stays=[
+{name:"Uhoo's Lavish Oasis",slug:"uhoos-lavish-oasis",location:"V. Felidhoo, Maldives",image:"/uhoos/WhatsApp%20Image%202026-08-17%20at%2015.30.23.jpeg",description:"Comfortable rooms, warm island hospitality and flexible meal plans for a relaxed Felidhoo getaway.",rates:{"Bed & Breakfast":85,"Half Board":95,"Full Board":115}},
+{name:"Masfalhi View Inn",slug:"masfalhi-view-inn",location:"Maldives",image:"/images%20(3).jpeg",description:"A comfortable local island guesthouse stay with flexible meal plans and friendly Maldivian hospitality.",rates:{"Bed & Breakfast":80,"Half Board":90,"Full Board":100}}
 ];
 
-const steps = [
-  {
-    n: "01",
-    title: "Send your request",
-    text: "Choose your stay or package, enter your travel dates and contact details, then send your booking request.",
-    Icon: Send,
-  },
-  {
-    n: "02",
-    title: "We check availability",
-    text: "Tripelor checks the requested accommodation, package and any services you need for your dates.",
-    Icon: SearchCheck,
-  },
-  {
-    n: "03",
-    title: "Receive confirmation",
-    text: "We send you the confirmed availability, booking details, applicable terms and final amount before you pay.",
-    Icon: BadgeCheck,
-  },
-  {
-    n: "04",
-    title: "Complete payment",
-    text: "Follow the payment instructions provided with your confirmation. Your reservation is secured once the required payment is received and acknowledged.",
-    Icon: CreditCard,
-  },
-  {
-    n: "05",
-    title: "Enjoy the Maldives",
-    text: "Receive your final travel details and get ready for your island stay and included experiences.",
-    Icon: Palmtree,
-  },
+const marine=[
+{title:"Manta Encounters",eyebrow:"GLIDE WITH GIANTS",image:"https://images.unsplash.com/photo-1723781496892-d085ed803ff8?auto=format&fit=crop&q=85&w=1600",text:"Discover the graceful manta rays of the Maldives and experience an unforgettable world beneath the surface."},
+{title:"Reef Shark Adventures",eyebrow:"WILD MALDIVES",image:"https://images.unsplash.com/photo-1666845191670-f8dd0a5fe43e?auto=format&fit=crop&q=85&w=1600",text:"Explore clear tropical waters where reef sharks cruise naturally through the blue."},
+{title:"Dolphin Cruises",eyebrow:"CHASE THE HORIZON",image:"https://images.unsplash.com/photo-1723645792146-474118799a2f?auto=format&fit=crop&q=85&w=1600",text:"Watch pods of dolphins move through the Maldivian ocean on a memorable island adventure."}
 ];
 
-type Review = {
-  id: string;
-  property_name: string;
-  guest_name: string;
-  country: string | null;
-  rating: number;
-  review_title: string | null;
-  review_text: string;
-  stay_date: string | null;
-  created_at: string;
-};
+const steps=[
+{n:"01",title:"Send your request",text:"Choose your stay or package, enter your travel dates and contact details, then send your booking request.",Icon:Send},
+{n:"02",title:"We check availability",text:"Tripelor checks the requested accommodation, package and any services you need for your dates.",Icon:SearchCheck},
+{n:"03",title:"Receive confirmation",text:"We send you the confirmed availability, booking details, applicable terms and final amount before you pay.",Icon:BadgeCheck},
+{n:"04",title:"Complete payment",text:"Follow the payment instructions provided with your confirmation. Your reservation is secured once the required payment is received and acknowledged.",Icon:CreditCard},
+{n:"05",title:"Enjoy the Maldives",text:"Receive your final travel details and get ready for your island stay and included experiences.",Icon:Palmtree}
+];
 
-async function getReviews(): Promise<Review[]> {
-  try {
-    const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseUrl || !serviceKey) return [];
+type Review={id:string;property_name:string;guest_name:string;country:string|null;rating:number;review_title:string|null;review_text:string;stay_date:string|null;created_at:string};
+async function getReviews():Promise<Review[]>{try{const supabaseUrl=process.env.SUPABASE_URL?.replace(/\/$/,"");const serviceKey=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!supabaseUrl||!serviceKey)return[];const r=await fetch(`${supabaseUrl}/rest/v1/reviews?select=id,property_name,guest_name,country,rating,review_title,review_text,stay_date,created_at&status=eq.approved&order=created_at.desc`,{headers:{apikey:serviceKey,Authorization:`Bearer ${serviceKey}`},cache:"no-store"});if(!r.ok){console.error("Homepage reviews fetch failed:",await r.text());return[]}return await r.json()}catch(error){console.error("Homepage reviews fetch error:",error);return[]}}
 
-    const r = await fetch(
-      `${supabaseUrl}/rest/v1/reviews?select=id,property_name,guest_name,country,rating,review_title,review_text,stay_date,created_at&status=eq.approved&order=created_at.desc`,
-      {
-        headers: {
-          apikey: serviceKey,
-          Authorization: `Bearer ${serviceKey}`,
-        },
-        cache: "no-store",
-      }
-    );
+export default async function Home(){const reviews=await getReviews();return <>
+<section className="relative min-h-[88vh] overflow-hidden">
+<img src="https://images.unsplash.com/photo-1723781496892-d085ed803ff8?auto=format&fit=crop&q=90&w=2200" alt="Manta ray in the Maldives" className="absolute inset-0 h-full w-full object-cover"/>
+<div className="absolute inset-0 bg-gradient-to-r from-black via-black/65 to-transparent"/><div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20"/>
+<div className="container relative flex min-h-[88vh] items-center"><div className="max-w-3xl py-24"><p className="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-gold">Maldives · Above & Below The Blue</p><h1 className="text-5xl font-bold leading-tight md:text-7xl">Dive into the <span className="text-gold">extraordinary.</span></h1><p className="mt-6 max-w-2xl text-lg text-gray-100">Island stays, manta encounters, reef adventures and unforgettable ocean experiences — discover the Maldives with Tripelor.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="/booking" className="btn-gold">Book Your Stay</Link><Link href="/island-adventures" className="btn-outline">Explore Adventures</Link></div></div></div>
+</section>
 
-    if (!r.ok) {
-      console.error("Homepage reviews fetch failed:", await r.text());
-      return [];
-    }
+<section className="border-y border-white/10 bg-[#020b12]"><div className="container py-20"><div className="mx-auto max-w-3xl text-center"><p className="text-sm uppercase tracking-[0.35em] text-gold">Beneath the surface</p><h2 className="mt-3 text-4xl font-bold md:text-6xl">Meet the wild side of the Maldives</h2><p className="mt-5 text-gray-400">From majestic manta rays to reef sharks and playful dolphins, the ocean is part of every Tripelor story.</p></div><div className="mt-12 grid gap-6 lg:grid-cols-3">{marine.map(item=><article key={item.title} className="group relative min-h-[520px] overflow-hidden rounded-3xl border border-white/10"><img src={item.image} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"/><div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"/><div className="absolute inset-x-0 bottom-0 p-7"><p className="text-xs font-semibold tracking-[0.28em] text-gold">{item.eyebrow}</p><h3 className="mt-2 text-3xl font-bold">{item.title}</h3><p className="mt-3 leading-7 text-gray-200">{item.text}</p><Link href="/island-adventures" className="mt-5 inline-block font-semibold text-gold">Explore experience →</Link></div></article>)}</div></div></section>
 
-    return await r.json();
-  } catch (error) {
-    console.error("Homepage reviews fetch error:", error);
-    return [];
-  }
-}
+<section className="border-y border-white/10 bg-white/[0.02]"><div className="container py-20"><div className="mb-10"><p className="text-sm uppercase tracking-[0.3em] text-gold">Our Stays</p><h2 className="mt-2 text-4xl font-bold">Choose your island guesthouse</h2></div><div className="grid gap-8 lg:grid-cols-2">{stays.map(stay=><article key={stay.name} className="card overflow-hidden"><div className="h-80 overflow-hidden"><img src={stay.image} alt={stay.name} className="h-full w-full object-cover"/></div><div className="p-7"><p className="text-sm font-semibold uppercase tracking-[0.25em] text-gold">Island Guesthouse</p><h3 className="mt-2 text-3xl font-bold">{stay.name}</h3><p className="mt-2 flex items-center gap-2 text-gray-400"><MapPin className="h-4 w-4 text-gold"/>{stay.location}</p><p className="mt-4 text-gray-400">{stay.description}</p><div className="mt-6 space-y-3">{Object.entries(stay.rates).map(([plan,price])=><div key={plan} className="flex items-center justify-between rounded-xl border border-white/10 px-4 py-3"><span className="flex items-center gap-2"><Utensils className="h-4 w-4 text-gold"/>{plan}</span><strong className="text-gold">USD {price}</strong></div>)}</div><p className="mt-3 text-xs text-gray-500">Rates are per room, per night.</p><div className="mt-7 flex flex-wrap gap-3"><Link href={`/stays/${stay.slug}`} className="btn-outline">View Stay</Link><Link href={`/booking?property=${encodeURIComponent(stay.name)}&mealPlan=Bed%20%26%20Breakfast`} className="btn-gold">Book Now</Link></div></div></article>)}</div></div></section>
 
-export default async function Home() {
-  const reviews = await getReviews();
+<section className="border-b border-white/10 bg-black"><div className="container py-20"><div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between"><div><p className="text-sm uppercase tracking-[0.3em] text-gold">Guest Experiences</p><h2 className="mt-2 text-4xl font-bold md:text-5xl">What our guests say</h2><p className="mt-4 max-w-2xl text-gray-400">Real reviews shared by Tripelor guests.</p></div><Link href="/reviews" className="btn-outline w-fit">Write a Review</Link></div>{reviews.length===0?<div className="card mt-10 p-8 text-center text-gray-400">No guest reviews yet. Be the first to share your Tripelor experience.</div>:<div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">{reviews.map(review=><article key={review.id} className="card flex h-full flex-col p-7"><div className="flex items-center gap-2 text-gold"><Star className="h-5 w-5 fill-current"/><span className="text-lg tracking-wider">{"★".repeat(review.rating)}{"☆".repeat(5-review.rating)}</span></div><h3 className="mt-4 text-xl font-bold">{review.review_title||"Guest experience"}</h3><p className="mt-3 flex-1 leading-7 text-gray-300">“{review.review_text}”</p><div className="mt-6 border-t border-white/10 pt-5"><p className="font-semibold text-white">{review.guest_name}</p><p className="mt-1 text-sm text-gray-400">{[review.country,review.property_name].filter(Boolean).join(" · ")}</p>{review.stay_date&&<p className="mt-1 text-xs text-gray-500">Stayed {new Date(`${review.stay_date}T00:00:00`).toLocaleDateString("en-GB",{month:"long",year:"numeric"})}</p>}</div></article>)}</div>}</div></section>
 
-  return (
-    <>
-      <section className="relative min-h-[78vh] overflow-hidden">
-        <Image
-          src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2200&auto=format&fit=crop"
-          alt="Luxury tropical destination"
-          fill
-          priority
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-black/20" />
-        <div className="container relative flex min-h-[78vh] items-center">
-          <div className="max-w-3xl py-24">
-            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-gold">
-              Discover. Escape. Remember.
-            </p>
-            <h1 className="text-5xl font-bold leading-tight md:text-7xl">
-              Travel beautifully with <span className="text-gold">Tripelor</span>
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg text-gray-200">
-              Relaxing island stays and memorable experiences, thoughtfully arranged for you.
-            </p>
-            <Link href="/booking" className="btn-gold mt-8">
-              Book Your Stay
-            </Link>
-          </div>
-        </div>
-      </section>
+<section className="border-b border-white/10 bg-white/[0.02]"><div className="container grid gap-8 py-16 md:grid-cols-3"><div className="card p-6"><Sparkles className="h-8 w-8 text-gold"/><h3 className="mt-4 text-xl font-semibold">Curated for you</h3><p className="mt-2 text-gray-400">Comfortable island stays tailored to your dates and meal preference.</p></div><div className="card border-gold/30 p-6"><Globe2 className="h-8 w-8 text-gold"/><p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-gold">5-Night Package</p><h3 className="mt-2 text-2xl font-semibold">Island Adventures</h3><p className="mt-2 text-gray-400">Snorkeling, sandbank escape, dolphins, fishing and island hopping — five nights made for memories.</p><div className="mt-5 flex justify-end"><Link href="/island-adventures" className="btn-gold">Explore Package</Link></div></div><div className="card p-6"><ShieldCheck className="h-8 w-8 text-gold"/><h3 className="mt-4 text-xl font-semibold">Trusted support</h3><p className="mt-2 text-gray-400">Personal guidance before, during, and after your stay.</p></div></div></section>
 
-      <section className="border-y border-white/10 bg-white/[0.02]">
-        <div className="container py-20">
-          <div className="mb-10">
-            <p className="text-sm uppercase tracking-[0.3em] text-gold">Our Stays</p>
-            <h2 className="mt-2 text-4xl font-bold">Choose your island guesthouse</h2>
-          </div>
-          <div className="grid gap-8 lg:grid-cols-2">
-            {stays.map((stay) => (
-              <article key={stay.name} className="card overflow-hidden">
-                <div className="h-80 overflow-hidden">
-                  <img src={stay.image} alt={stay.name} className="h-full w-full object-cover" />
-                </div>
-                <div className="p-7">
-                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gold">Island Guesthouse</p>
-                  <h3 className="mt-2 text-3xl font-bold">{stay.name}</h3>
-                  <p className="mt-2 flex items-center gap-2 text-gray-400">
-                    <MapPin className="h-4 w-4 text-gold" />
-                    {stay.location}
-                  </p>
-                  <p className="mt-4 text-gray-400">{stay.description}</p>
-                  <div className="mt-6 space-y-3">
-                    {Object.entries(stay.rates).map(([plan, price]) => (
-                      <div key={plan} className="flex items-center justify-between rounded-xl border border-white/10 px-4 py-3">
-                        <span className="flex items-center gap-2">
-                          <Utensils className="h-4 w-4 text-gold" />
-                          {plan}
-                        </span>
-                        <strong className="text-gold">USD {price}</strong>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="mt-3 text-xs text-gray-500">Rates are per room, per night.</p>
-                  <div className="mt-7 flex flex-wrap gap-3">
-                    <Link href={`/stays/${stay.slug}`} className="btn-outline">View Stay</Link>
-                    <Link href={`/booking?property=${encodeURIComponent(stay.name)}&mealPlan=Bed%20%26%20Breakfast`} className="btn-gold">Book Now</Link>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-white/10 bg-black">
-        <div className="container py-20">
-          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-gold">Guest Experiences</p>
-              <h2 className="mt-2 text-4xl font-bold md:text-5xl">What our guests say</h2>
-              <p className="mt-4 max-w-2xl text-gray-400">Real reviews shared by Tripelor guests.</p>
-            </div>
-            <Link href="/reviews" className="btn-outline w-fit">Write a Review</Link>
-          </div>
-
-          {reviews.length === 0 ? (
-            <div className="card mt-10 p-8 text-center text-gray-400">
-              No guest reviews yet. Be the first to share your Tripelor experience.
-            </div>
-          ) : (
-            <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {reviews.map((review) => (
-                <article key={review.id} className="card flex h-full flex-col p-7">
-                  <div className="flex items-center gap-2 text-gold">
-                    <Star className="h-5 w-5 fill-current" />
-                    <span className="text-lg tracking-wider">
-                      {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
-                    </span>
-                  </div>
-                  <h3 className="mt-4 text-xl font-bold">{review.review_title || "Guest experience"}</h3>
-                  <p className="mt-3 flex-1 leading-7 text-gray-300">“{review.review_text}”</p>
-                  <div className="mt-6 border-t border-white/10 pt-5">
-                    <p className="font-semibold text-white">{review.guest_name}</p>
-                    <p className="mt-1 text-sm text-gray-400">
-                      {[review.country, review.property_name].filter(Boolean).join(" · ")}
-                    </p>
-                    {review.stay_date && (
-                      <p className="mt-1 text-xs text-gray-500">
-                        Stayed {new Date(`${review.stay_date}T00:00:00`).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}
-                      </p>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="border-b border-white/10 bg-white/[0.02]">
-        <div className="container grid gap-8 py-16 md:grid-cols-3">
-          <div className="card p-6">
-            <Sparkles className="h-8 w-8 text-gold" />
-            <h3 className="mt-4 text-xl font-semibold">Curated for you</h3>
-            <p className="mt-2 text-gray-400">Comfortable island stays tailored to your dates and meal preference.</p>
-          </div>
-          <div className="card border-gold/30 p-6">
-            <Globe2 className="h-8 w-8 text-gold" />
-            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-gold">5-Night Package</p>
-            <h3 className="mt-2 text-2xl font-semibold">Island Adventures</h3>
-            <p className="mt-2 text-gray-400">Snorkeling, sandbank escape, dolphins, fishing and island hopping — five nights made for memories.</p>
-            <div className="mt-5 flex justify-end"><Link href="/island-adventures" className="btn-gold">Explore Package</Link></div>
-          </div>
-          <div className="card p-6">
-            <ShieldCheck className="h-8 w-8 text-gold" />
-            <h3 className="mt-4 text-xl font-semibold">Trusted support</h3>
-            <p className="mt-2 text-gray-400">Personal guidance before, during, and after your stay.</p>
-          </div>
-        </div>
-      </section>
-
-      <section id="how-booking-works" className="container py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-gold">Simple & transparent</p>
-          <h2 className="mt-3 text-4xl font-bold md:text-5xl">How booking with Tripelor works</h2>
-          <p className="mt-5 text-gray-400">Your online form starts a booking request. Nothing is charged automatically and your reservation is not confirmed until availability and booking details have been confirmed.</p>
-        </div>
-        <div className="mt-12 grid gap-5 md:grid-cols-5">
-          {steps.map(({ n, title, text, Icon }) => (
-            <div key={n} className="card relative p-6">
-              <span className="text-xs font-bold tracking-[.2em] text-gold">STEP {n}</span>
-              <Icon className="mt-5 h-8 w-8 text-gold" />
-              <h3 className="mt-4 text-xl font-semibold">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-gray-400">{text}</p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-9 text-center">
-          <Link href="/booking" className="btn-gold">Start Your Booking Request</Link>
-          <p className="mt-4 text-xs text-gray-500">Questions first? <Link href="/contact" className="text-gold">Contact Tripelor</Link></p>
-        </div>
-      </section>
-
-      <section className="container py-20 text-center">
-        <p className="text-sm uppercase tracking-[0.3em] text-gold">Your island escape</p>
-        <h2 className="mx-auto mt-3 max-w-3xl text-4xl font-bold md:text-5xl">Choose your stay and start planning your Maldives escape.</h2>
-        <Link href="/booking" className="btn-gold mt-8">Book Your Stay</Link>
-      </section>
-    </>
-  );
-}
+<section id="how-booking-works" className="container py-20"><div className="mx-auto max-w-3xl text-center"><p className="text-sm uppercase tracking-[0.3em] text-gold">Simple & transparent</p><h2 className="mt-3 text-4xl font-bold md:text-5xl">How booking with Tripelor works</h2><p className="mt-5 text-gray-400">Your online form starts a booking request. Nothing is charged automatically and your reservation is not confirmed until availability and booking details have been confirmed.</p></div><div className="mt-12 grid gap-5 md:grid-cols-5">{steps.map(({n,title,text,Icon})=><div key={n} className="card relative p-6"><span className="text-xs font-bold tracking-[.2em] text-gold">STEP {n}</span><Icon className="mt-5 h-8 w-8 text-gold"/><h3 className="mt-4 text-xl font-semibold">{title}</h3><p className="mt-3 text-sm leading-6 text-gray-400">{text}</p></div>)}</div><div className="mt-9 text-center"><Link href="/booking" className="btn-gold">Start Your Booking Request</Link><p className="mt-4 text-xs text-gray-500">Questions first? <Link href="/contact" className="text-gold">Contact Tripelor</Link></p></div></section>
+<section className="container py-20 text-center"><p className="text-sm uppercase tracking-[0.3em] text-gold">Your island escape</p><h2 className="mx-auto mt-3 max-w-3xl text-4xl font-bold md:text-5xl">Stay on the island. Explore beneath the blue.</h2><Link href="/booking" className="btn-gold mt-8">Book Your Stay</Link></section>
+</>}
