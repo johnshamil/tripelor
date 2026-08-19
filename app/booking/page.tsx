@@ -9,7 +9,7 @@ const PROPERTY_RATES: Record<string, Record<string, number>> = {
 };
 
 const PROPERTY_ROOM_COUNTS: Record<string, number> = {
-  "Uhoo's Lavish Oasis": 2,
+  "Uhoo's Lavish Oasis": 1,
   "Masfalhi View Inn": 6,
 };
 
@@ -39,7 +39,7 @@ export default function BookingPage() {
   const [children, setChildren] = useState("0");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
-  const [roomType, setRoomType] = useState("Deluxe Room");
+  const [roomType, setRoomType] = useState("ROOM 101");
   const [rooms, setRooms] = useState("1");
   const [mealPlan, setMealPlan] = useState("Bed & Breakfast");
   const [fullName, setFullName] = useState("");
@@ -66,8 +66,14 @@ export default function BookingPage() {
     if (!packageName) {
       const maxRooms = PROPERTY_ROOM_COUNTS[propertyName] ?? 1;
       if (Number(rooms) > maxRooms) setRooms("1");
+      if (propertyName === "Uhoo's Lavish Oasis" && !["ROOM 101", "ROOM 102"].includes(roomType)) {
+        setRoomType("ROOM 101");
+      }
+      if (propertyName === "Masfalhi View Inn" && roomType !== "Deluxe Room") {
+        setRoomType("Deluxe Room");
+      }
     }
-  }, [propertyName, rooms, packageName]);
+  }, [propertyName, rooms, packageName, roomType]);
 
   const nights = useMemo(() => {
     if (!checkIn || !checkOut) return 0;
@@ -175,7 +181,7 @@ export default function BookingPage() {
       {!packageName && <>
         {nights > 0 && <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm">Stay length: <span className="text-gold">{nights} night{nights === 1 ? "" : "s"}</span>{estimatedTotal > 0 && <> · Estimated room total: <span className="font-semibold text-gold">USD {estimatedTotal}</span></>}</div>}
         <div className="grid gap-5 md:grid-cols-2"><label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><Users className="h-4 w-4 text-gold"/>Adults</span><select value={adults} onChange={e => setAdults(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3">{[1,2,3,4,5,6,7,8].map(n => <option key={n}>{n}</option>)}</select></label><label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><Users className="h-4 w-4 text-gold"/>Children</span><select value={children} onChange={e => setChildren(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3">{[0,1,2,3,4,5,6].map(n => <option key={n}>{n}</option>)}</select></label></div>
-        <div className="grid gap-5 md:grid-cols-2"><label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><BedDouble className="h-4 w-4 text-gold"/>Room type</span><select value={roomType} onChange={e => setRoomType(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3"><option>Deluxe Room</option></select></label><label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><Utensils className="h-4 w-4 text-gold"/>Meal plan</span><select value={mealPlan} onChange={e => setMealPlan(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3"><option>Bed & Breakfast</option><option>Half Board</option><option>Full Board</option></select></label></div>
+        <div className="grid gap-5 md:grid-cols-2"><label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><BedDouble className="h-4 w-4 text-gold"/>Room type</span><select value={roomType} onChange={e => setRoomType(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3">{propertyName === "Uhoo's Lavish Oasis" ? <><option>ROOM 101</option><option>ROOM 102</option></> : <option>Deluxe Room</option>}</select></label><label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><Utensils className="h-4 w-4 text-gold"/>Meal plan</span><select value={mealPlan} onChange={e => setMealPlan(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3"><option>Bed & Breakfast</option><option>Half Board</option><option>Full Board</option></select></label></div>
         <p className="-mt-3 text-sm text-gray-400">Selected rate: <span className="font-semibold text-gold">USD {nightlyRate} per room/night</span></p>
       </>}
 
