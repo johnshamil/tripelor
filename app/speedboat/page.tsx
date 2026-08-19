@@ -1,0 +1,82 @@
+"use client";
+
+import { FormEvent, useMemo, useState } from "react";
+import { CalendarDays, Clock3, Mail, Ship, Users } from "lucide-react";
+
+function formatDateTime(date:string,time:string){
+  if(!date||!time)return "";
+  return `${date}T${time}:00`;
+}
+
+export default function SpeedboatPage(){
+  const [arrivalDate,setArrivalDate]=useState("");
+  const [arrivalTime,setArrivalTime]=useState("");
+  const [seats,setSeats]=useState("1");
+  const [fullName,setFullName]=useState("");
+  const [email,setEmail]=useState("");
+  const [phone,setPhone]=useState("");
+  const [notes,setNotes]=useState("");
+  const [sending,setSending]=useState(false);
+  const [status,setStatus]=useState("");
+
+  const minDate=useMemo(()=>{
+    const d=new Date();
+    d.setDate(d.getDate()+1);
+    const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  },[]);
+
+  async function submit(e:FormEvent){
+    e.preventDefault();
+    setStatus("");
+    if(!arrivalDate||!arrivalTime){setStatus("Please enter your arrival date and time.");return;}
+    const arrival=new Date(formatDateTime(arrivalDate,arrivalTime));
+    const hours=(arrival.getTime()-Date.now())/3600000;
+    if(hours<24){setStatus("Speedboat requests must be submitted at least 24 hours before your arrival time.");return;}
+    if(!fullName.trim()){setStatus("Please enter your full name.");return;}
+    if(!email.includes("@")){setStatus("Please enter a valid email address.");return;}
+    if(!phone.trim()){setStatus("Please enter your phone number.");return;}
+
+    setSending(true);
+    try{
+      const r=await fetch("/api/speedboat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({arrivalDate,arrivalTime,seats:Number(seats),fullName:fullName.trim(),email:email.trim(),phone:phone.trim(),notes:notes.trim()})});
+      const x=await r.json();
+      if(!r.ok)throw new Error(x?.error||"Unable to send speedboat request.");
+      setStatus("Speedboat request sent successfully. Tripelor will confirm availability and transfer details with you.");
+    }catch(err){setStatus(err instanceof Error?err.message:"Unable to send speedboat request.");}
+    finally{setSending(false);}
+  }
+
+  return <section className="container py-16 md:py-20">
+    <div className="mx-auto max-w-4xl">
+      <p className="text-sm uppercase tracking-[0.3em] text-gold">Airport Transfer</p>
+      <h1 className="mt-2 text-4xl font-bold md:text-6xl">Book a Speedboat</h1>
+      <p className="mt-5 max-w-2xl text-gray-400">Share your arrival date, arrival time and number of seats required. Tripelor will arrange and confirm the available speedboat transfer to V. Felidhoo.</p>
+
+      <div className="mt-8 rounded-2xl border border-gold/30 bg-gold/10 p-5">
+        <div className="flex gap-3"><Ship className="mt-1 h-6 w-6 text-gold"/><div><h2 className="font-semibold text-gold">Important booking notice</h2><p className="mt-1 text-sm text-gray-300">Please request your speedboat transfer at least <strong>24 hours before your arrival time</strong>. Requests made later may not be possible to arrange.</p></div></div>
+      </div>
+
+      <form onSubmit={submit} className="card mt-8 grid gap-6 p-6 md:p-8">
+        <div className="grid gap-5 md:grid-cols-2">
+          <label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><CalendarDays className="h-4 w-4 text-gold"/>Arrival date</span><input required type="date" min={minDate} value={arrivalDate} onChange={e=>setArrivalDate(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3"/></label>
+          <label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><Clock3 className="h-4 w-4 text-gold"/>Arrival time</span><input required type="time" value={arrivalTime} onChange={e=>setArrivalTime(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3"/></label>
+        </div>
+
+        <label className="grid gap-2"><span className="flex items-center gap-2 text-sm font-medium"><Users className="h-4 w-4 text-gold"/>Number of seats</span><select value={seats} onChange={e=>setSeats(e.target.value)} className="rounded-xl border border-white/10 bg-black px-4 py-3">{Array.from({length:20},(_,i)=>i+1).map(n=><option key={n} value={n}>{n} Seat{n>1?"s":""}</option>)}</select></label>
+
+        <div className="grid gap-5 md:grid-cols-3">
+          <input required value={fullName} onChange={e=>setFullName(e.target.value)} placeholder="Full name" className="rounded-xl border border-white/10 bg-black px-4 py-3"/>
+          <input required type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" className="rounded-xl border border-white/10 bg-black px-4 py-3"/>
+          <input required value={phone} onChange={e=>setPhone(e.target.value)} placeholder="Phone / WhatsApp" className="rounded-xl border border-white/10 bg-black px-4 py-3"/>
+        </div>
+
+        <textarea rows={4} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Flight number, airport terminal, or any other transfer notes" className="rounded-xl border border-white/10 bg-black px-4 py-3"/>
+
+        {status&&<div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-gray-200">{status}</div>}
+        <button disabled={sending} className="btn-gold w-full gap-2 disabled:opacity-60 md:w-auto"><Mail className="h-5 w-5"/>{sending?"Sending...":"Request Speedboat"}</button>
+        <p className="text-xs text-gray-500">Submitting this form is a transfer request. Speedboat timing, seats and final fare are subject to availability and confirmation by Tripelor.</p>
+      </form>
+    </div>
+  </section>;
+}
