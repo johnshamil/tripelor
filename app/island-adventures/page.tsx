@@ -7,7 +7,7 @@ const packages = [
     name:"Maldives Reef & Relax Escape",
     slug:"reef-relax-escape",
     label:"Relax & Snorkel",
-    price:320,
+    price:750,
     image:"https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1400&auto=format&fit=crop",
     preview:[
       "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=900&auto=format&fit=crop",
