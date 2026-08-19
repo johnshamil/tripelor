@@ -10,7 +10,7 @@ const PROPERTY_RATES: Record<string, Record<string, number>> = {
 const PROPERTY_ROOM_COUNTS: Record<string, number> = { "Uhoo's Lavish Oasis": 1, "Masfalhi View Inn": 6 };
 
 function formatDate(date:string){if(!date)return "";return new Intl.DateTimeFormat("en-GB",{day:"numeric",month:"long",year:"numeric"}).format(new Date(`${date}T00:00:00`));}
-function addDays(date:string,days:number){if(!date)return "";const d=new Date(`${date}T00:00:00`);d.setDate(d.getDate()+days);return d.toISOString().slice(0,10);}
+function addDays(date:string,days:number){if(!date)return "";const [year,month,day]=date.split('-').map(Number);const d=new Date(Date.UTC(year,month-1,day+days));return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;}
 
 export default function BookingPage(){
  const [propertyName,setPropertyName]=useState("Uhoo's Lavish Oasis"),[packageName,setPackageName]=useState(""),[packagePrice,setPackagePrice]=useState<number|null>(null),[packageNights,setPackageNights]=useState(5),[adults,setAdults]=useState("2"),[children,setChildren]=useState("0"),[checkIn,setCheckIn]=useState(""),[checkOut,setCheckOut]=useState(""),[roomType,setRoomType]=useState("ROOM 101"),[rooms,setRooms]=useState("1"),[mealPlan,setMealPlan]=useState("Bed & Breakfast"),[fullName,setFullName]=useState(""),[email,setEmail]=useState(""),[phone,setPhone]=useState(""),[specialRequests,setSpecialRequests]=useState(""),[sending,setSending]=useState(false),[status,setStatus]=useState("");
