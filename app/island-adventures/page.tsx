@@ -22,7 +22,7 @@ const packages = [
     name:"5-Night Island Adventure",
     slug:"5-night-island-adventure",
     label:"Full Adventure",
-    price:540,
+    price:950,
     image:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1400&auto=format&fit=crop",
     preview:[
       "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=900&auto=format&fit=crop",
