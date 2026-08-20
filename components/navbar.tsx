@@ -9,10 +9,10 @@ export default function Navbar() {
 
   return <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur">
     <div className="container flex h-16 items-center justify-between">
-      <Link href="/" className="flex items-center gap-2"><Plane className="h-5 w-5 text-gold"/><span className="text-xl font-bold tracking-wide">Tripelor</span></Link>
-      <nav className="hidden items-center gap-7 md:flex">{links.map(([href,label]) => <Link key={href} href={href} className="text-sm text-gray-300 hover:text-gold">{label}</Link>)}<Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" className="btn-gold">Book Now</Link></nav>
-      <button onClick={() => setOpen(!open)} className="md:hidden" aria-label="Toggle menu">{open ? <X/> : <Menu/>}</button>
+      <Link href="/" className="flex items-center gap-2 transition duration-300 hover:scale-[1.03]"><Plane className="h-5 w-5 text-gold"/><span className="text-xl font-bold tracking-wide">Tripelor</span></Link>
+      <nav className="hidden items-center gap-7 md:flex">{links.map(([href,label]) => <Link key={href} href={href} className="nav-tab text-sm">{label}</Link>)}<Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" className="btn-gold">Book Now</Link></nav>
+      <button onClick={() => setOpen(!open)} className="rounded-full p-2 transition active:scale-90 md:hidden" aria-label="Toggle menu">{open ? <X/> : <Menu/>}</button>
     </div>
-    {open && <div className="border-t border-white/10 bg-black md:hidden"><div className="container flex flex-col gap-4 py-5">{links.map(([href,label]) => <Link key={href} href={href} onClick={() => setOpen(false)} className="text-gray-300">{label}</Link>)}<Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" onClick={() => setOpen(false)} className="btn-gold">Book Now</Link></div></div>}
+    {open && <div className="border-t border-white/10 bg-black md:hidden"><div className="container flex flex-col gap-2 py-5">{links.map(([href,label]) => <Link key={href} href={href} onClick={() => setOpen(false)} className="nav-tab w-fit py-2 text-gray-300">{label}</Link>)}<Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" onClick={() => setOpen(false)} className="btn-gold mt-2">Book Now</Link></div></div>}
   </header>;
 }
