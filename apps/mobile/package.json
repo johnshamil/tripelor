@@ -1,0 +1,28 @@
+{
+  "name": "tripelor-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "15.1.1",
+    "@react-native-community/datetimepicker": "9.1.0",
+    "expo": "57.0.15",
+    "expo-haptics": "~57.0.1",
+    "expo-linear-gradient": "~57.0.1",
+    "expo-status-bar": "57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.2",
+    "react-native-safe-area-context": "~5.7.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.18",
+    "typescript": "~5.9.2"
+  }
+}
