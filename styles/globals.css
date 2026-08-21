@@ -11,6 +11,10 @@ a{text-decoration:none}
 .btn-gold{@apply inline-flex items-center justify-center rounded-full bg-gold px-5 py-3 font-semibold text-black transition hover:opacity-90}
 .btn-outline{@apply inline-flex items-center justify-center rounded-full border border-gold px-5 py-3 font-semibold text-gold transition hover:bg-gold hover:text-black}
 
+/* Keep package folders separate when opened from the homepage */
+main:has(#5-night-packages:target) #3-night-packages{display:none}
+main:has(#3-night-packages:target) #5-night-packages{display:none}
+
 /* Premium page entrance */
 .page-enter{animation:tripelorPageEnter .65s cubic-bezier(.22,1,.36,1) both;transform-origin:center top}
 @keyframes tripelorPageEnter{
