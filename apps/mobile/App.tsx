@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { BackHandler, Platform, SafeAreaView, StatusBar as NativeStatusBar, StyleSheet, View } from "react-native";
+import { BackHandler, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomTabs } from "./src/components/ui";
 import { HomeScreen } from "./src/screens/HomeScreen";
 import { StaysScreen, StayDetailScreen } from "./src/screens/StaysScreen";
@@ -12,7 +13,8 @@ import type { AppRoute, Navigate, TabName } from "./src/types";
 
 const plainTabs = new Set(["home", "stays", "packages", "booking", "more"]);
 
-export default function App() {
+function TripelorApp() {
+  const insets = useSafeAreaInsets();
   const [route, setRoute] = useState<AppRoute>({ name: "home" });
   const [history, setHistory] = useState<AppRoute[]>([]);
 
@@ -106,21 +108,24 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={[styles.safeArea, { paddingTop: insets.top }]}>
       <StatusBar style="light" />
       <View style={styles.app}>
         <View style={styles.screen}>{screen}</View>
         <BottomTabs active={activeTab} navigate={navigate} />
       </View>
-    </SafeAreaView>
+    </View>
   );
+}
+
+export default function App() {
+  return <SafeAreaProvider><TripelorApp /></SafeAreaProvider>;
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingTop: Platform.OS === "android" ? NativeStatusBar.currentHeight ?? 0 : 0,
   },
   app: { flex: 1, backgroundColor: colors.background },
   screen: { flex: 1 },

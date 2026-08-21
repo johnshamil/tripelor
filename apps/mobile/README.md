@@ -14,9 +14,13 @@ Scan the QR code using Expo Go on Android or the iPhone Camera app. The app call
 ## Production builds
 
 ```bash
-npx eas-cli login
-npx eas-cli build --platform android --profile production
-npx eas-cli build --platform ios --profile production
+npm install -g eas-cli
+eas login
+eas init
+eas build --platform android --profile production
+eas build --platform ios --profile production
 ```
 
-Apple App Store submission requires an Apple Developer account. Google Play submission requires a Google Play Console account.
+`eas init` is required once to connect this directory to an Expo project. The production Android build is an AAB for Google Play. The iOS build runs in Expo's cloud and can be created from Windows.
+
+Store listing copy, privacy disclosures, screenshot guidance, and the release checklist are in [`store`](./store).

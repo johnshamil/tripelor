@@ -7,6 +7,8 @@
     "icon": "./assets/icon.png",
     "scheme": "tripelor",
     "userInterfaceStyle": "dark",
+    "backgroundColor": "#070707",
+    "primaryColor": "#D4AF37",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/icon.png",
@@ -14,9 +16,11 @@
       "backgroundColor": "#090909"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.tripelor.app",
+      "buildNumber": "1",
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false
         }
@@ -24,12 +28,14 @@
     },
     "android": {
       "package": "com.tripelor.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#090909"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": true
+      "predictiveBackGestureEnabled": true,
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "favicon": "./assets/icon.png"

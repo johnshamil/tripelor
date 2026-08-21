@@ -1,6 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, { useEffect, useState } from "react";
-import { ImageBackground, ScrollView, StyleSheet, Text, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useRef, useState } from "react";
+import { Animated, ImageBackground, ScrollView, StyleSheet, Text, View } from "react-native";
 import { getReviews } from "../api";
 import { packages, properties } from "../data";
 import { colors } from "../theme";
@@ -9,6 +10,7 @@ import { AppHeader, Badge, Body, Card, CoverCard, Eyebrow, GoldButton, H2, Outli
 
 export function HomeScreen({ navigate }: { navigate: Navigate }) {
   const [reviews, setReviews] = useState<PublicReview[]>([]);
+  const entrance = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     let mounted = true;
@@ -18,18 +20,23 @@ export function HomeScreen({ navigate }: { navigate: Navigate }) {
     return () => { mounted = false; };
   }, []);
 
+  useEffect(() => {
+    Animated.timing(entrance, { toValue: 1, duration: 420, useNativeDriver: true }).start();
+  }, [entrance]);
+
   const featuredPackage = packages.find((item) => item.id === "island-adventure-5") ?? packages[0];
 
   return (
     <View style={styles.screen}>
       <AppHeader />
+      <Animated.View style={[styles.animated, { opacity: entrance }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <ImageBackground
           source={{ uri: "https://images.unsplash.com/photo-1723781496892-d085ed803ff8?auto=format&fit=crop&q=88&w=1600" }}
           style={styles.hero}
           imageStyle={styles.heroImage}
         >
-          <View style={styles.heroShade} />
+          <LinearGradient colors={["rgba(0,0,0,0.08)", "rgba(0,0,0,0.26)", "rgba(0,0,0,0.95)"]} locations={[0, 0.48, 1]} style={styles.heroShade} />
           <View style={styles.heroContent}>
             <Eyebrow>Maldives · Above & Below The Blue</Eyebrow>
             <Text style={styles.heroTitle}>Dive into the <Text style={styles.heroGold}>extraordinary.</Text></Text>
@@ -40,6 +47,20 @@ export function HomeScreen({ navigate }: { navigate: Navigate }) {
             </View>
           </View>
         </ImageBackground>
+
+        <View style={styles.quickBookWrap}>
+          <Card style={styles.quickBookCard}>
+            <View style={styles.quickBookTop}>
+              <View style={styles.quickBookCopy}>
+                <Eyebrow>Fast & Simple</Eyebrow>
+                <Text style={styles.quickBookTitle}>Book your island escape in minutes</Text>
+              </View>
+              <View style={styles.quickBookIcon}><Ionicons name="flash" size={24} color={colors.black} /></View>
+            </View>
+            <Text style={styles.quickBookText}>Pick a stay, tap your dates, add your details and send—Tripelor checks availability automatically.</Text>
+            <GoldButton title="Start Quick Booking" icon="arrow-forward" onPress={() => navigate("booking")} />
+          </Card>
+        </View>
 
         <View style={styles.section}>
           <Eyebrow>Tripelor Packages</Eyebrow>
@@ -155,14 +176,16 @@ export function HomeScreen({ navigate }: { navigate: Navigate }) {
           <GoldButton title="Start Booking" icon="arrow-forward" onPress={() => navigate("booking")} />
         </View>
       </ScrollView>
+      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
+  animated: { flex: 1 },
   content: { paddingBottom: 46 },
-  hero: { minHeight: 560, justifyContent: "flex-end" },
+  hero: { minHeight: 640, justifyContent: "flex-end" },
   heroImage: { opacity: 0.92 },
   heroShade: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(0,0,0,0.46)" },
   heroContent: { paddingHorizontal: 20, paddingTop: 90, paddingBottom: 36, backgroundColor: "rgba(0,0,0,0.13)" },
@@ -170,6 +193,13 @@ const styles = StyleSheet.create({
   heroGold: { color: colors.goldSoft },
   heroBody: { color: "#E4E4E7", fontSize: 17, lineHeight: 25, marginTop: 16, maxWidth: 520 },
   heroButtons: { gap: 11, marginTop: 25, alignItems: "stretch" },
+  quickBookWrap: { paddingHorizontal: 18, marginTop: -18 },
+  quickBookCard: { gap: 15, borderColor: colors.goldBorder, backgroundColor: "#11100C" },
+  quickBookTop: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
+  quickBookCopy: { flex: 1 },
+  quickBookTitle: { color: colors.text, fontSize: 22, lineHeight: 27, fontWeight: "900", marginTop: 7 },
+  quickBookText: { color: colors.muted, lineHeight: 21 },
+  quickBookIcon: { width: 45, height: 45, borderRadius: 16, backgroundColor: colors.gold, alignItems: "center", justifyContent: "center" },
   section: { paddingHorizontal: 18, paddingTop: 42, gap: 17 },
   sectionRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: 12 },
   sectionTitleWrap: { flex: 1, gap: 5 },

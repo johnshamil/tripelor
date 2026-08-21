@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   intro: { marginTop: 14 },
   selector: { marginTop: 24 },
   list: { gap: 17, marginTop: 18 },
-  detailImage: { width: "100%", height: 375, backgroundColor: colors.surface },
+  detailImage: { width: "100%", height: 440, backgroundColor: colors.surface },
   detailContent: { padding: 18, gap: 17 },
   topRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 10 },
   titleWrap: { flex: 1 },
