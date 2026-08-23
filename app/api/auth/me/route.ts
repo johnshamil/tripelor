@@ -1,0 +1,2 @@
+import { currentUser, isAdminEmail } from "@/lib/auth-server";
+export async function GET(){try{const user=await currentUser();if(!user)return Response.json({user:null},{status:200});return Response.json({user:{id:user.id,email:user.email,fullName:user.user_metadata?.full_name||"",isAdmin:isAdminEmail(user.email)}});}catch(e){return Response.json({error:e instanceof Error?e.message:"Unable to load account."},{status:500});}}
