@@ -27,7 +27,8 @@ export function middleware(request:NextRequest){
   const { pathname, search } = request.nextUrl;
   if (isPublic(pathname)) return NextResponse.next();
 
-  const accessToken = request.cookies.get("tripelor_access_token")?.value;
+  // Must match the cookie created in lib/auth-server.ts.
+  const accessToken = request.cookies.get("tripelor_access")?.value;
   if (!accessToken) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", `${pathname}${search}`);
