@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { Menu, Plane, X } from "lucide-react";
+import { Menu, Plane, UserRound, X } from "lucide-react";
 import { useState } from "react";
 
 export default function Navbar() {
@@ -10,9 +10,9 @@ export default function Navbar() {
   return <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl">
     <div className="container flex h-16 items-center justify-between">
       <Link href="/" className="flex items-center gap-2 transition duration-300 hover:scale-[1.03]"><Plane className="h-5 w-5 text-gold"/><span className="text-xl font-bold tracking-wide">Tripelor</span></Link>
-      <nav className="hidden items-center gap-5 lg:flex">{links.map(([href,label]) => <Link key={href} href={href} className="nav-tab text-sm">{label}</Link>)}<Link href="/build-your-trip" className="btn-outline px-4 py-2.5">Build Your Trip</Link><Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" className="btn-gold px-4 py-2.5">Book Now</Link></nav>
+      <nav className="hidden items-center gap-5 lg:flex">{links.map(([href,label]) => <Link key={href} href={href} className="nav-tab text-sm">{label}</Link>)}<Link href="/account" className="nav-tab gap-1.5 text-sm"><UserRound className="h-4 w-4"/>Account</Link><Link href="/build-your-trip" className="btn-outline px-4 py-2.5">Build Your Trip</Link><Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" className="btn-gold px-4 py-2.5">Book Now</Link></nav>
       <button onClick={() => setOpen(!open)} className="rounded-full p-2 transition active:scale-90 lg:hidden" aria-label="Toggle menu">{open ? <X/> : <Menu/>}</button>
     </div>
-    {open && <div className="border-t border-white/10 bg-black/95 lg:hidden"><div className="container flex flex-col gap-2 py-5">{links.map(([href,label]) => <Link key={href} href={href} onClick={() => setOpen(false)} className="nav-tab w-fit py-2 text-gray-300">{label}</Link>)}<Link href="/build-your-trip" onClick={() => setOpen(false)} className="btn-outline mt-2">Build Your Trip</Link><Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" onClick={() => setOpen(false)} className="btn-gold mt-1">Book Now</Link></div></div>}
+    {open && <div className="border-t border-white/10 bg-black/95 lg:hidden"><div className="container flex flex-col gap-2 py-5">{links.map(([href,label]) => <Link key={href} href={href} onClick={() => setOpen(false)} className="nav-tab w-fit py-2 text-gray-300">{label}</Link>)}<Link href="/account" onClick={() => setOpen(false)} className="nav-tab flex w-fit items-center gap-2 py-2 text-gray-300"><UserRound className="h-4 w-4"/>Account</Link><Link href="/build-your-trip" onClick={() => setOpen(false)} className="btn-outline mt-2">Build Your Trip</Link><Link href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" onClick={() => setOpen(false)} className="btn-gold mt-1">Book Now</Link></div></div>}
   </header>;
 }
