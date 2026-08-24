@@ -1,154 +1,18 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Send, Star } from "lucide-react";
+import { Send, Star, BadgeCheck } from "lucide-react";
 
-type Review = {
-  id: string;
-  property_name: string;
-  guest_name: string;
-  country: string | null;
-  rating: number;
-  review_title: string | null;
-  review_text: string;
-  stay_date: string | null;
-  created_at: string;
-};
+type Review = {id:string;property_name:string;guest_name:string;country:string|null;rating:number;review_title:string|null;review_text:string;stay_date:string|null;created_at:string};
 
 export default function ReviewsPage() {
-  const [status, setStatus] = useState("idle");
-  const [notice, setNotice] = useState("");
-  const [rating, setRating] = useState(5);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loadingReviews, setLoadingReviews] = useState(true);
-
-  async function loadReviews() {
-    try {
-      const r = await fetch("/api/reviews/public", { cache: "no-store" });
-      const x = await r.json();
-      if (r.ok) setReviews(x.reviews || []);
-    } finally {
-      setLoadingReviews(false);
-    }
-  }
-
-  useEffect(() => {
-    loadReviews();
-  }, []);
-
-  async function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setStatus("sending");
-    setNotice("");
-    const form = e.currentTarget;
-    const data = Object.fromEntries(new FormData(form).entries());
-
-    try {
-      const r = await fetch("/api/reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, rating }),
-      });
-      const x = await r.json();
-      if (!r.ok) throw new Error(x.error || "Unable to submit review.");
-      setStatus("success");
-      setNotice("Thank you! Your review has been published.");
-      form.reset();
-      setRating(5);
-      await loadReviews();
-    } catch (err) {
-      setStatus("error");
-      setNotice(err instanceof Error ? err.message : "Unable to submit review.");
-    }
-  }
-
-  return (
-    <main className="container py-14 md:py-20">
-      <p className="text-sm uppercase tracking-[.3em] text-gold">Guest experiences</p>
-      <h1 className="mt-2 text-4xl font-bold md:text-6xl">Guest Reviews</h1>
-      <p className="mt-5 max-w-3xl text-lg text-gray-400">
-        Read genuine Tripelor guest experiences or share your own stay with future travelers.
-      </p>
-
-      <section className="mt-12">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <p className="text-sm uppercase tracking-[.25em] text-gold">What our guests say</p>
-            <h2 className="mt-2 text-3xl font-bold">Published Reviews</h2>
-          </div>
-          {!loadingReviews && reviews.length > 0 && (
-            <p className="text-sm text-gray-400">{reviews.length} review{reviews.length === 1 ? "" : "s"}</p>
-          )}
-        </div>
-
-        {loadingReviews ? (
-          <p className="mt-7 text-gray-400">Loading guest reviews...</p>
-        ) : reviews.length === 0 ? (
-          <div className="card mt-7 p-7 text-gray-400">No guest reviews yet. Be the first to share your Tripelor experience.</div>
-        ) : (
-          <div className="mt-7 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {reviews.map((review) => (
-              <article key={review.id} className="card flex h-full flex-col p-7">
-                <div className="text-xl tracking-wider text-gold" aria-label={`${review.rating} out of 5 stars`}>
-                  {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
-                </div>
-                <h3 className="mt-4 text-xl font-bold">{review.review_title || "Guest experience"}</h3>
-                <p className="mt-3 flex-1 leading-7 text-gray-300">“{review.review_text}”</p>
-                <div className="mt-6 border-t border-white/10 pt-5">
-                  <p className="font-semibold text-white">{review.guest_name}</p>
-                  <p className="mt-1 text-sm text-gray-400">
-                    {[review.country, review.property_name].filter(Boolean).join(" · ")}
-                  </p>
-                  {review.stay_date && (
-                    <p className="mt-1 text-xs text-gray-500">
-                      Stayed {new Date(`${review.stay_date}T00:00:00`).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}
-                    </p>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <div className="mt-16 grid gap-8 lg:grid-cols-[.7fr_1.3fr]">
-        <aside className="card h-fit p-7">
-          <Star className="h-8 w-8 text-gold" />
-          <h2 className="mt-4 text-2xl font-bold">Your experience matters</h2>
-          <p className="mt-3 leading-7 text-gray-400">
-            Tell future travelers about your stay, service, comfort, food and favorite moments.
-          </p>
-          <div className="mt-6 rounded-xl border border-gold/20 bg-gold/5 p-4 text-sm text-gray-300">
-            Reviews are published when submitted so guests can share their genuine experience in their own words.
-          </div>
-        </aside>
-
-        <form onSubmit={submit} className="card p-7 md:p-9">
-          <h2 className="text-3xl font-bold">Leave a review</h2>
-          <div className="mt-7 grid gap-5 md:grid-cols-2">
-            <label className="text-sm">Property<select required name="property" className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3"><option>Uhoo&apos;s Lavish Oasis</option><option>Masfalhi View Inn</option></select></label>
-            <label className="text-sm">Your name<input required name="name" className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3" /></label>
-            <label className="text-sm">Email<input required type="email" name="email" className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3" /></label>
-            <label className="text-sm">Country<input name="country" className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3" placeholder="e.g. Maldives" /></label>
-            <label className="text-sm">Date of stay<input type="date" name="stayDate" className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3" /></label>
-            <label className="text-sm">Review title<input name="title" maxLength={100} className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3" placeholder="Wonderful island stay" /></label>
-          </div>
-
-          <div className="mt-6">
-            <span className="text-sm">Your rating</span>
-            <div className="mt-2 flex gap-2" aria-label={`${rating} star rating`}>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button key={n} type="button" onClick={() => setRating(n)} aria-label={`${n} star${n > 1 ? "s" : ""}`} className={`text-3xl leading-none ${n <= rating ? "text-gold" : "text-gray-600"}`}>★</button>
-              ))}
-            </div>
-          </div>
-
-          <label className="mt-5 block text-sm">Your review<textarea required name="review" minLength={20} maxLength={1500} rows={7} className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3" placeholder="Tell us about your stay, room, service, food, island experience and favorite moments..." /></label>
-          <label className="mt-5 flex gap-3 text-sm text-gray-400"><input required type="checkbox" name="permission" value="yes" className="mt-1" />I confirm this is my genuine experience and give Tripelor permission to publish my name, country, rating and review.</label>
-          <button disabled={status === "sending"} className="btn-gold mt-7 gap-2 disabled:opacity-60"><Send className="h-4 w-4" />{status === "sending" ? "Submitting..." : "Submit Review"}</button>
-          {notice && <p className={`mt-5 rounded-xl border p-4 text-sm ${status === "success" ? "border-green-500/30" : "border-red-500/30"}`}>{notice}</p>}
-        </form>
-      </div>
-    </main>
-  );
+  const [status,setStatus]=useState("idle");const [notice,setNotice]=useState("");const [rating,setRating]=useState(5);const [reviews,setReviews]=useState<Review[]>([]);const [loadingReviews,setLoadingReviews]=useState(true);const [reservationId,setReservationId]=useState("");
+  async function loadReviews(){try{const r=await fetch("/api/reviews/public",{cache:"no-store"});const x=await r.json();if(r.ok)setReviews(x.reviews||[])}finally{setLoadingReviews(false)}}
+  useEffect(()=>{loadReviews();const p=new URLSearchParams(window.location.search);setReservationId(p.get("reservationId")||"")},[]);
+  async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setStatus("sending");setNotice("");const form=e.currentTarget;const data=Object.fromEntries(new FormData(form).entries());try{const r=await fetch("/api/reviews",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...data,rating,reservationId:reservationId||undefined})});const x=await r.json();if(!r.ok)throw new Error(x.error||"Unable to submit review.");setStatus("success");setNotice(x.verified?`Thank you! Your verified review has been published and ${x.pointsAwarded||100} bonus points were added to your Tripelor Rewards.`:"Thank you! Your review has been published.");form.reset();setRating(5);await loadReviews()}catch(err){setStatus("error");setNotice(err instanceof Error?err.message:"Unable to submit review.")}}
+  return <main className="container py-14 md:py-20"><p className="text-sm uppercase tracking-[.3em] text-gold">Guest experiences</p><h1 className="mt-2 text-4xl font-bold md:text-6xl">Guest Reviews</h1><p className="mt-5 max-w-3xl text-lg text-gray-400">Read genuine Tripelor guest experiences or share your own stay with future travelers.</p>
+  {reservationId&&<div className="mt-7 flex gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-5"><BadgeCheck className="h-6 w-6 shrink-0 text-emerald-300"/><div><h2 className="font-semibold text-emerald-200">Verified post-stay review</h2><p className="mt-1 text-sm text-gray-300">Submit a review for your completed Tripelor reservation and receive <strong className="text-gold">100 bonus points</strong>. One review bonus is available per completed stay.</p></div></div>}
+  <section className="mt-12"><div className="flex items-end justify-between gap-4"><div><p className="text-sm uppercase tracking-[.25em] text-gold">What our guests say</p><h2 className="mt-2 text-3xl font-bold">Published Reviews</h2></div>{!loadingReviews&&reviews.length>0&&<p className="text-sm text-gray-400">{reviews.length} review{reviews.length===1?"":"s"}</p>}</div>{loadingReviews?<p className="mt-7 text-gray-400">Loading guest reviews...</p>:reviews.length===0?<div className="card mt-7 p-7 text-gray-400">No guest reviews yet. Be the first to share your Tripelor experience.</div>:<div className="mt-7 grid gap-6 md:grid-cols-2 xl:grid-cols-3">{reviews.map(review=><article key={review.id} className="card flex h-full flex-col p-7"><div className="text-xl tracking-wider text-gold">{"★".repeat(review.rating)}{"☆".repeat(5-review.rating)}</div><h3 className="mt-4 text-xl font-bold">{review.review_title||"Guest experience"}</h3><p className="mt-3 flex-1 leading-7 text-gray-300">“{review.review_text}”</p><div className="mt-6 border-t border-white/10 pt-5"><p className="font-semibold text-white">{review.guest_name}</p><p className="mt-1 text-sm text-gray-400">{[review.country,review.property_name].filter(Boolean).join(" · ")}</p>{review.stay_date&&<p className="mt-1 text-xs text-gray-500">Stayed {new Date(`${review.stay_date}T00:00:00`).toLocaleDateString("en-GB",{month:"long",year:"numeric"})}</p>}</div></article>)}</div>}</section>
+  <div className="mt-16 grid gap-8 lg:grid-cols-[.7fr_1.3fr]"><aside className="card h-fit p-7"><Star className="h-8 w-8 text-gold"/><h2 className="mt-4 text-2xl font-bold">Your experience matters</h2><p className="mt-3 leading-7 text-gray-400">Tell future travelers about your stay, service, comfort, food and favorite moments.</p><div className="mt-6 rounded-xl border border-gold/20 bg-gold/5 p-4 text-sm text-gray-300">Reviews are published when submitted. Verified post-stay reviews can earn a one-time bonus for that reservation.</div></aside>
+  <form onSubmit={submit} className="card p-7 md:p-9"><h2 className="text-3xl font-bold">Leave a review</h2><div className="mt-7 grid gap-5 md:grid-cols-2"><label className="text-sm">Property<select required name="property" className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3"><option>Uhoo&apos;s Lavish Oasis</option><option>Masfalhi View Inn</option></select></label><label className="text-sm">Your name<input required name="name" className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3"/></label><label className="text-sm">Email<input required type="email" name="email" className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3"/></label><label className="text-sm">Country<input name="country" className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3" placeholder="e.g. Maldives"/></label><label className="text-sm">Date of stay<input type="date" name="stayDate" className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3"/></label><label className="text-sm">Review title<input name="title" maxLength={100} className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3" placeholder="Wonderful island stay"/></label></div><div className="mt-6"><span className="text-sm">Your rating</span><div className="mt-2 flex gap-2">{[1,2,3,4,5].map(n=><button key={n} type="button" onClick={()=>setRating(n)} className={`text-3xl leading-none ${n<=rating?"text-gold":"text-gray-600"}`}>★</button>)}</div></div><label className="mt-5 block text-sm">Your review<textarea required name="review" minLength={20} maxLength={1500} rows={7} className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3" placeholder="Tell us about your stay, room, service, food, island experience and favorite moments..."/></label><label className="mt-5 flex gap-3 text-sm text-gray-400"><input required type="checkbox" name="permission" value="yes" className="mt-1"/>I confirm this is my genuine experience and give Tripelor permission to publish my name, country, rating and review.</label><button disabled={status==="sending"} className="btn-gold mt-7 gap-2 disabled:opacity-60"><Send className="h-4 w-4"/>{status==="sending"?"Submitting...":"Submit Review"}</button>{notice&&<p className={`mt-5 rounded-xl border p-4 text-sm ${status==="success"?"border-green-500/30":"border-red-500/30"}`}>{notice}</p>}</form></div></main>
 }
