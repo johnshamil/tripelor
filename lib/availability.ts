@@ -30,7 +30,7 @@ async function rpc<T>(name: string, payload: Record<string, unknown>): Promise<T
   return data as T;
 }
 
-export async function checkAvailability(input: {
+async function checkOneRoom(input: {
   propertyName: string;
   roomType: string;
   checkIn: string;
@@ -45,6 +45,28 @@ export async function checkAvailability(input: {
     p_rooms: input.rooms,
   });
   return rows?.[0] || { available: false, rooms_left: 0, total_rooms: 0 };
+}
+
+export async function checkAvailability(input: {
+  propertyName: string;
+  roomType: string;
+  checkIn: string;
+  checkOut: string;
+  rooms: number;
+}): Promise<AvailabilityResult> {
+  const selected = await checkOneRoom(input);
+
+  // Uhoo's Lavish Oasis has two separately bookable rooms. Return the total
+  // number of rooms still available for the selected stay so the booking UI
+  // can truthfully show “1 left” only when one of the two rooms remains.
+  if (input.propertyName.toLowerCase() === "uhoo's lavish oasis" && ["ROOM 101", "ROOM 102"].includes(input.roomType.toUpperCase())) {
+    const roomTypes = ["ROOM 101", "ROOM 102"];
+    const results = await Promise.all(roomTypes.map(roomType => checkOneRoom({ ...input, roomType, rooms: 1 })));
+    const propertyRoomsLeft = results.filter(result => result.available).length;
+    return { ...selected, rooms_left: propertyRoomsLeft, total_rooms: 2 };
+  }
+
+  return selected;
 }
 
 export async function reserveRooms(input: {
