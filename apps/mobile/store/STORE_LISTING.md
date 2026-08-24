@@ -29,12 +29,15 @@ Discover a more personal way to experience the Maldives with Tripelor.
 
 Explore handpicked local-island stays, compare meal plans, discover couple packages and send a booking request in three simple steps. Tripelor brings accommodation, transfers and selected island experiences together in one comfortable mobile experience.
 
+Create an optional Tripelor account to prefill your contact details for faster booking, or continue as a guest with no account required.
+
 With Tripelor you can:
 
 - Browse Maldives guesthouses with large, immersive photos
 - Compare room rates and meal plans
 - Discover curated couple packages
 - Select travel dates with a simple native calendar
+- Sign in for faster booking, or explore and book as a guest
 - Check room availability before sending a request
 - Request scheduled speedboat transfers
 - Ask about snorkelling, sandbank trips and island experiences
@@ -47,4 +50,4 @@ Plan a relaxed local-island escape with personal support from your first enquiry
 
 ## Version 1.0 release notes
 
-Welcome to Tripelor for Android and iPhone. Explore Maldives stays and couple packages, check availability, request transfers and send a booking request through a fast three-step flow.
+Welcome to Tripelor for Android and iPhone. Enjoy a redesigned luxury experience, optional secure sign-in, larger travel photography and a faster three-step booking flow.

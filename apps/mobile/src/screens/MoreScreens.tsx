@@ -1,10 +1,10 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React, { useEffect, useState } from "react";
-import { Alert, Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { getReviews, parseISODate, submitContact, submitReview, submitSpeedboat } from "../api";
 import { faqs, properties } from "../data";
 import { colors } from "../theme";
-import type { Navigate, PublicReview } from "../types";
+import type { Navigate, PublicReview, TravelerProfile } from "../types";
 import { Body, Card, ChoiceRow, Eyebrow, Feature, Field, GoldButton, H1, H2, Notice, OutlineButton, Screen, Stepper } from "../components/ui";
 
 type IconName = React.ComponentProps<typeof Ionicons>["name"];
@@ -23,12 +23,91 @@ function MenuCard({ icon, title, text, onPress }: { icon: IconName; title: strin
   );
 }
 
-export function MoreScreen({ navigate }: { navigate: Navigate }) {
+export function MoreScreen({
+  navigate,
+  traveler,
+  signedIn,
+  onOpenAuth,
+  onSignOut,
+  onDeleteAccount,
+}: {
+  navigate: Navigate;
+  traveler: TravelerProfile;
+  signedIn: boolean;
+  onOpenAuth: () => void;
+  onSignOut: () => void;
+  onDeleteAccount: () => Promise<void>;
+}) {
+  const [deleting, setDeleting] = useState(false);
+  const [accountStatus, setAccountStatus] = useState<Status>(null);
+  const accountName = traveler.fullName?.trim() || traveler.email?.split("@")[0] || "Traveler";
+  const initial = accountName.charAt(0).toUpperCase();
+
+  function confirmDeleteAccount() {
+    Alert.alert(
+      "Delete Tripelor account?",
+      "Your sign-in account will be permanently deleted. Existing booking requests may still be retained where needed for service, legal or accounting records.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete account",
+          style: "destructive",
+          onPress: async () => {
+            setDeleting(true);
+            setAccountStatus(null);
+            try {
+              await onDeleteAccount();
+            } catch (error) {
+              setAccountStatus({ type: "error", message: error instanceof Error ? error.message : "Unable to delete your account." });
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ],
+    );
+  }
+
   return (
     <Screen>
-      <Eyebrow>Tripelor Support</Eyebrow>
-      <H1>Everything you need for your Maldives trip</H1>
-      <View style={styles.intro}><Body muted>Transfers, travel guidance, contact support, guest reviews and useful booking information.</Body></View>
+      <Eyebrow>Your Tripelor</Eyebrow>
+      <H1>{signedIn ? `Welcome, ${accountName}` : "Travel your way"}</H1>
+      <View style={styles.intro}><Body muted>{signedIn ? "Your contact details are ready for quicker booking requests." : "Sign in for faster booking, or continue exploring freely as a guest."}</Body></View>
+      <Card style={styles.accountCard}>
+        <View style={styles.accountTop}>
+          <View style={[styles.avatar, !signedIn && styles.avatarGuest]}>
+            {signedIn ? <Text style={styles.avatarText}>{initial}</Text> : <Ionicons name="person-outline" size={25} color={colors.lagoon} />}
+          </View>
+          <View style={styles.accountCopy}>
+            <Text style={styles.accountEyebrow}>{signedIn ? "TRIPELOR ACCOUNT" : "OPTIONAL ACCOUNT"}</Text>
+            <Text style={styles.accountTitle}>{signedIn ? accountName : "Make booking even easier"}</Text>
+            <Text numberOfLines={1} style={styles.accountEmail}>{signedIn ? traveler.email : "Save your name and email securely."}</Text>
+          </View>
+          <Ionicons name={signedIn ? "shield-checkmark" : "sparkles"} size={25} color={colors.lagoon} />
+        </View>
+        {signedIn ? (
+          <View style={styles.accountActions}>
+            <OutlineButton title="Sign out" icon="log-out-outline" onPress={onSignOut} />
+            <Pressable
+              accessibilityRole="button"
+              disabled={deleting}
+              onPress={confirmDeleteAccount}
+              style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed, deleting && styles.deleteButtonDisabled]}
+            >
+              {deleting ? <ActivityIndicator size="small" color={colors.danger} /> : <Ionicons name="trash-outline" size={18} color={colors.danger} />}
+              <Text style={styles.deleteText}>{deleting ? "Deleting…" : "Delete account"}</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <GoldButton title="Sign In or Create Account" icon="person-circle-outline" onPress={onOpenAuth} />
+        )}
+        {accountStatus ? <Notice type={accountStatus.type}>{accountStatus.message}</Notice> : null}
+      </Card>
+
+      <View style={styles.supportHeading}>
+        <Eyebrow>Travel Support</Eyebrow>
+        <H2>Everything you need</H2>
+      </View>
       <View style={styles.menuList}>
         <MenuCard icon="boat" title="Speedboat Transfer" text="Request airport-to-Felidhoo seats at least 24 hours ahead." onPress={() => navigate("transfers")} />
         <MenuCard icon="mail" title="Contact Tripelor" text="Ask about stays, packages, activities or an existing booking." onPress={() => navigate("contact")} />
@@ -216,9 +295,9 @@ export function TravelInfoScreen({ goBack, navigate }: { goBack: () => void; nav
       </Card>
       <Card>
         <H2>Privacy</H2>
-        <View style={styles.cardTop}><Body muted>Tripelor uses the name, email, phone number, travel dates and preferences you provide to arrange and respond to your request. Information may be shared with relevant service providers when necessary. Tripelor does not sell personal information.</Body></View>
+        <View style={styles.cardTop}><Body muted>Tripelor uses the name, email, phone number, travel dates and preferences you provide to arrange and respond to your request. Optional accounts are authenticated by Supabase and can be permanently deleted from Your Tripelor. Information may be shared with relevant service providers when necessary. Tripelor does not sell personal information.</Body></View>
       </Card>
-      <Text style={styles.updated}>Transfer details are indicative and must be reconfirmed for the guest’s actual travel date. Updated 17 August 2026.</Text>
+      <Text style={styles.updated}>Transfer details are indicative and must be reconfirmed for the guest’s actual travel date. Updated 25 August 2026.</Text>
     </Screen>
   );
 }
@@ -296,10 +375,24 @@ export function ReviewsScreen({ goBack }: { goBack: () => void }) {
 
 const styles = StyleSheet.create({
   intro: { marginTop: 14, marginBottom: 22 },
+  accountCard: { gap: 18, borderColor: colors.lagoonBorder, backgroundColor: colors.surfaceRaised },
+  accountTop: { flexDirection: "row", alignItems: "center", gap: 13 },
+  avatar: { width: 52, height: 52, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.gold },
+  avatarGuest: { backgroundColor: "rgba(101,213,208,0.10)", borderWidth: 1, borderColor: colors.lagoonBorder },
+  avatarText: { color: colors.black, fontSize: 21, fontWeight: "900" },
+  accountCopy: { flex: 1 },
+  accountEyebrow: { color: colors.lagoon, fontSize: 9, fontWeight: "900", letterSpacing: 1.5 },
+  accountTitle: { color: colors.text, fontSize: 18, fontWeight: "900", marginTop: 4 },
+  accountEmail: { color: colors.muted, fontSize: 12, marginTop: 4 },
+  accountActions: { gap: 10 },
+  deleteButton: { minHeight: 48, borderRadius: 999, borderWidth: 1, borderColor: "rgba(251,113,133,0.34)", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "rgba(251,113,133,0.05)" },
+  deleteButtonDisabled: { opacity: 0.6 },
+  deleteText: { color: colors.danger, fontSize: 14, fontWeight: "800" },
+  supportHeading: { gap: 5, marginTop: 30, marginBottom: 16 },
   menuList: { gap: 11 },
   menuCard: { minHeight: 94, flexDirection: "row", alignItems: "center", gap: 13, padding: 15, borderRadius: 20, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
   pressed: { transform: [{ scale: 0.985 }], opacity: 0.9 },
-  menuIcon: { width: 48, height: 48, borderRadius: 17, backgroundColor: "rgba(212,175,55,0.10)", alignItems: "center", justifyContent: "center" },
+  menuIcon: { width: 48, height: 48, borderRadius: 17, backgroundColor: "rgba(210,168,74,0.10)", alignItems: "center", justifyContent: "center" },
   menuCopy: { flex: 1 },
   menuTitle: { color: colors.text, fontSize: 17, fontWeight: "900" },
   menuText: { color: colors.muted, lineHeight: 19, marginTop: 4, fontSize: 13 },

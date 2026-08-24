@@ -11,6 +11,8 @@ npm start
 
 Scan the QR code using Expo Go on Android or the iPhone Camera app. The app calls the live Tripelor APIs at `https://www.tripelor.com` for availability, bookings, transfers, enquiries, and reviews.
 
+Travelers can create an optional account through Supabase Auth or continue as a guest. Native sessions are encrypted before being persisted, with the encryption key protected by Expo SecureStore. Signed-in travelers can permanently delete their account from the **Your Tripelor** screen.
+
 ## Production builds
 
 ```bash

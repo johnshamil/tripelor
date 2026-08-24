@@ -7,13 +7,16 @@
     "icon": "./assets/icon.png",
     "scheme": "tripelor",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#070707",
-    "primaryColor": "#D4AF37",
+    "backgroundColor": "#06090A",
+    "primaryColor": "#D2A84A",
     "newArchEnabled": true,
+    "plugins": [
+      "expo-secure-store"
+    ],
     "splash": {
       "image": "./assets/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#090909"
+      "backgroundColor": "#06090A"
     },
     "ios": {
       "supportsTablet": false,
@@ -31,7 +34,7 @@
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#090909"
+        "backgroundColor": "#06090A"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": true,

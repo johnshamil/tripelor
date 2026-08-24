@@ -127,14 +127,20 @@ export function GoldButton({
       disabled={disabled || loading}
       onPress={() => { tapFeedback(); onPress(); }}
       style={({ pressed }) => [
-        styles.goldButton,
-        compact && styles.buttonCompact,
+        styles.goldButtonShell,
         pressed && styles.buttonPressed,
         (disabled || loading) && styles.buttonDisabled,
       ]}
     >
-      {loading ? <ActivityIndicator size="small" color={colors.black} /> : icon ? <Ionicons name={icon} size={19} color={colors.black} /> : null}
-      <Text style={styles.goldButtonText}>{loading ? "Please wait…" : title}</Text>
+      <LinearGradient
+        colors={[colors.goldSoft, colors.gold, colors.goldDeep]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.goldButton, compact && styles.buttonCompact]}
+      >
+        {loading ? <ActivityIndicator size="small" color={colors.black} /> : icon ? <Ionicons name={icon} size={19} color={colors.black} /> : null}
+        <Text style={styles.goldButtonText}>{loading ? "Please wait…" : title}</Text>
+      </LinearGradient>
     </Pressable>
   );
 }
@@ -179,15 +185,18 @@ export function Badge({ children }: PropsWithChildren) {
   );
 }
 
-export function Field({ label, multiline, style, ...props }: TextInputProps & { label: string }) {
+export function Field({ label, multiline, style, onFocus, onBlur, ...props }: TextInputProps & { label: string }) {
+  const [focused, setFocused] = useState(false);
   return (
     <View style={styles.fieldWrap}>
       <Text style={styles.fieldLabel}>{label}</Text>
       <TextInput
+        onBlur={(event) => { setFocused(false); onBlur?.(event); }}
+        onFocus={(event) => { setFocused(true); onFocus?.(event); }}
         placeholderTextColor={colors.faint}
         multiline={multiline}
         textAlignVertical={multiline ? "top" : "center"}
-        style={[styles.input, multiline && styles.textarea, style]}
+        style={[styles.input, focused && styles.inputFocused, multiline && styles.textarea, style]}
         {...props}
       />
     </View>
@@ -364,8 +373,8 @@ export function CoverCard({
 const tabs: Array<{ name: TabName; label: string; icon: IconName; activeIcon: IconName }> = [
   { name: "home", label: "Home", icon: "home-outline", activeIcon: "home" },
   { name: "stays", label: "Stays", icon: "bed-outline", activeIcon: "bed" },
-  { name: "packages", label: "Packages", icon: "sparkles-outline", activeIcon: "sparkles" },
   { name: "booking", label: "Book", icon: "calendar-outline", activeIcon: "calendar" },
+  { name: "packages", label: "Packages", icon: "sparkles-outline", activeIcon: "sparkles" },
   { name: "more", label: "More", icon: "menu-outline", activeIcon: "menu" },
 ];
 
@@ -406,7 +415,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
     paddingHorizontal: 18,
-    backgroundColor: "rgba(7,7,7,0.98)",
+    backgroundColor: "rgba(6,9,10,0.98)",
   },
   backButton: { width: 42, height: 42, alignItems: "center", justifyContent: "center", marginLeft: -10 },
   headerTitle: { flex: 1, color: colors.text, fontWeight: "700", fontSize: 17, textAlign: "center" },
@@ -424,7 +433,8 @@ const styles = StyleSheet.create({
   body: { color: colors.text, fontSize: 16, lineHeight: 25 },
   bodyMuted: { color: colors.muted },
   card: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radius.large, padding: 21, ...shadow },
-  goldButton: { minHeight: 56, paddingHorizontal: 22, borderRadius: radius.pill, backgroundColor: colors.gold, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center" },
+  goldButtonShell: { borderRadius: radius.pill, overflow: "hidden" },
+  goldButton: { minHeight: 56, paddingHorizontal: 22, borderRadius: radius.pill, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center" },
   outlineButton: { minHeight: 56, paddingHorizontal: 22, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.gold, flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center" },
   buttonCompact: { minHeight: 46, paddingHorizontal: 17 },
   buttonPressed: { transform: [{ scale: 0.97 }], opacity: 0.88 },
@@ -433,11 +443,12 @@ const styles = StyleSheet.create({
   outlineButtonText: { color: colors.gold, fontSize: 15, fontWeight: "800" },
   featureRow: { flexDirection: "row", gap: 10, alignItems: "flex-start", marginTop: 11 },
   featureText: { color: colors.text, lineHeight: 21, flex: 1 },
-  badge: { borderWidth: 1, borderColor: colors.goldBorder, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 5, backgroundColor: "rgba(212,175,55,0.10)" },
+  badge: { borderWidth: 1, borderColor: colors.goldBorder, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 5, backgroundColor: "rgba(210,168,74,0.10)" },
   badgeText: { color: colors.gold, fontSize: 11, fontWeight: "800" },
   fieldWrap: { gap: 8 },
   fieldLabel: { color: colors.text, fontSize: 13, fontWeight: "700" },
   input: { minHeight: 56, borderRadius: radius.medium, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.black, color: colors.text, paddingHorizontal: 16, fontSize: 16 },
+  inputFocused: { borderColor: colors.lagoon, backgroundColor: "#080D0E" },
   textarea: { minHeight: 122, paddingTop: 15 },
   dateField: { minHeight: 56, borderRadius: radius.medium, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.black, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   dateFieldDisabled: { opacity: 0.7, backgroundColor: colors.surfaceRaised },
@@ -448,14 +459,14 @@ const styles = StyleSheet.create({
   iosCalendar: { overflow: "hidden", borderRadius: radius.medium, backgroundColor: colors.black },
   choiceRow: { gap: 8, paddingRight: 4 },
   choice: { minHeight: 46, paddingHorizontal: 16, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.black, alignItems: "center", justifyContent: "center" },
-  choiceActive: { borderColor: colors.gold, backgroundColor: "rgba(212,175,55,0.13)" },
+  choiceActive: { borderColor: colors.gold, backgroundColor: "rgba(210,168,74,0.13)" },
   choiceText: { color: colors.muted, fontSize: 13, fontWeight: "700" },
   choiceTextActive: { color: colors.gold },
   stepperRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   stepperControls: { flexDirection: "row", alignItems: "center", gap: 14 },
   stepperButton: { width: 46, height: 46, borderRadius: 23, borderWidth: 1, borderColor: colors.goldBorder, alignItems: "center", justifyContent: "center", backgroundColor: colors.black },
   stepperValue: { color: colors.text, minWidth: 24, textAlign: "center", fontSize: 17, fontWeight: "800" },
-  notice: { flexDirection: "row", gap: 10, alignItems: "flex-start", padding: 14, borderRadius: radius.medium, borderWidth: 1, borderColor: colors.goldBorder, backgroundColor: "rgba(212,175,55,0.08)" },
+  notice: { flexDirection: "row", gap: 10, alignItems: "flex-start", padding: 14, borderRadius: radius.medium, borderWidth: 1, borderColor: colors.goldBorder, backgroundColor: "rgba(210,168,74,0.08)" },
   noticeSuccess: { borderColor: "rgba(74,222,128,0.35)", backgroundColor: "rgba(74,222,128,0.07)" },
   noticeError: { borderColor: "rgba(251,113,133,0.35)", backgroundColor: "rgba(251,113,133,0.07)" },
   noticeText: { color: colors.text, lineHeight: 20, flex: 1, fontSize: 13 },
@@ -470,10 +481,10 @@ const styles = StyleSheet.create({
   coverSubtitle: { color: "#E4E4E7", fontSize: 15, lineHeight: 22, marginTop: 9 },
   coverLink: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 13 },
   coverLinkText: { color: colors.gold, fontWeight: "800", fontSize: 13 },
-  tabBar: { minHeight: 78, paddingTop: 9, paddingBottom: 8, flexDirection: "row", borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border, backgroundColor: "#0B0B0B" },
+  tabBar: { minHeight: 78, paddingTop: 9, paddingBottom: 8, flexDirection: "row", borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border, backgroundColor: "#090D0F" },
   tabButton: { flex: 1, minHeight: 54, alignItems: "center", justifyContent: "center", gap: 4 },
   bookingTabButton: { transform: [{ translateY: -11 }] },
-  bookingTabIcon: { width: 51, height: 51, borderRadius: 26, backgroundColor: colors.gold, alignItems: "center", justifyContent: "center", borderWidth: 4, borderColor: "#0B0B0B", ...shadow },
+  bookingTabIcon: { width: 51, height: 51, borderRadius: 26, backgroundColor: colors.gold, alignItems: "center", justifyContent: "center", borderWidth: 4, borderColor: "#090D0F", ...shadow },
   bookingTabIconActive: { backgroundColor: colors.goldSoft, transform: [{ scale: 1.06 }] },
   tabLabel: { color: colors.faint, fontSize: 10, fontWeight: "700" },
   tabLabelActive: { color: colors.gold },

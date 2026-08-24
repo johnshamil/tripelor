@@ -4,7 +4,7 @@ import { Alert, Animated, ScrollView, StyleSheet, Text, View } from "react-nativ
 import { addDays, checkAvailability, dateToLong, nightsBetween, parseISODate, submitBooking } from "../api";
 import { getPackage, getProperty, properties } from "../data";
 import { colors } from "../theme";
-import type { Navigate } from "../types";
+import type { Navigate, TravelerProfile } from "../types";
 import { Body, Card, ChoiceRow, DateField, Eyebrow, Field, GoldButton, H1, H2, Notice, OutlineButton, Screen, Stepper } from "../components/ui";
 
 type Status = { type: "info" | "success" | "error"; message: string } | null;
@@ -44,10 +44,12 @@ export function BookingScreen({
   propertyId,
   packageId,
   navigate,
+  traveler,
 }: {
   propertyId?: string;
   packageId?: string;
   navigate: Navigate;
+  traveler?: TravelerProfile;
 }) {
   const selectedPackage = getPackage(packageId);
   const initialProperty = selectedPackage ? getProperty("uhoos") : getProperty(propertyId);
@@ -62,8 +64,8 @@ export function BookingScreen({
   const [children, setChildren] = useState(0);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState(traveler?.fullName ?? "");
+  const [email, setEmail] = useState(traveler?.email ?? "");
   const [phone, setPhone] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
   const [sending, setSending] = useState(false);
@@ -222,6 +224,9 @@ export function BookingScreen({
 
         {step === 2 ? (
           <View style={styles.stepContent}>
+            {traveler?.email ? (
+              <Notice type="success">Your Tripelor account details have been added. Just enter your phone number to continue.</Notice>
+            ) : null}
             <Card style={styles.formCard}>
               <H2>Guest details</H2>
               <Field label="Full name" value={fullName} onChangeText={setFullName} placeholder="Your full name" autoCapitalize="words" autoComplete="name" />
@@ -291,7 +296,7 @@ const styles = StyleSheet.create({
   packageMeta: { color: colors.muted, marginTop: 6, lineHeight: 19 },
   formCard: { gap: 18 },
   inlineGold: { color: colors.gold, fontWeight: "900" },
-  summaryCard: { gap: 17, borderColor: colors.goldBorder, backgroundColor: "rgba(212,175,55,0.07)" },
+  summaryCard: { gap: 17, borderColor: colors.goldBorder, backgroundColor: "rgba(210,168,74,0.07)" },
   summaryTop: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 12 },
   summaryCopy: { flex: 1 },
   summaryLabel: { color: colors.gold, textTransform: "uppercase", fontSize: 10, letterSpacing: 1.4, fontWeight: "900" },

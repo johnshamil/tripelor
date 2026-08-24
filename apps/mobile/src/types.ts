@@ -23,6 +23,11 @@ export type AppRoute = {
 
 export type Navigate = (name: ScreenName, params?: RouteParams) => void;
 
+export type TravelerProfile = {
+  fullName?: string;
+  email?: string;
+};
+
 export type Property = {
   id: string;
   name: string;

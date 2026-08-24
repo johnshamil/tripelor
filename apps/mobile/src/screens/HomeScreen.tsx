@@ -32,12 +32,16 @@ export function HomeScreen({ navigate }: { navigate: Navigate }) {
       <Animated.View style={[styles.animated, { opacity: entrance }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <ImageBackground
-          source={{ uri: "https://images.unsplash.com/photo-1723781496892-d085ed803ff8?auto=format&fit=crop&q=88&w=1600" }}
+          source={require("../../assets/images/uhoos-cover.jpeg")}
           style={styles.hero}
           imageStyle={styles.heroImage}
         >
           <LinearGradient colors={["rgba(0,0,0,0.08)", "rgba(0,0,0,0.26)", "rgba(0,0,0,0.95)"]} locations={[0, 0.48, 1]} style={styles.heroShade} />
           <View style={styles.heroContent}>
+            <View style={styles.heroPill}>
+              <Ionicons name="location" size={15} color={colors.lagoon} />
+              <Text style={styles.heroPillText}>V. FELIDHOO · MALDIVES</Text>
+            </View>
             <Eyebrow>Maldives · Above & Below The Blue</Eyebrow>
             <Text style={styles.heroTitle}>Dive into the <Text style={styles.heroGold}>extraordinary.</Text></Text>
             <Text style={styles.heroBody}>Island stays and unforgettable ocean experiences—discover the Maldives with Tripelor.</Text>
@@ -60,6 +64,19 @@ export function HomeScreen({ navigate }: { navigate: Navigate }) {
             <Text style={styles.quickBookText}>Pick a stay, tap your dates, add your details and send—Tripelor checks availability automatically.</Text>
             <GoldButton title="Start Quick Booking" icon="arrow-forward" onPress={() => navigate("booking")} />
           </Card>
+        </View>
+
+        <View style={styles.trustStrip}>
+          {[
+            ["diamond-outline", "Curated stays"],
+            ["people-outline", "Local expertise"],
+            ["chatbubble-ellipses-outline", "Personal support"],
+          ].map(([icon, label]) => (
+            <View key={label} style={styles.trustItem}>
+              <Ionicons name={icon as React.ComponentProps<typeof Ionicons>["name"]} size={18} color={colors.lagoon} />
+              <Text style={styles.trustText}>{label}</Text>
+            </View>
+          ))}
         </View>
 
         <View style={styles.section}>
@@ -185,21 +202,26 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   animated: { flex: 1 },
   content: { paddingBottom: 46 },
-  hero: { minHeight: 640, justifyContent: "flex-end" },
-  heroImage: { opacity: 0.92 },
+  hero: { minHeight: 575, justifyContent: "flex-end" },
+  heroImage: { opacity: 0.94 },
   heroShade: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(0,0,0,0.46)" },
-  heroContent: { paddingHorizontal: 20, paddingTop: 90, paddingBottom: 36, backgroundColor: "rgba(0,0,0,0.13)" },
-  heroTitle: { color: colors.white, fontSize: 46, lineHeight: 49, letterSpacing: -1.5, fontWeight: "900", marginTop: 12 },
+  heroContent: { paddingHorizontal: 20, paddingTop: 74, paddingBottom: 36, backgroundColor: "rgba(0,0,0,0.13)" },
+  heroPill: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 7, paddingHorizontal: 11, paddingVertical: 8, borderRadius: 999, borderWidth: 1, borderColor: colors.lagoonBorder, backgroundColor: "rgba(6,9,10,0.66)", marginBottom: 14 },
+  heroPillText: { color: colors.lagoonSoft, fontSize: 10, fontWeight: "900", letterSpacing: 1.35 },
+  heroTitle: { color: colors.white, fontSize: 44, lineHeight: 47, letterSpacing: -1.4, fontWeight: "900", marginTop: 12 },
   heroGold: { color: colors.goldSoft },
   heroBody: { color: "#E4E4E7", fontSize: 17, lineHeight: 25, marginTop: 16, maxWidth: 520 },
   heroButtons: { gap: 11, marginTop: 25, alignItems: "stretch" },
   quickBookWrap: { paddingHorizontal: 18, marginTop: -18 },
-  quickBookCard: { gap: 15, borderColor: colors.goldBorder, backgroundColor: "#11100C" },
+  quickBookCard: { gap: 15, borderColor: colors.goldBorder, backgroundColor: colors.surfaceRaised },
   quickBookTop: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
   quickBookCopy: { flex: 1 },
   quickBookTitle: { color: colors.text, fontSize: 22, lineHeight: 27, fontWeight: "900", marginTop: 7 },
   quickBookText: { color: colors.muted, lineHeight: 21 },
   quickBookIcon: { width: 45, height: 45, borderRadius: 16, backgroundColor: colors.gold, alignItems: "center", justifyContent: "center" },
+  trustStrip: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 6, paddingHorizontal: 18, paddingTop: 22 },
+  trustItem: { flex: 1, alignItems: "center", gap: 7 },
+  trustText: { color: colors.muted, fontSize: 10, fontWeight: "700", textAlign: "center" },
   section: { paddingHorizontal: 18, paddingTop: 42, gap: 17 },
   sectionRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: 12 },
   sectionTitleWrap: { flex: 1, gap: 5 },
@@ -218,5 +240,5 @@ const styles = StyleSheet.create({
   stars: { color: colors.gold, letterSpacing: 2, fontSize: 18 },
   reviewTitle: { color: colors.text, fontSize: 19, fontWeight: "800", marginVertical: 9 },
   reviewGuest: { color: colors.gold, fontSize: 12, fontWeight: "700", marginTop: 15 },
-  cta: { marginHorizontal: 18, marginTop: 48, padding: 24, borderRadius: 26, borderWidth: 1, borderColor: colors.goldBorder, backgroundColor: "rgba(212,175,55,0.08)", gap: 14, alignItems: "flex-start" },
+  cta: { marginHorizontal: 18, marginTop: 48, padding: 24, borderRadius: 26, borderWidth: 1, borderColor: colors.goldBorder, backgroundColor: "rgba(210,168,74,0.08)", gap: 14, alignItems: "flex-start" },
 });
