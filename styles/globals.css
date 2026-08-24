@@ -3,9 +3,12 @@
 @tailwind utilities;
 
 :root{color-scheme:dark}
-html{scroll-behavior:smooth}
-body{margin:0;background:#070707;color:#f5f5f5;font-family:Arial,Helvetica,sans-serif}
-a{text-decoration:none}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
+body{margin:0;background:#070707;color:#f5f5f5;font-family:Arial,Helvetica,sans-serif;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{text-decoration:none;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{-webkit-tap-highlight-color:transparent;font:inherit}
+input,select,textarea{font-size:16px}
+img,video{max-width:100%;height:auto}
 .container{@apply max-w-7xl mx-auto px-5}
 .card{@apply border border-white/10 bg-white/[0.03] rounded-3xl}
 .btn-gold{@apply inline-flex items-center justify-center rounded-full bg-gold px-5 py-3 font-semibold text-black transition hover:opacity-90}
@@ -23,9 +26,25 @@ a{text-decoration:none}
 .nav-tab:active{animation:tabPulse .42s ease;transform:scale(.9)}
 @keyframes tabPulse{0%{filter:drop-shadow(0 0 0 rgba(212,175,55,0))}45%{filter:drop-shadow(0 0 14px rgba(212,175,55,.95))}100%{filter:drop-shadow(0 0 0 rgba(212,175,55,0))}}
 
-.btn-gold,.btn-outline{position:relative;overflow:hidden;transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .3s ease,background-color .3s ease,color .3s ease,opacity .3s ease}
+.btn-gold,.btn-outline{position:relative;overflow:hidden;transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .3s ease,background-color .3s ease,color .3s ease,opacity .3s ease;touch-action:manipulation}
 .btn-gold:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(212,175,55,.22)}
 .btn-outline:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(212,175,55,.18)}
-.btn-gold:active,.btn-outline:active{transform:scale(.94)}
+.btn-gold:active,.btn-outline:active{transform:scale(.96)}
 
-@media (prefers-reduced-motion:reduce){.page-enter,.nav-tab:active{animation:none}.nav-tab,.btn-gold,.btn-outline{transition:none}[class*="heroDrift"]{animation:none!important}}
+.mobile-scroll{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scroll-snap-type:x proximity}
+.mobile-scroll>*{scroll-snap-align:start}
+
+@media (max-width:767px){
+  .container{padding-left:1rem;padding-right:1rem}
+  .card{border-radius:1.25rem}
+  .page-enter{animation-duration:.4s}
+  .btn-gold,.btn-outline{min-height:46px;padding:.75rem 1rem}
+  h1{line-height:1.08}
+  h2{line-height:1.15}
+  table{font-size:.75rem}
+  input,select,textarea{min-height:46px;border-radius:.9rem}
+  textarea{min-height:96px}
+  .nav-tab{min-height:44px}
+}
+
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.page-enter,.nav-tab:active{animation:none}.nav-tab,.btn-gold,.btn-outline{transition:none}[class*="heroDrift"]{animation:none!important}}
