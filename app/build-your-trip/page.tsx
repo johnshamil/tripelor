@@ -6,7 +6,7 @@ import { BedDouble, CalendarDays, CheckCircle2, Ship, Sparkles, Utensils } from 
 import SaveTripButton from "@/components/save-trip-button";
 
 const packageOptions=[
-  {name:"Maldives Reef & Relax Escape",nights:3,price:500,meal:"Half Board"},{name:"Island Adventure",nights:3,price:650,meal:"Half Board"},{name:"Maldives Ocean Discovery Escape",nights:3,price:750,meal:"Full Board"},{name:"Beach BBQ Dinner Escape",nights:3,price:650,meal:"Half Board"},{name:"Honeymoon Island Escape",nights:3,price:900,meal:"Full Board"},{name:"Manta & Dolphin Adventure",nights:3,price:700,meal:"Half Board"},{name:"Sunset & Sandbank Escape",nights:3,price:550,meal:"Half Board"},
+  {name:"Maldives Reef & Relax Escape",nights:3,price:500,meal:"Half Board"},{name:"Island Adventure",nights:3,price:750,meal:"Half Board"},{name:"Maldives Ocean Discovery Escape",nights:3,price:750,meal:"Full Board"},{name:"Beach BBQ Dinner Escape",nights:3,price:650,meal:"Half Board"},{name:"Honeymoon Island Escape",nights:3,price:900,meal:"Full Board"},{name:"Manta & Dolphin Adventure",nights:3,price:700,meal:"Half Board"},{name:"Sunset & Sandbank Escape",nights:3,price:550,meal:"Half Board"},
   {name:"Maldives Reef & Relax Escape",nights:5,price:750,meal:"Half Board"},{name:"5-Night Island Adventure",nights:5,price:950,meal:"Half Board"},{name:"Maldives Ocean Discovery Escape",nights:5,price:1150,meal:"Full Board"},{name:"Beach BBQ Dinner Escape",nights:5,price:990,meal:"Half Board"},{name:"Honeymoon Island Escape",nights:5,price:1350,meal:"Full Board"},{name:"Manta & Dolphin Adventure",nights:5,price:1050,meal:"Half Board"},{name:"Sunset & Sandbank Escape",nights:5,price:820,meal:"Half Board"}
 ];
 
