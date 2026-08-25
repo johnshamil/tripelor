@@ -18,7 +18,7 @@ export async function GET(){
     if(!accountRes.ok)throw new Error(accounts?.message||"Unable to load loyalty points.");
     if(!txRes.ok)throw new Error(transactions?.message||"Unable to load loyalty history.");
     const account=accounts?.[0]||{guest_email:email,points_balance:0,lifetime_points:0,free_nights_earned:0,free_nights_redeemed:0};
-    return Response.json({account,transactions,pointsPerNight:100,pointsForFreeNight:1000,freeNightsAvailable:Math.floor(Number(account.points_balance||0)/1000)});
+    return Response.json({account,transactions,pointsPerNight:100,pointsForFreeNight:2000,freeNightsAvailable:Math.floor(Number(account.points_balance||0)/2000)});
   }catch(e){
     if(e instanceof Error&&e.message==="UNAUTHORIZED")return Response.json({error:"Please log in."},{status:401});
     return Response.json({error:e instanceof Error?e.message:"Unable to load loyalty points."},{status:500});
