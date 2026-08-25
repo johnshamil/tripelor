@@ -15,7 +15,7 @@ const fiveNight:Pkg[]=[
 {name:"Manta & Dolphin Adventure",slug:"manta-dolphin-adventure",label:"Marine Adventure",price:1050,nights:5,image:"https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1400&auto=format&fit=crop",description:"A couple ocean adventure with manta excursion when conditions allow, dolphin cruise and snorkeling.",items:["5 nights for 2 adults","1 room at Uhoo's Lavish Oasis","Half Board meal plan","Manta excursion","Dolphin cruise + snorkeling"],meal:"Half Board"},
 {name:"Sunset & Sandbank Escape",slug:"sunset-sandbank-escape",label:"Island Romance",price:820,nights:5,image:fallback,description:"A romantic five-night couple getaway with Half Board dining, sandbank time and a sunset cruise.",items:["5 nights for 2 adults","1 room at Uhoo's Lavish Oasis","Half Board meal plan","Sandbank trip","Sunset cruise + snorkeling"],meal:"Half Board"}
 ];
-const threePrices=[500,750,750,650,900,700,550];
+const threePrices=[500,750,950,650,900,700,550];
 const threeNight:Pkg[]=fiveNight.map((p,i)=>({...p,name:p.name.replace("5-Night ",""),nights:3,price:threePrices[i],description:p.description.replace(/five-night/gi,"three-night").replace(/five nights/gi,"three nights"),items:p.items.map(x=>x.startsWith("5 nights")?"3 nights for 2 adults":x)}));
 
 function uploadedPhotos(nights:number){const dir=path.join(process.cwd(),"public","packages",`${nights}-nights`);try{return fs.readdirSync(dir).filter(x=>/\.(jpe?g|png|webp|avif)$/i.test(x)).map(x=>`/packages/${nights}-nights/${encodeURIComponent(x)}`);}catch{return[];}}
