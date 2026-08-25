@@ -6,7 +6,7 @@ import SaveTripButton from "@/components/save-trip-button";
 
 const stays=[
 {name:"Uhoo's Lavish Oasis",slug:"uhoos-lavish-oasis",location:"V. Felidhoo, Maldives",image:"/uhoos/WhatsApp%20Image%202026-08-17%20at%2015.30.23.jpeg",description:"Two dedicated rooms, flexible meal plans, live availability and local Tripelor support.",rates:{"Bed & Breakfast":85,"Half Board":95,"Full Board":115}},
-{name:"Masfalhi View Inn",slug:"masfalhi-view-inn",location:"Maldives",image:"/images%20(3).jpeg",description:"A comfortable local-island guesthouse with flexible meal plans and Maldivian hospitality.",rates:{"Bed & Breakfast":80,"Half Board":90,"Full Board":100}}
+{name:"Masfalhi View Inn",slug:"masfalhi-view-inn",location:"Maldives",image:"/images%20(3).jpeg",description:"A comfortable local-island guesthouse with flexible meal plans and Maldivian hospitality.",rates:{"Bed & Breakfast":97,"Half Board":110,"Full Board":130}}
 ];
 const folders=[
 {title:"3 Nights Packages",href:"/island-adventures?duration=3",image:"https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=1600&q=88",text:"Quick Maldives escapes for couples with island stays, meals and selected ocean experiences."},
