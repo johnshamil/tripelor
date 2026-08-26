@@ -2,83 +2,16 @@ import Link from "next/link";
 import {ArrowRight,BedDouble,Hotel,MapPin,Utensils} from "lucide-react";
 
 const properties=[
-  {
-    name:"Uhoo's Lavish Oasis",
-    slug:"uhoos-lavish-oasis",
-    location:"V. Felidhoo, Maldives",
-    type:"Island Guesthouse",
-    description:"A warm local-island stay with Tripelor support, flexible meal plans and live room availability.",
-    rooms:"2 rooms",
-    live:true,
-    rates:[
-      ["Bed & Breakfast","USD 85"],
-      ["Half Board","USD 95"],
-      ["Full Board","USD 115"],
-    ],
-    bookHref:"/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast",
-  },
-  {
-    name:"Masfalhi View Inn",
-    slug:"masfalhi-view-inn",
-    location:"Maldives",
-    type:"Local Island Guesthouse",
-    description:"Comfortable Maldivian hospitality with flexible meal plans and Tripelor booking support.",
-    rooms:"6 rooms",
-    live:true,
-    rates:[
-      ["Bed & Breakfast","USD 97"],
-      ["Half Board","USD 110"],
-      ["Full Board","USD 130"],
-    ],
-    bookHref:"/booking?property=Masfalhi%20View%20Inn&mealPlan=Bed%20%26%20Breakfast",
-  },
-  {
-    name:"Rivethi Beach Hotel",
-    slug:"rivethi-beach-hotel",
-    location:"Hulhumalé, Maldives",
-    type:"Beach Hotel",
-    description:"A convenient beachfront stay close to Velana International Airport, ideal for arrivals, departures and short stays.",
-    rooms:"18 rooms",
-    live:false,
-    rates:[
-      ["Deluxe Double · RO","USD 70 SGL / 80 DBL"],
-      ["Deluxe Double · BB","USD 80 SGL / 90 DBL"],
-      ["Deluxe Sea View · BB","USD 110 SGL / 120 DBL"],
-      ["Deluxe Sea View · FB","USD 150 SGL / 190 DBL"],
-    ],
-    bookHref:"/stays/rivethi-beach-hotel",
-  },
+{name:"Uhoo's Lavish Oasis",slug:"uhoos-lavish-oasis",location:"V. Felidhoo, Maldives",type:"Island Guesthouse",description:"A warm local-island stay with Tripelor support, flexible meal plans and live room availability.",rooms:"2 rooms",live:true,rates:[["Bed & Breakfast","USD 85"],["Half Board","USD 95"],["Full Board","USD 115"]],bookHref:"/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast"},
+{name:"Masfalhi View Inn",slug:"masfalhi-view-inn",location:"Maldives",type:"Local Island Guesthouse",description:"Comfortable Maldivian hospitality with flexible meal plans and Tripelor booking support.",rooms:"6 rooms",live:true,rates:[["Bed & Breakfast","USD 97"],["Half Board","USD 110"],["Full Board","USD 130"]],bookHref:"/booking?property=Masfalhi%20View%20Inn&mealPlan=Bed%20%26%20Breakfast"},
+{name:"Rivethi Beach Hotel",slug:"rivethi-beach-hotel",location:"Hulhumalé, Maldives",type:"Beach Hotel",description:"A convenient beachfront stay close to Velana International Airport, ideal for arrivals, departures and short stays.",rooms:"18 rooms",live:false,rates:[["Deluxe Double · RO","USD 70 SGL / 80 DBL"],["Deluxe Double · BB","USD 80 SGL / 90 DBL"],["Deluxe Sea View · BB","USD 110 SGL / 120 DBL"],["Deluxe Sea View · FB","USD 150 SGL / 190 DBL"]],bookHref:"/stays/rivethi-beach-hotel"}
 ];
 
-export default function StaysPage(){
-  return <main className="container py-12 pb-24 md:py-18">
-    <div className="mx-auto max-w-3xl text-center">
-      <p className="text-sm uppercase tracking-[.32em] text-gold">Tripelor Properties</p>
-      <h1 className="mt-3 text-4xl font-bold md:text-6xl">Choose your Maldives stay</h1>
-      <p className="mt-4 text-gray-400">Open any property to see full details, or compare prices here and start your booking directly.</p>
-    </div>
-
-    <div className="mt-10 grid gap-6 xl:grid-cols-3">
-      {properties.map(p=><article key={p.slug} className="card overflow-hidden border-white/10">
-        <div className="border-b border-white/10 bg-gradient-to-br from-gold/[.12] via-white/[.03] to-transparent p-6">
-          <div className="flex items-start justify-between gap-3">
-            <div><p className="text-xs uppercase tracking-[.22em] text-gold">{p.type}</p><h2 className="mt-2 text-2xl font-bold">{p.name}</h2></div>
-            <Hotel className="h-7 w-7 shrink-0 text-gold"/>
-          </div>
-          <p className="mt-3 flex items-center gap-2 text-sm text-gray-400"><MapPin className="h-4 w-4 text-gold"/>{p.location}</p>
-          <p className="mt-4 text-sm leading-6 text-gray-300">{p.description}</p>
-          <div className="mt-4 flex flex-wrap gap-2 text-xs"><span className="rounded-full border border-white/10 px-3 py-1.5"><BedDouble className="mr-1 inline h-3.5 w-3.5 text-gold"/>{p.rooms}</span><span className={`rounded-full border px-3 py-1.5 ${p.live?"border-emerald-500/25 text-emerald-300":"border-amber-500/25 text-amber-300"}`}>{p.live?"Live availability":"Availability on request"}</span></div>
-        </div>
-
-        <div className="p-6">
-          <div className="flex items-center gap-2"><Utensils className="h-4 w-4 text-gold"/><h3 className="font-semibold">Price list</h3></div>
-          <div className="mt-4 space-y-2">{p.rates.map(([label,price])=><div key={label} className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/[.025] px-4 py-3 text-sm"><span className="text-gray-300">{label}</span><strong className="text-right text-gold">{price}</strong></div>)}</div>
-          {p.slug==="rivethi-beach-hotel"&&<p className="mt-3 text-xs text-gray-500">Rivethi rates shown as selected examples. Open the property for the full RO / BB / HB / FB / AI table.</p>}
-          <div className="mt-6 grid grid-cols-2 gap-3"><Link href={`/stays/${p.slug}`} className="btn-outline">View Property</Link><Link href={p.bookHref} className="btn-gold">{p.live?"Book Stay":"Request Stay"}</Link></div>
-        </div>
-      </article>)}
-    </div>
-
-    <div className="mt-10 rounded-3xl border border-gold/20 bg-gold/[.06] p-6 text-center md:p-8"><h2 className="text-2xl font-bold">Not sure which property to choose?</h2><p className="mx-auto mt-2 max-w-2xl text-sm text-gray-400">Compare location, meal plans and prices above, then open the property that suits your trip best.</p><Link href="/contact" className="mt-5 inline-flex items-center gap-2 font-semibold text-gold">Ask Tripelor for help <ArrowRight className="h-4 w-4"/></Link></div>
-  </main>
-}
+export default function StaysPage(){return <main className="container py-12 pb-24 md:py-18">
+<div className="mx-auto max-w-3xl text-center"><p className="text-sm uppercase tracking-[.32em] text-gold">Tripelor Properties</p><h1 className="mt-3 text-4xl font-bold md:text-6xl">Our stays</h1><p className="mt-4 text-gray-400">Browse all Tripelor properties in one simple list. Compare prices, view details and book your stay.</p></div>
+<div className="mx-auto mt-10 max-w-6xl space-y-5">{properties.map(p=><article key={p.slug} className="card overflow-hidden border-white/10"><div className="grid md:grid-cols-[1.05fr_.95fr]">
+<div className="border-b border-white/10 bg-gradient-to-br from-gold/[.10] via-white/[.025] to-transparent p-6 md:border-b-0 md:border-r md:p-7"><div className="flex items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[.22em] text-gold">{p.type}</p><h2 className="mt-2 text-2xl font-bold md:text-3xl">{p.name}</h2></div><Hotel className="h-7 w-7 shrink-0 text-gold"/></div><p className="mt-3 flex items-center gap-2 text-sm text-gray-400"><MapPin className="h-4 w-4 text-gold"/>{p.location}</p><p className="mt-4 max-w-2xl text-sm leading-6 text-gray-300">{p.description}</p><div className="mt-5 flex flex-wrap gap-2 text-xs"><span className="rounded-full border border-white/10 px-3 py-1.5"><BedDouble className="mr-1 inline h-3.5 w-3.5 text-gold"/>{p.rooms}</span><span className={`rounded-full border px-3 py-1.5 ${p.live?"border-emerald-500/25 text-emerald-300":"border-amber-500/25 text-amber-300"}`}>{p.live?"Live availability":"Availability on request"}</span></div><div className="mt-6 flex flex-col gap-3 sm:flex-row"><Link href={`/stays/${p.slug}`} className="btn-outline sm:min-w-36">View Property</Link><Link href={p.bookHref} className="btn-gold sm:min-w-36">{p.live?"Book Stay":"Request Stay"}</Link></div></div>
+<div className="p-6 md:p-7"><div className="flex items-center gap-2"><Utensils className="h-4 w-4 text-gold"/><h3 className="font-semibold">Price list</h3></div><div className="mt-4 space-y-2">{p.rates.map(([label,price])=><div key={label} className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/[.025] px-4 py-3 text-sm"><span className="text-gray-300">{label}</span><strong className="text-right text-gold">{price}</strong></div>)}</div>{p.slug==="rivethi-beach-hotel"&&<p className="mt-3 text-xs text-gray-500">Selected rates shown. Open the property for the complete RO / BB / HB / FB / AI price table.</p>}</div>
+</div></article>)}</div>
+<div className="mx-auto mt-10 max-w-6xl rounded-3xl border border-gold/20 bg-gold/[.06] p-6 text-center md:p-8"><h2 className="text-2xl font-bold">Need help choosing?</h2><p className="mx-auto mt-2 max-w-2xl text-sm text-gray-400">Tell Tripelor your dates and preferred meal plan and we can help you choose the best stay.</p><Link href="/contact" className="mt-5 inline-flex items-center gap-2 font-semibold text-gold">Ask Tripelor for help <ArrowRight className="h-4 w-4"/></Link></div>
+</main>}
