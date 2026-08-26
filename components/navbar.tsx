@@ -8,7 +8,7 @@ type User={email:string;fullName:string;isAdmin?:boolean};
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [user,setUser]=useState<User|null>(null);
-  const links = [["/", "Home"], ["/stays/uhoos-lavish-oasis", "Stays"], ["/island-adventures", "Packages"], ["/experience-bundles", "Bundles"], ["/account#referral-rewards", "Referral & Earn"], ["/speedboat", "Speedboat"], ["/reviews", "Reviews"], ["/contact", "Contact"]];
+  const links = [["/", "Home"], ["/stays", "Properties"], ["/island-adventures", "Packages"], ["/experience-bundles", "Bundles"], ["/account#referral-rewards", "Referral & Earn"], ["/speedboat", "Speedboat"], ["/reviews", "Reviews"], ["/contact", "Contact"]];
 
   useEffect(()=>{fetch("/api/auth/me",{cache:"no-store"}).then(r=>r.json()).then(x=>setUser(x.user||null)).catch(()=>setUser(null));},[]);
   useEffect(()=>{document.body.style.overflow=open?"hidden":"";return()=>{document.body.style.overflow=""}},[open]);
