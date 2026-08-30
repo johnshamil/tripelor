@@ -38,8 +38,8 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [{ url: "/tripelor-favicon.svg?v=3", type: "image/svg+xml" }],
-    shortcut: "/tripelor-favicon.svg?v=3",
+    icon: [{ url: "/tripelor-favicon.svg?v=4", type: "image/svg+xml" }],
+    shortcut: "/tripelor-favicon.svg?v=4",
   },
   openGraph: {
     type: "website",
