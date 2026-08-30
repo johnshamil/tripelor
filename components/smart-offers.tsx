@@ -1,16 +1,131 @@
 "use client";
+
 import Link from "next/link";
-import {useEffect,useState} from "react";
-import {Flame,Heart,Clock3,CalendarDays,ArrowRight} from "lucide-react";
-const hotels=[{name:"Uhoo's Lavish Oasis",rooms:["ROOM 101","ROOM 102"]},{name:"Masfalhi View Inn",rooms:["ROOM 101","ROOM 102","ROOM 103","ROOM 104","ROOM 105","ROOM 106"]}];
-const fmt=(d:Date)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-const add=(n:number)=>{const d=new Date();d.setDate(d.getDate()+n);return fmt(d)};
-export default function SmartOffers(){const[availability,setAvailability]=useState<Record<string,number>>({});const today=fmt(new Date()),tomorrow=add(1),lastMinuteEnd=add(3);
-useEffect(()=>{(async()=>{const out:Record<string,number>={};for(const h of hotels){const a=await Promise.all(h.rooms.map(async room=>{try{const r=await fetch("/api/availability",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({propertyName:h.name,roomType:room,checkIn:today,checkOut:tomorrow,rooms:1})});const x=await r.json();return r.ok&&x.available!==false}catch{return false}}));out[h.name]=a.filter(Boolean).length}setAvailability(out)})()},[]);
-const scarce=hotels.find(h=>availability[h.name]===1);const lastMinute=hotels.find(h=>(availability[h.name]??0)>0);
-return <section className="border-y border-white/10 bg-[#070707]"><div className="container py-16"><div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between"><div><p className="text-sm uppercase tracking-[.3em] text-gold">Smart Offers</p><h2 className="mt-2 text-3xl font-bold md:text-4xl">A better reason to book now</h2><p className="mt-2 text-gray-400">Offers and urgency are shown only when they match current Tripelor availability.</p></div><Link href="/island-adventures?duration=5" className="text-sm font-semibold text-gold">View all packages →</Link></div><div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-{scarce&&<Link href={`/booking?property=${encodeURIComponent(scarce.name)}&checkIn=${today}&checkOut=${tomorrow}`} className="group rounded-3xl border border-red-500/25 bg-red-500/[.07] p-6"><Flame className="h-7 w-7 text-red-300"/><p className="mt-5 text-xs uppercase tracking-[.2em] text-red-300">Live availability</p><h3 className="mt-2 text-2xl font-bold">Only 1 room left tonight</h3><p className="mt-2 text-sm text-gray-400">{scarce.name}</p><span className="mt-5 flex items-center gap-2 font-semibold text-gold">Book this room <ArrowRight className="h-4 w-4"/></span></Link>}
-<Link href="/island-adventures?duration=5" className="group rounded-3xl border border-gold/25 bg-gold/[.07] p-6"><CalendarDays className="h-7 w-7 text-gold"/><p className="mt-5 text-xs uppercase tracking-[.2em] text-gold">Longer escape</p><h3 className="mt-2 text-2xl font-bold">Stay 5 nights & experience more</h3><p className="mt-2 text-sm text-gray-400">Explore Tripelor's 5-night island packages with stays and curated experiences.</p><span className="mt-5 flex items-center gap-2 font-semibold text-gold">See 5-night packages <ArrowRight className="h-4 w-4"/></span></Link>
-<Link href="/island-adventures?duration=5" className="group rounded-3xl border border-pink-400/20 bg-pink-400/[.05] p-6"><Heart className="h-7 w-7 text-pink-300"/><p className="mt-5 text-xs uppercase tracking-[.2em] text-pink-300">Couples</p><h3 className="mt-2 text-2xl font-bold">Honeymoon Special</h3><p className="mt-2 text-sm text-gray-400">Romantic island stays, sunset experiences and memorable dinners for two.</p><span className="mt-5 flex items-center gap-2 font-semibold text-gold">Explore romantic trips <ArrowRight className="h-4 w-4"/></span></Link>
-{lastMinute&&<Link href={`/booking?property=${encodeURIComponent(lastMinute.name)}&checkIn=${today}&checkOut=${lastMinuteEnd}`} className="group rounded-3xl border border-emerald-500/20 bg-emerald-500/[.05] p-6"><Clock3 className="h-7 w-7 text-emerald-300"/><p className="mt-5 text-xs uppercase tracking-[.2em] text-emerald-300">Last-minute availability</p><h3 className="mt-2 text-2xl font-bold">Maldives this week?</h3><p className="mt-2 text-sm text-gray-400">{lastMinute.name} currently has room availability. Check your dates before it changes.</p><span className="mt-5 flex items-center gap-2 font-semibold text-gold">Check availability <ArrowRight className="h-4 w-4"/></span></Link>}
-</div></div></section>}
+import { ArrowRight, CalendarDays, Clock3, Flame, Heart } from "lucide-react";
+import { useEffect, useState } from "react";
+
+const hotels = [
+  { name: "Uhoo's Lavish Oasis", rooms: ["ROOM 101", "ROOM 102"] },
+  {
+    name: "Masfalhi View Inn",
+    rooms: ["ROOM 101", "ROOM 102", "ROOM 103", "ROOM 104", "ROOM 105", "ROOM 106"],
+  },
+];
+
+const formatDate = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+const addDays = (days: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return formatDate(date);
+};
+
+export default function SmartOffers() {
+  const [availability, setAvailability] = useState<Record<string, number>>({});
+  const today = formatDate(new Date());
+  const tomorrow = addDays(1);
+  const lastMinuteEnd = addDays(3);
+
+  useEffect(() => {
+    (async () => {
+      const nextAvailability: Record<string, number> = {};
+      for (const hotel of hotels) {
+        const availableRooms = await Promise.all(
+          hotel.rooms.map(async (room) => {
+            try {
+              const response = await fetch("/api/availability", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  propertyName: hotel.name,
+                  roomType: room,
+                  checkIn: today,
+                  checkOut: tomorrow,
+                  rooms: 1,
+                }),
+              });
+              const data = await response.json();
+              return response.ok && data.available !== false;
+            } catch {
+              return false;
+            }
+          }),
+        );
+        nextAvailability[hotel.name] = availableRooms.filter(Boolean).length;
+      }
+      setAvailability(nextAvailability);
+    })();
+  }, []);
+
+  const scarce = hotels.find((hotel) => availability[hotel.name] === 1);
+  const lastMinute = hotels.find((hotel) => (availability[hotel.name] ?? 0) > 0);
+
+  return (
+    <section className="border-y border-white/10 bg-[#06151c]">
+      <div className="container py-24">
+        <div className="grid gap-8 lg:grid-cols-[.65fr_1.35fr]">
+          <div>
+            <p className="eyebrow">Timely escapes</p>
+            <h2 className="section-title mt-4">A beautiful reason to stay longer.</h2>
+            <p className="mt-5 max-w-md leading-7 text-white/50">
+              Thoughtful packages and current availability, presented clearly so you can choose with confidence.
+            </p>
+            <Link href="/island-adventures" className="luxury-link mt-8">
+              Explore All Packages <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {scarce && (
+              <Link
+                href={`/booking?property=${encodeURIComponent(scarce.name)}&checkIn=${today}&checkOut=${tomorrow}`}
+                className="offer-card group"
+              >
+                <Flame className="h-6 w-6 text-[#d9bd7b]" />
+                <p className="offer-tag mt-8">Live availability</p>
+                <h3 className="font-display mt-3 text-3xl">Only one room left tonight.</h3>
+                <p className="mt-3 text-sm leading-6 text-white/45">{scarce.name}</p>
+                <span className="luxury-link mt-7">View Room <ArrowRight className="h-4 w-4" /></span>
+              </Link>
+            )}
+
+            <Link href="/island-adventures?duration=5" className="offer-card group">
+              <CalendarDays className="h-6 w-6 text-[#d9bd7b]" />
+              <p className="offer-tag mt-8">Five-night journey</p>
+              <h3 className="font-display mt-3 text-3xl">More time for the Maldives.</h3>
+              <p className="mt-3 text-sm leading-6 text-white/45">
+                A longer island stay with more room for ocean experiences.
+              </p>
+              <span className="luxury-link mt-7">Explore Journey <ArrowRight className="h-4 w-4" /></span>
+            </Link>
+
+            <Link href="/island-adventures?duration=5" className="offer-card group">
+              <Heart className="h-6 w-6 text-[#d9bd7b]" />
+              <p className="offer-tag mt-8">For two</p>
+              <h3 className="font-display mt-3 text-3xl">A romantic island escape.</h3>
+              <p className="mt-3 text-sm leading-6 text-white/45">
+                Sunset moments, island stays and memorable dinners for two.
+              </p>
+              <span className="luxury-link mt-7">Explore Couples Trips <ArrowRight className="h-4 w-4" /></span>
+            </Link>
+
+            {lastMinute && (
+              <Link
+                href={`/booking?property=${encodeURIComponent(lastMinute.name)}&checkIn=${today}&checkOut=${lastMinuteEnd}`}
+                className="offer-card group"
+              >
+                <Clock3 className="h-6 w-6 text-[#d9bd7b]" />
+                <p className="offer-tag mt-8">This week</p>
+                <h3 className="font-display mt-3 text-3xl">The Maldives, sooner.</h3>
+                <p className="mt-3 text-sm leading-6 text-white/45">
+                  {lastMinute.name} currently has rooms available.
+                </p>
+                <span className="luxury-link mt-7">Check Dates <ArrowRight className="h-4 w-4" /></span>
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
