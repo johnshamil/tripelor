@@ -1,1 +1,56 @@
-import Link from "next/link";import {MapPin,Utensils,BedDouble} from "lucide-react";const photos=["/images%20(3).jpeg","/images.jpeg","/images%20(1).jpeg","/images%20(2).jpeg","/8afbb6cc.jpeg","/images%20(4).jpeg","/images%20(5).jpeg","/images%20(6).jpeg","/images%20(7).jpeg","/images%20(8).jpeg"];const rates=[{name:"Bed & Breakfast",price:97},{name:"Half Board",price:110},{name:"Full Board",price:130}];const schema={"@context":"https://schema.org","@type":"LodgingBusiness",name:"Masfalhi View Inn",url:"https://tripelor.com/stays/masfalhi-view-inn",image:photos.map(x=>`https://tripelor.com${x}`),description:"Maldives local island guesthouse with Bed & Breakfast, Half Board and Full Board room rates.",address:{"@type":"PostalAddress",addressCountry:"MV"},priceRange:"USD 97-130 per room per night",offers:rates.map(r=>({"@type":"Offer",name:r.name,price:r.price,priceCurrency:"USD",url:`https://tripelor.com/booking?property=Masfalhi%20View%20Inn&mealPlan=${encodeURIComponent(r.name)}`,availability:"https://schema.org/LimitedAvailability"}))};export default function Page(){return <main><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema)}}/><section className="container py-14"><p className="text-sm uppercase tracking-[0.3em] text-gold">Island Guesthouse</p><h1 className="mt-2 text-4xl font-bold md:text-6xl">Masfalhi View Inn</h1><p className="mt-3 flex items-center gap-2 text-gray-400"><MapPin className="h-4 w-4 text-gold"/>Maldives</p><div className="mt-10 grid gap-3 md:grid-cols-2"><div className="h-[480px] overflow-hidden rounded-2xl"><img src={photos[0]} alt="Masfalhi View Inn" className="h-full w-full object-cover"/></div><div className="grid grid-cols-2 gap-3">{photos.slice(1,5).map((p,i)=><div key={p} className="h-[234px] overflow-hidden rounded-2xl"><img src={p} alt={`Masfalhi View Inn ${i+2}`} className="h-full w-full object-cover"/></div>)}</div></div><div className="mt-12 grid gap-8 lg:grid-cols-[1fr_.65fr]"><div><h2 className="text-3xl font-bold">Your comfortable island stay</h2><p className="mt-4 text-gray-400">Enjoy a relaxed Maldivian guesthouse experience at Masfalhi View Inn with comfortable accommodation and a choice of meal plans.</p><div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-5">{photos.slice(5).map((p,i)=><div key={p} className="h-32 overflow-hidden rounded-xl"><img src={p} alt={`Masfalhi View Inn gallery ${i+1}`} className="h-full w-full object-cover"/></div>)}</div></div><aside className="card p-6"><div className="flex items-center gap-2"><BedDouble className="h-5 w-5 text-gold"/><h2 className="text-xl font-semibold">Room rates</h2></div><div className="mt-5 space-y-3">{rates.map((r,i)=><div key={r.name} className={`flex justify-between ${i<2?"border-b border-white/10 pb-3":""}`}><span className="flex gap-2">{i===0&&<Utensils className="h-4 w-4 text-gold"/>}{r.name}</span><strong className="text-gold">USD {r.price}</strong></div>)}</div><p className="mt-4 text-xs text-gray-500">Per room, per night.</p><Link href="/booking?property=Masfalhi%20View%20Inn&mealPlan=Bed%20%26%20Breakfast" className="btn-gold mt-6 w-full">Book Now</Link></aside></div></section></main>}
+import LuxuryPropertyPage from "@/components/luxury-property-page";
+
+const photos = [
+  "/images%20(3).jpeg",
+  "/images.jpeg",
+  "/images%20(1).jpeg",
+  "/images%20(2).jpeg",
+  "/8afbb6cc.jpeg",
+  "/images%20(4).jpeg",
+  "/images%20(5).jpeg",
+  "/images%20(6).jpeg",
+  "/images%20(7).jpeg",
+  "/images%20(8).jpeg",
+];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "LodgingBusiness",
+  name: "Masfalhi View Inn",
+  url: "https://tripelor.com/stays/masfalhi-view-inn",
+  image: photos.map((photo) => `https://tripelor.com${photo}`),
+  description: "Maldives local island guesthouse with Bed & Breakfast, Half Board and Full Board room rates.",
+  address: { "@type": "PostalAddress", addressCountry: "MV" },
+  priceRange: "USD 97-130 per room per night",
+};
+
+export default function Page() {
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <LuxuryPropertyPage
+        eyebrow="Relaxed island guesthouse"
+        name="Masfalhi View Inn"
+        location="Maldives"
+        description="A comfortable six-room local-island guesthouse with flexible meal plans and a relaxed setting for an authentic Maldives stay."
+        photos={photos}
+        startingFrom={97}
+        bookingHref="/booking?property=Masfalhi%20View%20Inn&mealPlan=Bed%20%26%20Breakfast"
+        highlights={[
+          { icon: "island", title: "Island atmosphere", text: "A slower, more personal way to experience everyday life in the Maldives." },
+          { icon: "dining", title: "Flexible dining", text: "Choose Bed & Breakfast, Half Board or Full Board for your stay." },
+          { icon: "support", title: "Tripelor assistance", text: "Clear booking support from your first enquiry to arrival." },
+        ]}
+        rates={[
+          { name: "Bed & Breakfast", price: 97, detail: "Comfortable room with daily breakfast.", bookingHref: "/booking?property=Masfalhi%20View%20Inn&mealPlan=Bed%20%26%20Breakfast" },
+          { name: "Half Board", price: 110, detail: "Room with breakfast and dinner included.", bookingHref: "/booking?property=Masfalhi%20View%20Inn&mealPlan=Half%20Board" },
+          { name: "Full Board", price: 130, detail: "Room with breakfast, lunch and dinner.", bookingHref: "/booking?property=Masfalhi%20View%20Inn&mealPlan=Full%20Board" },
+        ]}
+        terms={[
+          { title: "Six-room availability", text: "Tripelor checks the current room pool for your dates before a reservation is confirmed." },
+          { title: "A clear booking journey", text: "Select your dates and meal plan online, then receive personal confirmation and payment guidance from Tripelor." },
+        ]}
+      />
+    </>
+  );
+}
