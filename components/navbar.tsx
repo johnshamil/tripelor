@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Compass, LogOut, Menu, UserRound, X } from "lucide-react";
+import { LogOut, Menu, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import TripelorMark from "@/components/tripelor-mark";
 
 type User = { email: string; fullName: string; isAdmin?: boolean };
 
@@ -54,9 +55,7 @@ export default function Navbar() {
           className="group flex items-center gap-3"
           aria-label="Tripelor home"
         >
-          <span className="flex h-10 w-10 items-center justify-center border border-[#c9a86a]/55 text-[#d9bd7b] transition group-hover:bg-[#c9a86a] group-hover:text-[#071922]">
-            <Compass className="h-5 w-5" />
-          </span>
+          <TripelorMark className="h-11 w-11 text-[#d9bd7b] transition duration-300 group-hover:text-[#f2dfb6]" />
           <span>
             <span className="font-display block text-[1.35rem] leading-none tracking-[.08em] text-white">
               TRIPELOR
