@@ -1,10 +1,61 @@
-import Link from "next/link";
-import {BedDouble,MapPin,Plane,ShieldCheck,Utensils} from "lucide-react";
+import LuxuryPropertyPage from "@/components/luxury-property-page";
 
-const rates=[
- {room:"Deluxe Double / Twin",plan:"Room Only (RO)",price:"USD 85"},
- {room:"Deluxe Double / Twin",plan:"Bed & Breakfast (BB)",price:"USD 95"},
- {room:"Deluxe Double Sea View",plan:"Bed & Breakfast (BB)",price:"USD 130"},
- {room:"Deluxe Double Sea View",plan:"Full Board (FB)",price:"USD 195"}
+const photos = [
+  "/properties/rivethi-beach-hotel/1719713475.jpeg",
+  "/properties/rivethi-beach-hotel/0584s12000ssx9b685F06_W_1280_853_R5.webp",
+  "/properties/rivethi-beach-hotel/604895445.jpg",
+  "/properties/rivethi-beach-hotel/816271360.jpg",
+  "/properties/rivethi-beach-hotel/7143733a-088c-4eea-b23a-117a50d93240.webp",
 ];
-export default function RivethiBeach(){return <main><section className="container py-14 md:py-20"><p className="text-sm uppercase tracking-[.3em] text-gold">Tripelor · Hulhumalé Stay</p><h1 className="mt-2 text-4xl font-bold md:text-6xl">Rivethi Beach Hotel</h1><p className="mt-4 flex items-center gap-2 text-gray-300"><MapPin className="h-4 w-4 text-gold"/>Hulhumalé, Maldives · Beachfront · Near Velana International Airport</p><p className="mt-5 max-w-3xl text-gray-400">A convenient beachfront stay for arrivals, departures and short Maldives stopovers, with live Tripelor booking and clear room rates.</p><div className="mt-7 flex flex-wrap gap-3"><Link href="/booking?property=Rivethi%20Beach%20Hotel&roomType=Deluxe%20Double&mealPlan=Bed%20%26%20Breakfast" className="btn-gold">Book Live</Link><a href="https://wa.me/9609429403?text=Hello%20Tripelor%2C%20I%20would%20like%20to%20check%20Rivethi%20Beach%20Hotel%20availability." className="btn-outline">WhatsApp Tripelor</a></div><div className="mt-10 grid gap-4 md:grid-cols-4">{[[BedDouble,"18-room live pool"],[Plane,"5–10 min from airport"],[Utensils,"RO · BB · Sea View FB"],[ShieldCheck,"Live Tripelor booking"]].map(([I,t]:any)=><div key={t} className="card p-5"><I className="h-5 w-5 text-gold"/><p className="mt-3 font-semibold">{t}</p></div>)}</div></section><section className="container pb-16"><div className="card overflow-hidden"><div className="p-6"><p className="text-xs uppercase tracking-[.25em] text-gold">Tripelor Selling Rates</p><h2 className="mt-2 text-2xl font-bold">Room & meal-plan prices</h2><p className="mt-2 text-sm text-gray-400">USD per room/night.</p></div><div className="overflow-x-auto"><table className="min-w-[620px] w-full text-left text-sm"><thead className="bg-white/[.04]"><tr><th className="p-4 text-gold">Room</th><th className="p-4 text-gold">Meal Plan</th><th className="p-4 text-gold">Price</th><th className="p-4 text-gold"></th></tr></thead><tbody>{rates.map(r=><tr key={`${r.room}-${r.plan}`} className="border-t border-white/10"><td className="p-4 font-semibold">{r.room}</td><td className="p-4">{r.plan}</td><td className="p-4 text-lg font-bold text-gold">{r.price}</td><td className="p-4"><Link href={`/booking?property=Rivethi%20Beach%20Hotel&roomType=${encodeURIComponent(r.room.includes("Sea View")?"Deluxe Double Sea View":"Deluxe Double")}&mealPlan=${encodeURIComponent(r.plan.includes("Room Only")?"Room Only":r.plan.includes("Full Board")?"Full Board":"Bed & Breakfast")}`} className="font-semibold text-gold">Book →</Link></td></tr>)}</tbody></table></div></div><div className="mt-6 grid gap-5 lg:grid-cols-2"><div className="card p-6"><h3 className="text-xl font-bold">Child & extra bed</h3><div className="mt-4 space-y-2 text-sm text-gray-300"><p>0–4 years: free sharing existing bedding.</p><p>5–12 years: USD 30 per child/night with extra mattress and breakfast.</p><p>13+ years: USD 40 per person/night with extra mattress and breakfast.</p></div></div><div className="card p-6"><h3 className="text-xl font-bold">Booking terms</h3><div className="mt-4 space-y-2 text-sm text-gray-300"><p>50% advance payment required to confirm; remaining balance may be settled on arrival.</p><p>7+ days before arrival: free cancellation. Within 7 days: 50%. Within 2 days / no-show: 100%.</p><p>Rates valid until July 2027, subject to change.</p></div></div></div><div className="mt-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/[.06] p-4 text-sm text-gray-300"><b className="text-emerald-300">Live booking is active.</b> A Tripelor reservation immediately reduces availability for overlapping dates.</div></section></main>}
+
+export default function RivethiBeach() {
+  return (
+    <LuxuryPropertyPage
+      eyebrow="Beachfront Hulhumalé stay"
+      name="Rivethi Beach Hotel"
+      location="Hulhumalé, Maldives"
+      description="A convenient beachfront hotel near Velana International Airport, ideal for a refined arrival, departure or short Maldives stopover."
+      photos={photos}
+      startingFrom={85}
+      bookingHref="/booking?property=Rivethi%20Beach%20Hotel&roomType=Deluxe%20Double&mealPlan=Bed%20%26%20Breakfast"
+      highlights={[
+        { icon: "airport", title: "Close to the airport", text: "A convenient base approximately 5–10 minutes from Velana International Airport." },
+        { icon: "island", title: "Beachfront setting", text: "A comfortable city-island stay close to the shoreline and Hulhumalé amenities." },
+        { icon: "shield", title: "Live Tripelor booking", text: "Current availability is checked before your reservation request is confirmed." },
+      ]}
+      rooms={[
+        {
+          name: "Deluxe Double",
+          image: photos[1],
+          description: "A comfortable double room for an easy arrival, departure or short island-city stay.",
+          details: ["Single or double", "RO or BB", "Live room pool", "Near airport"],
+          bookingHref: "/booking?property=Rivethi%20Beach%20Hotel&roomType=Deluxe%20Double&mealPlan=Bed%20%26%20Breakfast",
+        },
+        {
+          name: "Deluxe Twin",
+          image: photos[2],
+          description: "Twin accommodation with clear room-only and breakfast options.",
+          details: ["Twin bedding", "RO or BB", "Live room pool", "Beachfront hotel"],
+          bookingHref: "/booking?property=Rivethi%20Beach%20Hotel&roomType=Deluxe%20Twin&mealPlan=Bed%20%26%20Breakfast",
+        },
+        {
+          name: "Deluxe Sea View",
+          image: photos[3],
+          description: "A sea-facing stay with breakfast or full-board dining choices.",
+          details: ["Sea view", "BB or FB", "Live room pool", "Up to 2 adults"],
+          bookingHref: "/booking?property=Rivethi%20Beach%20Hotel&roomType=Deluxe%20Double%20Sea%20View&mealPlan=Bed%20%26%20Breakfast",
+        },
+      ]}
+      rates={[
+        { name: "Deluxe Double / Twin · Room Only", price: 85, detail: "Comfortable room without meals.", bookingHref: "/booking?property=Rivethi%20Beach%20Hotel&roomType=Deluxe%20Double&mealPlan=Room%20Only" },
+        { name: "Deluxe Double / Twin · Breakfast", price: 95, detail: "Comfortable room with daily breakfast.", bookingHref: "/booking?property=Rivethi%20Beach%20Hotel&roomType=Deluxe%20Double&mealPlan=Bed%20%26%20Breakfast" },
+        { name: "Deluxe Sea View · Breakfast", price: 130, detail: "Sea-view room with daily breakfast.", bookingHref: "/booking?property=Rivethi%20Beach%20Hotel&roomType=Deluxe%20Double%20Sea%20View&mealPlan=Bed%20%26%20Breakfast" },
+        { name: "Deluxe Sea View · Full Board", price: 195, detail: "Sea-view room with breakfast, lunch and dinner.", bookingHref: "/booking?property=Rivethi%20Beach%20Hotel&roomType=Deluxe%20Double%20Sea%20View&mealPlan=Full%20Board" },
+      ]}
+      terms={[
+        { title: "Children & extra beds", text: "Children aged 0–4 stay free when sharing existing bedding. Extra mattress and breakfast charges apply for older children and additional adults." },
+        { title: "Booking & cancellation", text: "A 50% advance payment is required to confirm. Cancellation charges vary by notice period, with free cancellation 7 or more days before arrival." },
+      ]}
+    />
+  );
+}

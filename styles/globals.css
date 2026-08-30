@@ -68,12 +68,24 @@ img, video { max-width: 100%; height: auto; }
 .luxury-hero-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; animation: heroDrift 18s ease-in-out infinite alternate; }
 .luxury-hero-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(2, 13, 18, .97) 0%, rgba(3, 18, 24, .84) 42%, rgba(3, 18, 24, .42) 72%, rgba(3, 18, 24, .28) 100%), linear-gradient(0deg, rgba(2, 14, 20, .72), transparent 48%); }
 
+.property-cinematic-hero { position: relative; min-height: 78vh; overflow: hidden; background: var(--ocean-deep); }
+.property-cinematic-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: propertyPhotoIn .8s cubic-bezier(.22, 1, .36, 1) both; }
+.property-cinematic-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(2, 13, 18, .94) 0%, rgba(3, 18, 24, .67) 48%, rgba(3, 18, 24, .2) 100%), linear-gradient(0deg, rgba(2, 14, 20, .9) 0%, transparent 55%); }
+
 .availability-shell { margin-top: -4rem; position: relative; z-index: 20; }
 .availability-panel { border: 1px solid rgba(201, 168, 106, .28); background: rgba(7, 25, 34, .96); box-shadow: 0 30px 100px rgba(0, 7, 10, .45); backdrop-filter: blur(20px); }
 .field-label { @apply grid gap-2 text-[10px] font-semibold uppercase tracking-[.18em] text-white/45; }
 .date-field { @apply min-h-[50px] border border-white/10 bg-white/[.045] px-4 text-base text-white transition; color-scheme: dark; }
 .date-field:focus { border-color: rgba(201, 168, 106, .75); outline: none; box-shadow: 0 0 0 3px rgba(201, 168, 106, .1); }
 .availability-result { @apply border-t border-white/10 pt-5 md:border-l md:border-t-0 md:pl-6 md:pt-0; }
+
+.premium-label { display: grid; gap: .55rem; color: #4e5a5f; font-size: .7rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+.premium-label > span { display: flex; align-items: center; gap: .5rem; }
+.premium-control { min-height: 52px; width: 100%; border: 1px solid #cfc4af; border-radius: 0; background: #fffdf8; padding: .85rem 1rem; color: #071922; font-size: 1rem; font-weight: 400; letter-spacing: normal; text-transform: none; transition: border-color .25s ease, box-shadow .25s ease, background-color .25s ease; }
+.premium-control:hover { border-color: #b7a889; background: #fffefa; }
+.premium-control:focus { border-color: #9c7d3d; outline: none; box-shadow: 0 0 0 3px rgba(156, 125, 61, .12); }
+.premium-control::placeholder { color: #899294; }
+.premium-control option { background: #fffdf8; color: #071922; }
 
 .escape-card { position: relative; min-height: 580px; overflow: hidden; background: #071922; }
 .escape-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1s cubic-bezier(.22, 1, .36, 1); }
@@ -161,6 +173,7 @@ img, video { max-width: 100%; height: auto; }
 @keyframes pageEnter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @keyframes routeFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes heroDrift { from { transform: scale(1.02); } to { transform: scale(1.085) translate3d(-.8%, .5%, 0); } }
+@keyframes propertyPhotoIn { from { opacity: .35; transform: scale(1.035); } to { opacity: 1; transform: scale(1); } }
 
 @media (max-width: 767px) {
   body { padding-bottom: 5.2rem; }
@@ -182,7 +195,7 @@ img, video { max-width: 100%; height: auto; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .page-enter, .route-transition, .luxury-hero-image { animation: none; }
+  .page-enter, .route-transition, .luxury-hero-image, .property-cinematic-image { animation: none; }
   .smooth-reveal, .smooth-reveal.is-visible { opacity: 1; transform: none; will-change: auto; }
   .nav-tab, .btn-gold, .btn-outline, .escape-card img, .property-row, .offer-card, .floating-plan { transition: none; }
   .btn-gold::before { display: none; }

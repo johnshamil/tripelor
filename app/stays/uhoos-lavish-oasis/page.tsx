@@ -1,11 +1,73 @@
-import Link from "next/link";
-import {BedDouble,MapPin,Utensils,Video,CheckCircle2,ShieldCheck,MessageCircle,Ship} from "lucide-react";
-const rates=[{name:"Bed & Breakfast",price:85,detail:"Room + daily breakfast"},{name:"Half Board",price:95,detail:"Room + breakfast + dinner"},{name:"Full Board",price:115,detail:"Room + breakfast + lunch + dinner"}];
-const photos=["/properties/uhoos-lavish-oasis/20250517_193323.jpg","/properties/uhoos-lavish-oasis/20250518_001256.jpg","/properties/uhoos-lavish-oasis/20250518_001936.jpg","/properties/uhoos-lavish-oasis/20250822_104240.jpg","/properties/uhoos-lavish-oasis/20250822_104258(1).jpg"];
-const rooms=[{name:"ROOM 101",href:"/stays/uhoos-lavish-oasis/room-101",booking:"/booking?property=Uhoo%27s%20Lavish%20Oasis&roomType=ROOM%20101&mealPlan=Bed%20%26%20Breakfast"},{name:"ROOM 102",href:"/stays/uhoos-lavish-oasis/room-102",booking:"/booking?property=Uhoo%27s%20Lavish%20Oasis&roomType=ROOM%20102&mealPlan=Bed%20%26%20Breakfast"}];
-const schema={"@context":"https://schema.org","@type":"LodgingBusiness",name:"Uhoo's Lavish Oasis",url:"https://tripelor.com/stays/uhoos-lavish-oasis",image:photos.map(x=>`https://tripelor.com${x}`),description:"Comfortable local island guesthouse accommodation in V. Felidhoo, Maldives with Bed & Breakfast, Half Board and Full Board meal plans.",address:{"@type":"PostalAddress",addressLocality:"Felidhoo",addressRegion:"Vaavu Atoll",addressCountry:"MV"},priceRange:"USD 85-115 per room per night"};
-export default function Page(){return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema)}}/><section className="container py-12 md:py-16"><div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><p className="text-sm uppercase tracking-[0.3em] text-gold">Featured Stay</p><h1 className="mt-2 text-4xl font-bold md:text-6xl">Uhoo&apos;s Lavish Oasis</h1><p className="mt-3 flex items-center gap-2 text-gray-300"><MapPin className="h-4 w-4 text-gold"/>V. Felidhoo, Maldives</p></div><Link href="/build-your-trip" className="btn-gold">Plan Your Maldives Escape</Link></div><div className="grid gap-4 lg:grid-cols-3"><div className="overflow-hidden rounded-2xl border border-white/10 lg:col-span-2"><img src={photos[0]} alt="Uhoo's Lavish Oasis" className="h-full min-h-[420px] w-full object-cover"/></div><div className="grid gap-4">{photos.slice(1,3).map((src,i)=><div key={src} className="overflow-hidden rounded-2xl border border-white/10"><img src={src} alt={`Uhoo's Lavish Oasis ${i+2}`} className="h-52 w-full object-cover"/></div>)}</div></div><div className="mt-4 flex gap-3 overflow-x-auto pb-2">{photos.map((src,i)=><div key={src} className="h-20 w-28 shrink-0 overflow-hidden rounded-xl border border-white/10"><img src={src} alt={`Uhoo's Lavish Oasis gallery ${i+1}`} className="h-full w-full object-cover"/></div>)}</div>
-<div className="mt-12 grid gap-5 md:grid-cols-3"><div className="card p-6"><ShieldCheck className="h-7 w-7 text-gold"/><h3 className="mt-3 font-semibold">Transparent pricing</h3><p className="mt-2 text-sm text-gray-400">Clear room rates and booking confirmation before payment.</p></div><div className="card p-6"><MessageCircle className="h-7 w-7 text-gold"/><h3 className="mt-3 font-semibold">Local support</h3><p className="mt-2 text-sm text-gray-400">Tripelor support before, during and after your Felidhoo stay.</p></div><div className="card p-6"><Ship className="h-7 w-7 text-gold"/><h3 className="mt-3 font-semibold">Speedboat assistance</h3><p className="mt-2 text-sm text-gray-400">Request your transfer to Felidhoo at least 24 hours before arrival.</p></div></div></section>
-<section className="border-y border-white/10 bg-white/[0.02]"><div className="container py-16"><div className="mb-8"><p className="text-sm uppercase tracking-[0.3em] text-gold">Choose Your Room</p><h2 className="mt-2 text-3xl font-bold md:text-4xl">ROOM 101 or ROOM 102</h2><p className="mt-3 text-gray-400">Each room has its own gallery and live availability checker.</p></div><div className="grid gap-6 md:grid-cols-2">{rooms.map((room,i)=><article key={room.name} className="card overflow-hidden"><div className="relative h-64 bg-zinc-900"><img src={photos[(i+1)%photos.length]} alt={room.name} className="h-full w-full object-cover"/><div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"/><h3 className="absolute bottom-5 left-6 text-3xl font-bold">{room.name}</h3></div><div className="p-6"><div className="grid gap-2 text-sm text-gray-300">{["Private room for up to 2 guests","BB / HB / FB meal plans","Live availability check","Your own room photo gallery"].map(x=><p key={x} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-gold"/>{x}</p>)}</div><div className="mt-6 flex flex-wrap gap-3"><Link href={room.href} className="btn-outline">View Room & Photos</Link><Link href={room.booking} className="btn-gold">Book {room.name}</Link></div></div></article>)}</div></div></section>
-<section className="container py-16"><div className="mb-8"><p className="text-sm uppercase tracking-[0.3em] text-gold">Room Rates</p><h2 className="mt-2 text-3xl font-bold md:text-4xl">Choose your meal plan</h2><p className="mt-2 text-gray-400">All prices are per room, per night.</p></div><div className="grid gap-5 md:grid-cols-3">{rates.map(r=><article key={r.name} className="card p-6"><Utensils className="h-7 w-7 text-gold"/><h3 className="mt-4 text-xl font-semibold">{r.name}</h3><p className="mt-2 text-gray-400">{r.detail}</p><p className="mt-6 text-4xl font-bold text-gold">${r.price}</p><p className="text-sm text-gray-500">USD per room / night</p></article>)}</div></section>
-<section className="border-y border-white/10 bg-white/[0.02]"><div className="container py-16"><div className="mb-7 flex items-center gap-3"><Video className="h-7 w-7 text-gold"/><div><p className="text-sm uppercase tracking-[0.3em] text-gold">Property Videos</p><h2 className="text-3xl font-bold">Take a closer look</h2></div></div><div className="grid gap-6 md:grid-cols-2"><video controls playsInline className="w-full rounded-2xl border border-white/10 bg-black" src="/uhoos/WhatsApp%20Video%202026-08-17%20at%2015.30.20.mp4"/><video controls playsInline className="w-full rounded-2xl border border-white/10 bg-black" src="/uhoos/WhatsApp%20Video%202026-08-17%20at%2015.30.22.mp4"/></div></div></section></>}
+import LuxuryPropertyPage from "@/components/luxury-property-page";
+
+const photos = [
+  "/properties/uhoos-lavish-oasis/20250517_193323.jpg",
+  "/properties/uhoos-lavish-oasis/20250518_001256.jpg",
+  "/properties/uhoos-lavish-oasis/20250518_001936.jpg",
+  "/properties/uhoos-lavish-oasis/20250822_104240.jpg",
+  "/properties/uhoos-lavish-oasis/20250822_104258(1).jpg",
+];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "LodgingBusiness",
+  name: "Uhoo's Lavish Oasis",
+  url: "https://tripelor.com/stays/uhoos-lavish-oasis",
+  image: photos.map((photo) => `https://tripelor.com${photo}`),
+  description: "Comfortable local island guesthouse accommodation in V. Felidhoo, Maldives with Bed & Breakfast, Half Board and Full Board meal plans.",
+  address: { "@type": "PostalAddress", addressLocality: "Felidhoo", addressRegion: "Vaavu Atoll", addressCountry: "MV" },
+  priceRange: "USD 85-115 per room per night",
+};
+
+export default function Page() {
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <LuxuryPropertyPage
+        eyebrow="Featured local-island stay"
+        name="Uhoo's Lavish Oasis"
+        location="V. Felidhoo, Maldives"
+        description="An intimate two-room island stay in Vaavu Atoll, with flexible meal plans, ocean experiences and personal Tripelor support."
+        photos={photos}
+        startingFrom={85}
+        bookingHref="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast"
+        highlights={[
+          { icon: "shield", title: "Clear from the start", text: "Transparent room rates and confirmation details before payment." },
+          { icon: "support", title: "Personal local support", text: "Tripelor assistance before, during and after your Felidhoo stay." },
+          { icon: "transfer", title: "Arrival arranged", text: "Speedboat transfer support when requested at least 24 hours before arrival." },
+        ]}
+        rooms={[
+          {
+            name: "Room 101",
+            image: photos[1],
+            description: "A comfortable private room for two, ready for an unhurried Felidhoo escape.",
+            details: ["Up to 2 guests", "BB, HB or FB", "Live availability", "Private room gallery"],
+            href: "/stays/uhoos-lavish-oasis/room-101",
+            bookingHref: "/booking?property=Uhoo%27s%20Lavish%20Oasis&roomType=ROOM%20101&mealPlan=Bed%20%26%20Breakfast",
+          },
+          {
+            name: "Room 102",
+            image: photos[2],
+            description: "A relaxed private room with the same personal service and flexible dining choices.",
+            details: ["Up to 2 guests", "BB, HB or FB", "Live availability", "Private room gallery"],
+            href: "/stays/uhoos-lavish-oasis/room-102",
+            bookingHref: "/booking?property=Uhoo%27s%20Lavish%20Oasis&roomType=ROOM%20102&mealPlan=Bed%20%26%20Breakfast",
+          },
+        ]}
+        rates={[
+          { name: "Bed & Breakfast", price: 85, detail: "Private room with daily breakfast.", bookingHref: "/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast" },
+          { name: "Half Board", price: 95, detail: "Private room with breakfast and dinner.", bookingHref: "/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Half%20Board" },
+          { name: "Full Board", price: 115, detail: "Private room with breakfast, lunch and dinner.", bookingHref: "/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Full%20Board" },
+        ]}
+        terms={[
+          { title: "Island arrival", text: "Tripelor can assist with scheduled speedboat arrangements between Malé and Felidhoo. Requests should be made at least 24 hours before arrival." },
+          { title: "Booking confirmation", text: "Your online request does not take an automatic payment. Tripelor reviews availability and sends confirmation with payment instructions." },
+        ]}
+        videos={[
+          "/uhoos/WhatsApp%20Video%202026-08-17%20at%2015.30.20.mp4",
+          "/uhoos/WhatsApp%20Video%202026-08-17%20at%2015.30.22.mp4",
+        ]}
+      />
+    </>
+  );
+}
