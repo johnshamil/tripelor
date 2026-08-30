@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowUpRight, Compass, Mail, MapPin, Phone } from "lucide-react";
+import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
+import TripelorMark from "@/components/tripelor-mark";
 
 export default function Footer() {
   return (
@@ -8,9 +9,7 @@ export default function Footer() {
         <div className="grid gap-12 lg:grid-cols-[1.35fr_.7fr_.8fr_1fr]">
           <div className="max-w-sm">
             <Link href="/" className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center border border-[#c9a86a]/55 text-[#d9bd7b]">
-                <Compass className="h-5 w-5" />
-              </span>
+              <TripelorMark className="h-11 w-11 text-[#d9bd7b]" />
               <span className="font-display text-2xl tracking-[.09em] text-white">TRIPELOR</span>
             </Link>
             <p className="mt-6 text-sm leading-7 text-white/45">
