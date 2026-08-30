@@ -1,24 +1,323 @@
 import Link from "next/link";
-import { ShieldCheck, Sparkles, CalendarDays, ArrowRight, MessageCircle, SearchCheck, Ship, Hotel, MapPin } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CalendarDays,
+  Compass,
+  Headphones,
+  Hotel,
+  MapPin,
+  ShieldCheck,
+  Ship,
+  Sparkles,
+  Star,
+} from "lucide-react";
 import RewardsChecker from "@/components/rewards-checker";
 import HomeLiveAvailability from "@/components/home-live-availability";
 import SmartOffers from "@/components/smart-offers";
+import { properties } from "@/lib/properties";
 
-const folders=[
-{title:"3 Nights Packages",href:"/island-adventures?duration=3",image:"https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=1600&q=88",text:"Quick Maldives escapes for couples with island stays, meals and selected ocean experiences."},
-{title:"5 Nights Packages",href:"/island-adventures?duration=5",image:"https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=1600&q=88",text:"Longer Maldives holidays with more time for snorkeling, sandbanks, dolphins and island adventures."}
+const escapes = [
+  {
+    title: "The 3-Night Escape",
+    href: "/island-adventures?duration=3",
+    image:
+      "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=1600&q=88",
+    label: "A beautiful introduction",
+    text: "A thoughtfully paced island stay with meals and selected ocean experiences.",
+  },
+  {
+    title: "The 5-Night Journey",
+    href: "/island-adventures?duration=5",
+    image:
+      "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=1600&q=88",
+    label: "Time to experience more",
+    text: "More unhurried days for snorkeling, sandbanks, dolphins and island life.",
+  },
 ];
-type Review={id:string;property_name:string;guest_name:string;country:string|null;rating:number;review_title:string|null;review_text:string;stay_date:string|null};
-async function getReviews():Promise<Review[]>{try{const u=process.env.SUPABASE_URL?.replace(/\/$/,"");const k=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!u||!k)return[];const r=await fetch(`${u}/rest/v1/reviews?select=id,property_name,guest_name,country,rating,review_title,review_text,stay_date&status=eq.approved&order=created_at.desc`,{headers:{apikey:k,Authorization:`Bearer ${k}`},cache:"no-store"});if(!r.ok)return[];return await r.json()}catch{return[]}}
 
-export default async function Home(){const reviews=await getReviews();return <>
-<section className="relative min-h-[88vh] overflow-hidden"><img src="https://images.unsplash.com/photo-1723781496892-d085ed803ff8?auto=format&fit=crop&q=90&w=2200" alt="Maldives underwater manta ray" className="absolute inset-0 h-full w-full object-cover scale-[1.03] animate-[heroDrift_14s_ease-in-out_infinite_alternate]"/><div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-black/10"/><div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20"/><div className="container relative flex min-h-[88vh] items-center"><div className="max-w-3xl py-24"><p className="mb-4 text-sm font-semibold uppercase tracking-[.35em] text-gold">Maldives · The Art of Exploring</p><h1 className="text-5xl font-bold leading-tight md:text-7xl">Plan your <span className="text-gold">Maldives escape.</span></h1><p className="mt-6 max-w-2xl text-lg text-gray-100">Island stays, curated couple packages, speedboat transfers and unforgettable ocean experiences — in one place.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="/build-your-trip" className="btn-gold">Build Your Maldives Trip</Link><Link href="/stays" className="btn-outline">Browse Properties</Link></div><div className="mt-8 flex flex-wrap gap-5 text-sm text-gray-200"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-gold"/>Transparent pricing</span><span className="flex items-center gap-2"><SearchCheck className="h-4 w-4 text-gold"/>Live room availability</span><span className="flex items-center gap-2"><MessageCircle className="h-4 w-4 text-gold"/>Local support</span></div></div></div></section>
-<HomeLiveAvailability/>
-<SmartOffers/>
-<RewardsChecker/>
-<section className="border-b border-white/10 bg-[#050505]"><div className="container py-20"><div className="mx-auto max-w-3xl text-center"><p className="text-sm uppercase tracking-[.35em] text-gold">Tripelor Packages</p><h2 className="mt-3 text-4xl font-bold md:text-5xl">Choose your perfect island escape</h2></div><div className="mt-10 grid gap-6 lg:grid-cols-2">{folders.map((folder,i)=><Link key={folder.title} href={folder.href} className="group relative min-h-[500px] overflow-hidden rounded-3xl border border-white/10 bg-zinc-900"><img src={folder.image} alt={folder.title} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-110"/><div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent"/><div className="absolute inset-x-0 bottom-0 p-7 md:p-9"><span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-3 py-2 text-sm backdrop-blur"><CalendarDays className="h-4 w-4 text-gold"/>{i===0?"3 Nights":"5 Nights"}</span><h3 className="mt-5 text-4xl font-bold">{folder.title}</h3><p className="mt-3 max-w-xl leading-7 text-gray-100">{folder.text}</p><span className="mt-5 inline-flex items-center gap-2 font-semibold text-gold">Open Package Folder <ArrowRight className="h-4 w-4"/></span></div></Link>)}</div></div></section>
-<section className="border-y border-white/10 bg-white/[.02]"><div className="container py-20"><div className="mx-auto max-w-4xl"><p className="text-sm uppercase tracking-[.3em] text-gold">Our Stays</p><h2 className="mt-2 text-4xl font-bold md:text-5xl">All properties in one place</h2><p className="mt-4 max-w-2xl text-gray-400">Explore every Tripelor guesthouse and hotel in one place, compare prices, view photos and check live availability.</p><Link href="/stays" className="group mt-9 block overflow-hidden rounded-[2rem] border border-gold/25 bg-[#101010] shadow-2xl transition hover:-translate-y-1 hover:border-gold/50"><div className="grid md:grid-cols-[1.1fr_.9fr]"><div className="relative min-h-[330px] overflow-hidden"><img src="/properties/rivethi-beach-hotel/1719713475.jpeg" alt="Explore Maldives Stays" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"/><div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/60"/><div className="absolute left-5 top-5 rounded-full border border-white/20 bg-black/55 px-3 py-2 text-xs font-semibold uppercase tracking-[.18em] text-white backdrop-blur">Explore Maldives Stays</div></div><div className="flex flex-col justify-center p-7 md:p-10"><Hotel className="h-9 w-9 text-gold"/><h3 className="mt-4 text-3xl font-bold">Browse All Tripelor Properties</h3><p className="mt-3 flex items-center gap-2 text-sm text-gray-400"><MapPin className="h-4 w-4 text-gold"/>Maldives stays in one folder</p><p className="mt-5 leading-7 text-gray-300">Discover Uhoo&apos;s Lavish Oasis, Masfalhi View Inn, Rivethi Beach Hotel and every new property added to Tripelor.</p><div className="mt-6 grid grid-cols-2 gap-3 text-sm"><div className="rounded-xl border border-white/10 p-3"><span className="block text-xs text-gray-500">Compare</span><b>Prices & meal plans</b></div><div className="rounded-xl border border-white/10 p-3"><span className="block text-xs text-gray-500">View</span><b>Photos & details</b></div><div className="rounded-xl border border-white/10 p-3"><span className="block text-xs text-gray-500">Check</span><b>Live availability</b></div><div className="rounded-xl border border-white/10 p-3"><span className="block text-xs text-gray-500">Book</span><b>Direct with Tripelor</b></div></div><span className="mt-7 inline-flex items-center gap-2 font-semibold text-gold">Explore Maldives Stays <ArrowRight className="h-4 w-4"/></span></div></div></Link></div></div></section>
-<section className="bg-black"><div className="container py-20"><div className="grid gap-6 md:grid-cols-3"><div className="card p-7"><SearchCheck className="h-8 w-8 text-gold"/><h3 className="mt-4 text-xl font-semibold">Live availability</h3><p className="mt-2 text-gray-400">Choose your dates above and see current room availability.</p></div><div className="card p-7"><Ship className="h-8 w-8 text-gold"/><h3 className="mt-4 text-xl font-semibold">Speedboat transfer</h3><p className="mt-2 text-gray-400">USD 50 per person. Request at least 24 hours before arrival.</p><Link href="/speedboat" className="mt-4 inline-block text-gold">Book transfer →</Link></div><div className="card p-7"><Sparkles className="h-8 w-8 text-gold"/><h3 className="mt-4 text-xl font-semibold">Build one complete trip</h3><p className="mt-2 text-gray-400">Choose package, room and transfer seats and see one estimated total.</p><Link href="/build-your-trip" className="mt-4 inline-block text-gold">Build your trip →</Link></div></div></div></section>
-<section className="border-y border-white/10 bg-white/[.02]"><div className="container py-20"><div className="flex items-end justify-between gap-5"><div><p className="text-sm uppercase tracking-[.3em] text-gold">Guest Experiences</p><h2 className="mt-2 text-4xl font-bold">What our guests say</h2></div><Link href="/reviews" className="btn-outline">Write a Review</Link></div>{reviews.length===0?<div className="card mt-10 p-8 text-center text-gray-400">No guest reviews yet.</div>:<div className="mt-10 flex snap-x gap-6 overflow-x-auto pb-4">{reviews.map(review=><article key={review.id} className="card min-w-[300px] snap-start p-7 md:min-w-[380px]"><div className="text-xl text-gold">{"★".repeat(review.rating)}{"☆".repeat(5-review.rating)}</div><h3 className="mt-4 text-xl font-bold">{review.review_title||"Guest experience"}</h3><p className="mt-3 leading-7 text-gray-300">“{review.review_text}”</p><div className="mt-6 border-t border-white/10 pt-5"><p className="font-semibold">{review.guest_name}</p><p className="text-sm text-gray-400">{[review.country,review.property_name].filter(Boolean).join(" · ")}</p></div></article>)}</div>}</div></section>
-<section className="container py-20 text-center"><p className="text-sm uppercase tracking-[.3em] text-gold">One simple journey</p><h2 className="mx-auto mt-3 max-w-3xl text-4xl font-bold md:text-5xl">Choose your stay. Add your experiences. Arrange your transfer.</h2><Link href="/build-your-trip" className="btn-gold mt-8">Start Building Your Trip</Link></section>
-</>}
+type Review = {
+  id: string;
+  property_name: string;
+  guest_name: string;
+  country: string | null;
+  rating: number;
+  review_title: string | null;
+  review_text: string;
+  stay_date: string | null;
+};
+
+async function getReviews(): Promise<Review[]> {
+  try {
+    const url = process.env.SUPABASE_URL?.replace(/\/$/, "");
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) return [];
+    const response = await fetch(
+      `${url}/rest/v1/reviews?select=id,property_name,guest_name,country,rating,review_title,review_text,stay_date&status=eq.approved&order=created_at.desc`,
+      {
+        headers: { apikey: key, Authorization: `Bearer ${key}` },
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) return [];
+    return await response.json();
+  } catch {
+    return [];
+  }
+}
+
+export default async function Home() {
+  const reviews = await getReviews();
+
+  return (
+    <>
+      <section className="luxury-hero">
+        <img
+          src="/properties/rivethi-beach-hotel/1719713475.jpeg"
+          alt="A serene Maldives beachfront escape"
+          className="luxury-hero-image"
+        />
+        <div className="luxury-hero-shade" />
+        <div className="container relative z-10 grid min-h-[88vh] items-center gap-12 py-24 lg:grid-cols-[1fr_320px]">
+          <div className="max-w-4xl">
+            <p className="eyebrow text-[#ead7aa]">Maldives, planned with care</p>
+            <h1 className="font-display mt-6 max-w-4xl text-5xl leading-[.98] text-white sm:text-6xl md:text-7xl lg:text-[6.3rem]">
+              Your Maldives,
+              <span className="block italic text-[#d9bd7b]">considered beautifully.</span>
+            </h1>
+            <p className="mt-7 max-w-2xl text-base leading-8 text-white/75 md:text-lg">
+              Curated island stays, private-feeling experiences and seamless
+              speedboat transfers—all thoughtfully brought together by a local
+              team.
+            </p>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link href="/build-your-trip" className="btn-gold">
+                Design My Journey <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/stays" className="btn-outline border-white/40 text-white">
+                Explore Stays
+              </Link>
+            </div>
+            <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-white/65">
+              <span className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-[#d9bd7b]" /> Transparent pricing
+              </span>
+              <span className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-[#d9bd7b]" /> Live availability
+              </span>
+              <span className="flex items-center gap-2">
+                <Headphones className="h-4 w-4 text-[#d9bd7b]" /> Local support
+              </span>
+            </div>
+          </div>
+
+          <aside className="hidden border-l border-white/20 pl-8 text-white lg:block">
+            <p className="text-xs uppercase tracking-[.3em] text-[#d9bd7b]">
+              The Tripelor way
+            </p>
+            <div className="mt-7 space-y-7">
+              {[
+                ["01", "Choose a stay", "Compare selected Maldives properties."],
+                ["02", "Add experiences", "Shape each day around your pace."],
+                ["03", "Arrange arrival", "Bring rooms and transfers together."],
+              ].map(([number, title, text]) => (
+                <div key={number} className="grid grid-cols-[34px_1fr] gap-3">
+                  <span className="font-display text-xl italic text-[#d9bd7b]">{number}</span>
+                  <div>
+                    <h2 className="font-medium">{title}</h2>
+                    <p className="mt-1 text-sm leading-6 text-white/55">{text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </aside>
+        </div>
+        <div className="absolute bottom-8 right-6 hidden rotate-90 text-[10px] uppercase tracking-[.42em] text-white/45 xl:block">
+          The art of exploring
+        </div>
+      </section>
+
+      <HomeLiveAvailability />
+
+      <section className="section-shell overflow-hidden">
+        <div className="container grid gap-12 py-24 lg:grid-cols-[.8fr_1.2fr] lg:items-end">
+          <div>
+            <p className="eyebrow">A quieter kind of luxury</p>
+            <h2 className="section-title mt-5">Travel that feels effortless.</h2>
+          </div>
+          <div className="lg:border-l lg:border-white/10 lg:pl-12">
+            <p className="max-w-2xl text-lg leading-8 text-white/65">
+              From your first search to your island arrival, Tripelor keeps the
+              details clear and the journey personal. Choose your dates, compare
+              stays and bring the whole experience together in one place.
+            </p>
+            <Link href="/about" className="luxury-link mt-7">
+              Discover Tripelor <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#f1ebdf] text-[#071922]">
+        <div className="container py-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="eyebrow text-[#8d7037]">Curated escapes</p>
+            <h2 className="font-display mt-4 text-4xl leading-tight md:text-6xl">
+              Choose the rhythm of your island stay.
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl leading-7 text-[#40505a]">
+              Two beautifully simple ways to begin, each ready to personalise
+              around the moments that matter to you.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+            {escapes.map((escape, index) => (
+              <Link key={escape.title} href={escape.href} className="escape-card group">
+                <img src={escape.image} alt={escape.title} />
+                <div className="escape-card-shade" />
+                <div className="absolute inset-x-0 bottom-0 z-10 p-7 text-white md:p-10">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="border border-white/35 bg-black/20 px-3 py-2 text-[10px] uppercase tracking-[.24em] backdrop-blur-md">
+                      {index === 0 ? "3 nights" : "5 nights"}
+                    </span>
+                    <ArrowUpRight className="h-6 w-6 transition duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+                  </div>
+                  <p className="mt-20 text-xs uppercase tracking-[.24em] text-[#ead7aa]">
+                    {escape.label}
+                  </p>
+                  <h3 className="font-display mt-3 text-4xl md:text-5xl">{escape.title}</h3>
+                  <p className="mt-3 max-w-lg leading-7 text-white/75">{escape.text}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-shell">
+        <div className="container py-24">
+          <div className="flex flex-col gap-6 border-b border-white/10 pb-10 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="eyebrow">Selected stays</p>
+              <h2 className="section-title mt-4">A beautiful place to begin.</h2>
+            </div>
+            <Link href="/stays" className="btn-outline w-fit">
+              View All Properties
+            </Link>
+          </div>
+
+          <div>
+            {properties.map((property, index) => (
+              <Link href={`/stays/${property.slug}`} key={property.slug} className="property-row group">
+                <span className="font-display text-xl italic text-[#c9a86a]">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <p className="flex items-center gap-2 text-xs uppercase tracking-[.2em] text-white/45">
+                    <MapPin className="h-3.5 w-3.5 text-[#c9a86a]" /> {property.location}
+                  </p>
+                  <h3 className="font-display mt-2 text-3xl text-white md:text-4xl">{property.name}</h3>
+                  <p className="mt-3 max-w-2xl leading-7 text-white/55">{property.description}</p>
+                </div>
+                <div className="md:text-right">
+                  <p className="text-xs uppercase tracking-[.18em] text-white/40">From</p>
+                  <p className="font-display mt-1 text-3xl text-[#d9bd7b]">${property.startingFrom}</p>
+                  <p className="text-xs text-white/40">per night</p>
+                </div>
+                <ArrowUpRight className="h-5 w-5 text-white/35 transition group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-[#d9bd7b]" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <SmartOffers />
+      <RewardsChecker />
+
+      <section className="bg-[#f1ebdf] text-[#071922]">
+        <div className="container py-24">
+          <div className="grid gap-12 lg:grid-cols-[.75fr_1.25fr]">
+            <div>
+              <p className="eyebrow text-[#8d7037]">One seamless journey</p>
+              <h2 className="font-display mt-4 text-4xl leading-tight md:text-6xl">
+                Everything your Maldives needs.
+              </h2>
+              <p className="mt-5 max-w-md leading-7 text-[#53616a]">
+                A simple way to plan your stay, your island experiences and the
+                transfer that brings it all together.
+              </p>
+            </div>
+            <div className="grid gap-px overflow-hidden border border-[#cfc4af] bg-[#cfc4af] md:grid-cols-3">
+              {[
+                [Hotel, "Selected stays", "Compare rooms, meal plans and live availability."],
+                [Compass, "Island experiences", "Choose ocean adventures and slower island moments."],
+                [Ship, "Speedboat transfers", "Arrange your arrival and departure in one journey."],
+              ].map(([Icon, title, text]) => {
+                const FeatureIcon = Icon as typeof Hotel;
+                return (
+                  <div key={title as string} className="bg-[#f7f3eb] p-7 md:p-8">
+                    <FeatureIcon className="h-7 w-7 text-[#9c7d3d]" />
+                    <h3 className="font-display mt-10 text-2xl">{title as string}</h3>
+                    <p className="mt-3 text-sm leading-6 text-[#53616a]">{text as string}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-shell">
+        <div className="container py-24">
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="eyebrow">Guest experiences</p>
+              <h2 className="section-title mt-4">Words from the journey.</h2>
+            </div>
+            <Link href="/reviews" className="luxury-link">
+              Share Your Experience <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {reviews.length === 0 ? (
+            <div className="mt-10 border border-white/10 bg-white/[.025] p-10 text-center text-white/45">
+              Guest stories will appear here soon.
+            </div>
+          ) : (
+            <div className="mobile-scroll mt-10 flex gap-5 pb-4">
+              {reviews.map((review) => (
+                <article key={review.id} className="min-w-[300px] border border-white/10 bg-white/[.025] p-7 md:min-w-[390px] md:p-9">
+                  <Star className="h-5 w-5 fill-[#c9a86a] text-[#c9a86a]" />
+                  <p className="font-display mt-7 text-2xl leading-9 text-white/90">“{review.review_text}”</p>
+                  <div className="mt-8 border-t border-white/10 pt-5">
+                    <p className="font-medium text-white">{review.guest_name}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[.15em] text-white/40">
+                      {[review.country, review.property_name].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="border-y border-[#c9a86a]/25 bg-[#0b2731]">
+        <div className="container py-24 text-center">
+          <Sparkles className="mx-auto h-7 w-7 text-[#d9bd7b]" />
+          <p className="eyebrow mt-6">Your island story starts here</p>
+          <h2 className="font-display mx-auto mt-4 max-w-4xl text-4xl leading-tight text-white md:text-6xl">
+            Stay beautifully. Explore deeply. Remember everything.
+          </h2>
+          <div className="mt-9 flex flex-wrap justify-center gap-3">
+            <Link href="/build-your-trip" className="btn-gold">
+              Build Your Trip <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href="/contact" className="btn-outline">Speak With Tripelor</Link>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

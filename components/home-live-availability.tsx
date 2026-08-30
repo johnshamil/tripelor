@@ -1,9 +1,142 @@
 "use client";
+
 import Link from "next/link";
-import {useEffect,useState} from "react";
-const props=[{name:"Uhoo's Lavish Oasis",rooms:["ROOM 101","ROOM 102"]},{name:"Masfalhi View Inn",rooms:["ROOM 101","ROOM 102","ROOM 103","ROOM 104","ROOM 105","ROOM 106"]}];
-const fmt=(d:Date)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-export default function HomeLiveAvailability(){const now=new Date(),next=new Date(Date.now()+86400000);const [cin,setCin]=useState(fmt(now));const [cout,setCout]=useState(fmt(next));const [counts,setCounts]=useState<Record<string,number>>({});const [loading,setLoading]=useState(false);
-async function check(){if(!cin||!cout||cout<=cin)return;setLoading(true);const out:Record<string,number>={};for(const p of props){const r=await Promise.all(p.rooms.map(async room=>{try{const x=await fetch("/api/availability",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({propertyName:p.name,roomType:room,checkIn:cin,checkOut:cout,rooms:1})});const j=await x.json();return x.ok&&j.available!==false}catch{return false}}));out[p.name]=r.filter(Boolean).length}setCounts(out);setLoading(false)}
-useEffect(()=>{check()},[]);
-return <section className="relative z-10 -mt-8"><div className="container"><div className="rounded-3xl border border-gold/25 bg-black p-5 shadow-2xl md:p-7"><p className="text-sm font-semibold uppercase tracking-[.25em] text-gold">● Live Room Availability</p><div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto]"><label className="grid gap-1 text-xs text-gray-400">Check-in<input type="date" value={cin} onChange={e=>setCin(e.target.value)} className="rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-base text-white"/></label><label className="grid gap-1 text-xs text-gray-400">Check-out<input type="date" value={cout} onChange={e=>setCout(e.target.value)} className="rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-base text-white"/></label><button onClick={check} disabled={loading||cout<=cin} className="btn-gold self-end">{loading?"Checking...":"Check Dates"}</button></div><div className="mt-5 grid gap-4 md:grid-cols-2">{props.map(p=>{const n=counts[p.name];return <div key={p.name} className="rounded-2xl border border-white/10 bg-white/[.03] p-5"><p className="text-sm text-gray-400">{p.name}</p><h3 className={`mt-1 text-xl font-bold ${n===1?"text-gold":n===0?"text-red-300":"text-emerald-300"}`}>{n===undefined?"Checking live rooms...":n===0?"Sold out for these dates":n===1?"🔥 Only 1 room left":`${cin===fmt(now)?"Tonight: ":""}${n} rooms available`}</h3><Link href={`/booking?property=${encodeURIComponent(p.name)}&mealPlan=Bed%20%26%20Breakfast&checkIn=${cin}&checkOut=${cout}`} className="btn-gold mt-4">{n===0?"Try Other Dates":"Book Now"}</Link></div>})}</div><p className="mt-4 text-xs text-gray-500">Live availability can change until your reservation is confirmed.</p></div></div></section>}
+import { ArrowRight, CalendarDays, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+
+const properties = [
+  { name: "Uhoo's Lavish Oasis", rooms: ["ROOM 101", "ROOM 102"] },
+  {
+    name: "Masfalhi View Inn",
+    rooms: ["ROOM 101", "ROOM 102", "ROOM 103", "ROOM 104", "ROOM 105", "ROOM 106"],
+  },
+];
+
+const formatDate = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+    date.getDate(),
+  ).padStart(2, "0")}`;
+
+export default function HomeLiveAvailability() {
+  const today = new Date();
+  const tomorrow = new Date(Date.now() + 86400000);
+  const [checkIn, setCheckIn] = useState(formatDate(today));
+  const [checkOut, setCheckOut] = useState(formatDate(tomorrow));
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [loading, setLoading] = useState(false);
+
+  async function check() {
+    if (!checkIn || !checkOut || checkOut <= checkIn) return;
+    setLoading(true);
+    const nextCounts: Record<string, number> = {};
+
+    for (const property of properties) {
+      const availability = await Promise.all(
+        property.rooms.map(async (room) => {
+          try {
+            const response = await fetch("/api/availability", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                propertyName: property.name,
+                roomType: room,
+                checkIn,
+                checkOut,
+                rooms: 1,
+              }),
+            });
+            const data = await response.json();
+            return response.ok && data.available !== false;
+          } catch {
+            return false;
+          }
+        }),
+      );
+      nextCounts[property.name] = availability.filter(Boolean).length;
+    }
+
+    setCounts(nextCounts);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    check();
+  }, []);
+
+  return (
+    <section className="availability-shell">
+      <div className="container">
+        <div className="availability-panel p-5 md:p-7 lg:p-8">
+          <div className="flex flex-col gap-2 border-b border-white/10 pb-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="eyebrow flex items-center gap-2">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                Live availability
+              </p>
+              <h2 className="font-display mt-2 text-2xl text-white md:text-3xl">Find your island dates.</h2>
+            </div>
+            <p className="max-w-md text-xs leading-5 text-white/40">
+              Select your travel dates to see available rooms before creating your booking.
+            </p>
+          </div>
+
+          <div className="mt-6 grid gap-5 lg:grid-cols-[.8fr_.8fr_auto_1.25fr_1.25fr] lg:items-end">
+            <label className="field-label">
+              <span className="flex items-center gap-2">
+                <CalendarDays className="h-3.5 w-3.5 text-[#c9a86a]" /> Check-in
+              </span>
+              <input
+                type="date"
+                value={checkIn}
+                onChange={(event) => setCheckIn(event.target.value)}
+                className="date-field"
+              />
+            </label>
+            <label className="field-label">
+              <span className="flex items-center gap-2">
+                <CalendarDays className="h-3.5 w-3.5 text-[#c9a86a]" /> Check-out
+              </span>
+              <input
+                type="date"
+                value={checkOut}
+                onChange={(event) => setCheckOut(event.target.value)}
+                className="date-field"
+              />
+            </label>
+            <button
+              onClick={check}
+              disabled={loading || checkOut <= checkIn}
+              className="btn-gold whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              <Search className="h-4 w-4" /> {loading ? "Checking" : "Check Dates"}
+            </button>
+
+            {properties.map((property) => {
+              const count = counts[property.name];
+              return (
+                <div key={property.name} className="availability-result">
+                  <p className="truncate text-[10px] uppercase tracking-[.16em] text-white/40">{property.name}</p>
+                  <p className={`mt-2 text-sm font-semibold ${count === 0 ? "text-red-300" : "text-[#e3ca91]"}`}>
+                    {count === undefined
+                      ? "Checking rooms…"
+                      : count === 0
+                        ? "Unavailable for these dates"
+                        : count === 1
+                          ? "Only 1 room available"
+                          : `${count} rooms available`}
+                  </p>
+                  <Link
+                    href={`/booking?property=${encodeURIComponent(property.name)}&mealPlan=Bed%20%26%20Breakfast&checkIn=${checkIn}&checkOut=${checkOut}`}
+                    className="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.12em] text-white/65 transition hover:text-[#d9bd7b]"
+                  >
+                    {count === 0 ? "Try other dates" : "Reserve"} <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
