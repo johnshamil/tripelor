@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import WhatsAppFloat from "@/components/whatsapp-float";
+import SmoothExperience from "@/components/smooth-experience";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tripelor.com"),
@@ -87,7 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }} />
         <Navbar />
-        <main>{children}</main>
+        <main><SmoothExperience>{children}</SmoothExperience></main>
         <Footer />
         <WhatsAppFloat />
       </body>
