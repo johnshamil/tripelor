@@ -46,6 +46,15 @@ img, video { max-width: 100%; height: auto; }
   overflow: hidden;
   touch-action: manipulation;
 }
+.btn-gold::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 22%, rgba(255, 255, 255, .48) 48%, transparent 72%);
+  transform: translateX(-130%);
+  transition: transform .7s cubic-bezier(.22, 1, .36, 1);
+}
+.btn-gold:hover::before { transform: translateX(130%); }
 .btn-gold { background: var(--gold); color: #071922; border: 1px solid var(--gold); }
 .btn-outline { border: 1px solid rgba(201, 168, 106, .72); color: var(--gold-light); }
 .btn-gold:hover { background: var(--gold-light); border-color: var(--gold-light); transform: translateY(-2px); box-shadow: 0 16px 40px rgba(201, 168, 106, .18); }
@@ -87,10 +96,74 @@ img, video { max-width: 100%; height: auto; }
 .mobile-scroll > * { scroll-snap-align: start; }
 
 .page-enter { animation: pageEnter .55s cubic-bezier(.22, 1, .36, 1) both; transform-origin: center top; }
+.route-transition { animation: routeFade .55s cubic-bezier(.22, 1, .36, 1) both; }
+.smooth-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .9s cubic-bezier(.22, 1, .36, 1), transform .9s cubic-bezier(.22, 1, .36, 1);
+  will-change: opacity, transform;
+}
+.smooth-reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+.floating-plan {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 5.25rem;
+  z-index: 55;
+  align-items: center;
+  gap: .75rem;
+  border: 1px solid rgba(201, 168, 106, .32);
+  background: rgba(4, 17, 23, .92);
+  box-shadow: 0 18px 60px rgba(0, 7, 10, .34);
+  backdrop-filter: blur(18px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(14px) scale(.96);
+  transition: opacity .4s ease, transform .55s cubic-bezier(.22, 1, .36, 1), border-color .3s ease;
+}
+.floating-plan.is-visible { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+.floating-plan:hover { border-color: rgba(201, 168, 106, .72); transform: translateY(-3px) scale(1); }
+
+.mobile-booking-bar {
+  display: grid;
+  position: fixed;
+  inset-inline: .75rem;
+  bottom: .7rem;
+  z-index: 70;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-height: 64px;
+  overflow: hidden;
+  border: 1px solid rgba(201, 168, 106, .25);
+  background: rgba(4, 17, 23, .94);
+  box-shadow: 0 20px 60px rgba(0, 6, 9, .48);
+  backdrop-filter: blur(20px);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.mobile-booking-action {
+  display: flex;
+  min-height: 64px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  border-right: 1px solid rgba(255, 255, 255, .08);
+  color: rgba(255, 255, 255, .55);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  transition: background-color .25s ease, color .25s ease, transform .2s ease;
+}
+.mobile-booking-action:last-child { border-right: 0; }
+.mobile-booking-action:active { transform: scale(.96); }
+.mobile-booking-action.is-active { background: rgba(201, 168, 106, .11); color: #e3ca91; }
+
 @keyframes pageEnter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes routeFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes heroDrift { from { transform: scale(1.02); } to { transform: scale(1.085) translate3d(-.8%, .5%, 0); } }
 
 @media (max-width: 767px) {
+  body { padding-bottom: 5.2rem; }
   .container { padding-left: 1rem; padding-right: 1rem; }
   .card { border-radius: 1rem; }
   .page-enter { animation-duration: .35s; }
@@ -109,6 +182,8 @@ img, video { max-width: 100%; height: auto; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .page-enter, .luxury-hero-image { animation: none; }
-  .nav-tab, .btn-gold, .btn-outline, .escape-card img, .property-row, .offer-card { transition: none; }
+  .page-enter, .route-transition, .luxury-hero-image { animation: none; }
+  .smooth-reveal, .smooth-reveal.is-visible { opacity: 1; transform: none; will-change: auto; }
+  .nav-tab, .btn-gold, .btn-outline, .escape-card img, .property-row, .offer-card, .floating-plan { transition: none; }
+  .btn-gold::before { display: none; }
 }
