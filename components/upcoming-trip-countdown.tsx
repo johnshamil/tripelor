@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {CalendarDays, CheckCircle2, MapPin, Sparkles, WalletCards} from "lucide-react";
+import {CalendarDays, CheckCircle2, Headphones, MapPin, Sparkles, WalletCards} from "lucide-react";
 import {useEffect, useMemo, useState} from "react";
 
 type Trip = {
@@ -130,11 +130,14 @@ export default function UpcomingTripCountdown({trip, stage}: {trip: Trip; stage:
               <span className="font-semibold tracking-[.12em] text-white">{trip.booking_reference}</span>
             </div>
           )}
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-            <Link href="/account/wallet" className="btn-gold gap-2 px-4 py-2 text-[10px]">
-              <WalletCards className="h-4 w-4" /> Open Travel Wallet
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <Link href="/account/wallet" className="btn-gold justify-center gap-2 px-4 py-2 text-[10px]">
+              <WalletCards className="h-4 w-4" /> Travel Wallet
             </Link>
-            <Link href="#my-bookings" className="inline-flex items-center gap-2 px-1 py-2 text-[10px] font-semibold uppercase tracking-[.15em] text-[#e3ca91] transition hover:text-white">
+            <Link href="/account/pre-arrival" className="btn-outline justify-center gap-2 px-4 py-2 text-[10px]">
+              <Headphones className="h-4 w-4" /> Pre-Arrival Concierge
+            </Link>
+            <Link href="#my-bookings" className="inline-flex items-center justify-center gap-2 px-1 py-2 text-[10px] font-semibold uppercase tracking-[.15em] text-[#e3ca91] transition hover:text-white sm:col-span-2">
               <CalendarDays className="h-4 w-4" /> Journey details
             </Link>
           </div>
