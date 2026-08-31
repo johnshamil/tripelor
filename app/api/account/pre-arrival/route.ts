@@ -87,7 +87,11 @@ export async function POST(request: Request) {
     const celebrationType = String(input.celebrationType || "none");
     const beddingPreference = String(input.beddingPreference || "");
     const activities = Array.isArray(input.preferredActivities)
-      ? [...new Set(input.preferredActivities.map(String).filter(value => activityOptions.has(value)))].slice(0, 7)
+      ? Array.from(
+          new Set<string>(
+            input.preferredActivities.map(String).filter((value: string) => activityOptions.has(value)),
+          ),
+        ).slice(0, 7)
       : [];
 
     if (!celebrationTypes.has(celebrationType)) {
