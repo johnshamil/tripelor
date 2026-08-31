@@ -115,6 +115,17 @@ export default function BookingPageClientV2() {
   }, []);
 
   useEffect(() => {
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((result) => {
+        if (!result?.user) return;
+        setFullName((current) => current || result.user.fullName || "");
+        setEmail((current) => current || result.user.email || "");
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (packageName && checkIn) setCheckOut(addDays(checkIn, packageNights));
   }, [packageName, checkIn, packageNights]);
 
