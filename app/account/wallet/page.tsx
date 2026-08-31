@@ -14,6 +14,7 @@ import {
   MessageCircle,
   PackageCheck,
   Phone,
+  Plane,
   Printer,
   ShieldCheck,
   Ship,
@@ -361,7 +362,10 @@ export default function TravelWalletPage() {
               For booking support, transfer confirmation or assistance during your stay, contact the Tripelor team.
             </p>
             <div className="wallet-no-print mt-5 flex flex-wrap gap-3">
-              <a href="https://wa.me/9609429403?text=Hello%20Tripelor%2C%20I%20need%20help%20with%20my%20travel%20wallet." className="btn-gold gap-2">
+              <Link href="/account/pre-arrival" className="btn-gold gap-2">
+                <Plane className="h-4 w-4" /> Prepare My Arrival
+              </Link>
+              <a href="https://wa.me/9609429403?text=Hello%20Tripelor%2C%20I%20need%20help%20with%20my%20travel%20wallet." className="btn-outline gap-2">
                 <MessageCircle className="h-4 w-4" /> WhatsApp
               </a>
               <a href="tel:+9609429403" className="btn-outline gap-2">
