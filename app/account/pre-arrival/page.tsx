@@ -15,7 +15,9 @@ import {
   Utensils,
   Waves,
 } from "lucide-react";
+import type {LucideIcon} from "lucide-react";
 import {useEffect, useMemo, useState} from "react";
+import type {ReactNode} from "react";
 
 type User = {email: string; fullName?: string};
 type Booking = {
@@ -25,7 +27,6 @@ type Booking = {
   id: string;
   property_name: string;
   room_type?: string | null;
-  meal_plan?: string | null;
   status?: string | null;
 };
 
@@ -38,6 +39,19 @@ type Draft = {
   celebration: string;
   interests: string[];
   specialRequest: string;
+};
+
+type StoredRequest = {
+  flight_number?: string | null;
+  arrival_time?: string | null;
+  transfer_preference?: string | null;
+  bed_preference?: string | null;
+  dietary?: string | null;
+  celebration?: string | null;
+  interests?: string[] | null;
+  special_request?: string | null;
+  status?: string | null;
+  submitted_at?: string | null;
 };
 
 const emptyDraft: Draft = {
@@ -91,6 +105,19 @@ function daysUntil(value?: string) {
   return Math.max(0, Math.ceil((target - now) / 86_400_000));
 }
 
+function fromStored(request: StoredRequest): Draft {
+  return {
+    flightNumber: request.flight_number || "",
+    arrivalTime: request.arrival_time || "",
+    transfer: request.transfer_preference || emptyDraft.transfer,
+    bedPreference: request.bed_preference || emptyDraft.bedPreference,
+    dietary: request.dietary || "",
+    celebration: request.celebration || "",
+    interests: Array.isArray(request.interests) ? request.interests : [],
+    specialRequest: request.special_request || "",
+  };
+}
+
 export default function PreArrivalConciergePage() {
   const [user, setUser] = useState<User | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -100,6 +127,9 @@ export default function PreArrivalConciergePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [requestStatus, setRequestStatus] = useState("");
+  const [submittedAt, setSubmittedAt] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -142,16 +172,46 @@ export default function PreArrivalConciergePage() {
 
   useEffect(() => {
     if (!trip?.id) return;
+    let cancelled = false;
     setDraftReady(false);
-    setSaved(false);
-    try {
-      const stored = window.localStorage.getItem(`tripelor-pre-arrival-${trip.id}`);
-      setDraft(stored ? {...emptyDraft, ...JSON.parse(stored)} : emptyDraft);
-    } catch {
-      setDraft(emptyDraft);
-    } finally {
-      setDraftReady(true);
-    }
+    setRequestStatus("");
+    setSubmittedAt("");
+    setError("");
+
+    (async () => {
+      let localDraft = emptyDraft;
+      try {
+        const stored = window.localStorage.getItem(`tripelor-pre-arrival-${trip.id}`);
+        if (stored) localDraft = {...emptyDraft, ...JSON.parse(stored)};
+      } catch {
+        localDraft = emptyDraft;
+      }
+
+      try {
+        const response = await fetch(`/api/account/pre-arrival?reservationId=${encodeURIComponent(trip.id)}`, {cache: "no-store"});
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Unable to load saved concierge preferences.");
+        if (cancelled) return;
+        if (data.request) {
+          setDraft(fromStored(data.request));
+          setRequestStatus(String(data.request.status || "new"));
+          setSubmittedAt(String(data.request.submitted_at || ""));
+        } else {
+          setDraft(localDraft);
+        }
+      } catch (reason) {
+        if (!cancelled) {
+          setDraft(localDraft);
+          setError(reason instanceof Error ? reason.message : "Unable to load saved concierge preferences.");
+        }
+      } finally {
+        if (!cancelled) setDraftReady(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [trip?.id]);
 
   useEffect(() => {
@@ -175,51 +235,48 @@ export default function PreArrivalConciergePage() {
     }));
   }
 
-  function sendToConcierge() {
+  async function submitToConcierge() {
     if (!trip) return;
-    const lines = [
-      "Hello Tripelor, I have completed my Pre-Arrival Concierge preferences.",
-      "",
-      `Guest: ${user?.fullName || user?.email || "Tripelor guest"}`,
-      `Booking: ${trip.booking_reference || "Pending reference"}`,
-      `Stay: ${trip.property_name}`,
-      `Dates: ${prettyDate(trip.check_in)} to ${prettyDate(trip.check_out)}`,
-      `Room: ${trip.room_type || "As booked"}`,
-      "",
-      `Flight number: ${draft.flightNumber || "Not provided"}`,
-      `Malé arrival time: ${draft.arrivalTime || "Not provided"}`,
-      `Transfer: ${draft.transfer}`,
-      `Bed preference: ${draft.bedPreference}`,
-      `Dietary / allergies: ${draft.dietary || "None provided"}`,
-      `Celebration: ${draft.celebration || "None"}`,
-      `Experiences: ${draft.interests.length ? draft.interests.join(", ") : "No preferences selected"}`,
-      `Special request: ${draft.specialRequest || "None"}`,
-      "",
-      "Please review these details and advise me if anything else is needed before arrival.",
-    ];
-    const message = lines.join("\n");
-    navigator.clipboard?.writeText(message).catch(() => undefined);
-    window.open(`https://wa.me/9609429403?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+    setSubmitting(true);
+    setError("");
+    try {
+      const response = await fetch("/api/account/pre-arrival", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({reservationId: trip.id, ...draft}),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to submit concierge request.");
+      setRequestStatus(String(data.request?.status || "new"));
+      setSubmittedAt(String(data.request?.submitted_at || new Date().toISOString()));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to submit concierge request.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  if (loading) {
-    return <main className="container py-20 text-white/45">Preparing your private pre-arrival concierge...</main>;
-  }
+  const whatsappMessage = trip
+    ? [
+        "Hello Tripelor, I have submitted my Pre-Arrival Concierge preferences.",
+        "",
+        `Guest: ${user?.fullName || user?.email || "Tripelor guest"}`,
+        `Booking: ${trip.booking_reference || "Pending reference"}`,
+        `Stay: ${trip.property_name}`,
+        `Dates: ${prettyDate(trip.check_in)} to ${prettyDate(trip.check_out)}`,
+        `Flight: ${draft.flightNumber || "Not provided"}${draft.arrivalTime ? ` · ${draft.arrivalTime}` : ""}`,
+        `Transfer: ${draft.transfer}`,
+        `Bed: ${draft.bedPreference}`,
+        `Dietary / allergies: ${draft.dietary || "None provided"}`,
+        `Celebration: ${draft.celebration || "None"}`,
+        `Experiences: ${draft.interests.length ? draft.interests.join(", ") : "No preferences selected"}`,
+        `Special request: ${draft.specialRequest || "None"}`,
+      ].join("\n")
+    : "";
+  const whatsappHref = `https://wa.me/9609429403?text=${encodeURIComponent(whatsappMessage)}`;
 
+  if (loading) return <main className="container py-20 text-white/45">Preparing your private pre-arrival concierge...</main>;
   if (!user) return null;
-
-  if (error) {
-    return (
-      <main className="container py-20">
-        <div className="mx-auto max-w-2xl border border-red-400/20 bg-red-400/5 p-8 text-center">
-          <Headphones className="mx-auto h-9 w-9 text-gold" />
-          <h1 className="font-display mt-4 text-4xl">Concierge temporarily unavailable</h1>
-          <p className="mt-3 text-white/45">{error}</p>
-          <Link href="/account" className="btn-outline mt-6">Back to My Trip</Link>
-        </div>
-      </main>
-    );
-  }
 
   if (!trip) {
     return (
@@ -254,11 +311,9 @@ export default function PreArrivalConciergePage() {
               <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.3em] text-[#e3ca91]">
                 <Sparkles className="h-4 w-4" /> Tripelor Private Journey
               </p>
-              <h1 className="font-display mt-5 max-w-4xl text-5xl leading-[1.02] md:text-7xl">
-                Arrive with every detail already considered.
-              </h1>
+              <h1 className="font-display mt-5 max-w-4xl text-5xl leading-[1.02] md:text-7xl">Arrive with every detail already considered.</h1>
               <p className="mt-5 max-w-2xl text-base leading-8 text-white/55">
-                Tell us how you would like to arrive, rest, eat and explore. Your preferences are prepared in one private request for the Tripelor concierge team.
+                Tell us how you would like to arrive, rest, eat and explore. Once submitted, your preferences appear directly in Tripelor&apos;s concierge operations dashboard.
               </p>
             </div>
             <div className="border border-[#c9a86a]/25 bg-black/25 p-6 backdrop-blur-md">
@@ -277,15 +332,32 @@ export default function PreArrivalConciergePage() {
 
       <div className="container mt-8 grid gap-7 xl:grid-cols-[1fr_330px]">
         <div className="space-y-7">
+          {error && <div className="border border-red-400/20 bg-red-400/5 p-4 text-sm text-red-200">{error}</div>}
+
+          {requestStatus && (
+            <div className="flex flex-col gap-3 border border-emerald-300/20 bg-emerald-400/[.06] p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-emerald-300" />
+                <div>
+                  <p className="font-semibold text-emerald-100">Your concierge request is with Tripelor.</p>
+                  <p className="mt-1 text-xs text-emerald-100/55">
+                    Status: {requestStatus}{submittedAt ? ` · Submitted ${new Intl.DateTimeFormat("en-GB", {dateStyle: "medium", timeStyle: "short"}).format(new Date(submittedAt))}` : ""}
+                  </p>
+                </div>
+              </div>
+              <a href={whatsappHref} target="_blank" rel="noreferrer" className="btn-outline gap-2 whitespace-nowrap">
+                <MessageCircle className="h-4 w-4" /> WhatsApp Tripelor
+              </a>
+            </div>
+          )}
+
           {upcomingBookings.length > 1 && (
             <section className="border border-white/10 bg-white/[.025] p-6">
               <label className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/45">
                 Choose journey
                 <select value={trip.id} onChange={event => setSelectedId(event.target.value)} className={fieldClass}>
                   {upcomingBookings.map(booking => (
-                    <option key={booking.id} value={booking.id} className="bg-[#071922]">
-                      {booking.property_name} · {prettyDate(booking.check_in)}
-                    </option>
+                    <option key={booking.id} value={booking.id} className="bg-[#071922]">{booking.property_name} · {prettyDate(booking.check_in)}</option>
                   ))}
                 </select>
               </label>
@@ -337,9 +409,7 @@ export default function PreArrivalConciergePage() {
                     type="button"
                     key={item}
                     onClick={() => toggleExperience(item)}
-                    className={`flex min-h-14 items-center justify-between border px-4 text-left text-sm transition ${
-                      active ? "border-[#c9a86a]/60 bg-[#c9a86a]/10 text-white" : "border-white/10 bg-white/[.025] text-white/55 hover:border-white/25"
-                    }`}
+                    className={`flex min-h-14 items-center justify-between border px-4 text-left text-sm transition ${active ? "border-[#c9a86a]/60 bg-[#c9a86a]/10 text-white" : "border-white/10 bg-white/[.025] text-white/55 hover:border-white/25"}`}
                   >
                     {item}
                     {active && <CheckCircle2 className="h-4 w-4 shrink-0 text-[#e3ca91]" />}
@@ -373,21 +443,17 @@ export default function PreArrivalConciergePage() {
             <p className="flex items-center gap-2 text-xs text-white/40">
               <CheckCircle2 className="h-4 w-4 text-emerald-300" /> {saved ? "Draft saved on this device" : "Your draft saves automatically"}
             </p>
-            <button onClick={sendToConcierge} className="btn-gold mt-5 w-full justify-center gap-2">
-              <MessageCircle className="h-4 w-4" /> Send to Concierge
+            <button disabled={submitting || !draftReady} onClick={submitToConcierge} className="btn-gold mt-5 w-full justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-45">
+              <Headphones className="h-4 w-4" /> {submitting ? "Submitting…" : requestStatus ? "Update Concierge Request" : "Submit to Tripelor"}
             </button>
             <p className="mt-3 text-center text-[11px] leading-5 text-white/35">
-              Opens WhatsApp with your booking and preferences ready to send to Tripelor.
+              Your submitted preferences are securely sent to the Tripelor Admin Concierge dashboard.
             </p>
           </div>
 
           <div className="mt-6 grid grid-cols-2 gap-3">
-            <Link href="/account/wallet" className="border border-white/10 p-3 text-center text-xs text-white/55 transition hover:border-[#c9a86a]/40 hover:text-white">
-              Travel Wallet
-            </Link>
-            <Link href="/speedboat" className="border border-white/10 p-3 text-center text-xs text-white/55 transition hover:border-[#c9a86a]/40 hover:text-white">
-              Transfers
-            </Link>
+            <Link href="/account/wallet" className="border border-white/10 p-3 text-center text-xs text-white/55 transition hover:border-[#c9a86a]/40 hover:text-white">Travel Wallet</Link>
+            <Link href="/speedboat" className="border border-white/10 p-3 text-center text-xs text-white/55 transition hover:border-[#c9a86a]/40 hover:text-white">Transfers</Link>
           </div>
         </aside>
       </div>
@@ -395,17 +461,7 @@ export default function PreArrivalConciergePage() {
   );
 }
 
-function ConciergeSection({
-  icon: Icon,
-  eyebrow,
-  title,
-  children,
-}: {
-  icon: typeof Headphones;
-  eyebrow: string;
-  title: string;
-  children: React.ReactNode;
-}) {
+function ConciergeSection({icon: Icon, eyebrow, title, children}: {icon: LucideIcon; eyebrow: string; title: string; children: ReactNode}) {
   return (
     <section className="border border-white/10 bg-white/[.025] p-6 md:p-8">
       <div className="flex items-start gap-4 border-b border-white/10 pb-5">
@@ -422,7 +478,7 @@ function ConciergeSection({
   );
 }
 
-function Field({label, wide = false, children}: {label: string; wide?: boolean; children: React.ReactNode}) {
+function Field({label, wide = false, children}: {label: string; wide?: boolean; children: ReactNode}) {
   return (
     <label className={`text-[10px] font-semibold uppercase tracking-[.16em] text-white/45 ${wide ? "md:col-span-2" : ""}`}>
       {label}
@@ -431,7 +487,7 @@ function Field({label, wide = false, children}: {label: string; wide?: boolean; 
   );
 }
 
-function Summary({icon: Icon, label, value}: {icon: typeof Headphones; label: string; value: string}) {
+function Summary({icon: Icon, label, value}: {icon: LucideIcon; label: string; value: string}) {
   return (
     <div className="flex gap-3">
       <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[#c9a86a]" />
