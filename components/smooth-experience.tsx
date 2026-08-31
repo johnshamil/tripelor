@@ -14,6 +14,9 @@ const mobileActions = [
 export default function SmoothExperience({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [showPlanButton, setShowPlanButton] = useState(false);
+  const authSurface = ["/login", "/signup", "/forgot-password", "/reset-password"].some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
 
   useEffect(() => {
     const update = () => setShowPlanButton(window.scrollY > 560);
@@ -58,39 +61,43 @@ export default function SmoothExperience({ children }: { children: React.ReactNo
         {children}
       </div>
 
-      <Link
-        href="/build-your-trip"
-        className={`floating-plan hidden md:flex ${showPlanButton ? "is-visible" : ""}`}
-        aria-hidden={!showPlanButton}
-        tabIndex={showPlanButton ? 0 : -1}
-      >
-        <span className="flex h-10 w-10 items-center justify-center bg-[#c9a86a] text-[#071922]">
-          <Sparkles className="h-4 w-4" />
-        </span>
-        <span className="pr-5">
-          <span className="block text-[9px] uppercase tracking-[.2em] text-white/40">
-            Your Maldives
-          </span>
-          <span className="mt-0.5 block text-sm font-semibold text-white">Plan My Trip</span>
-        </span>
-      </Link>
+      {!authSurface && (
+        <>
+          <Link
+            href="/build-your-trip"
+            className={`floating-plan hidden md:flex ${showPlanButton ? "is-visible" : ""}`}
+            aria-hidden={!showPlanButton}
+            tabIndex={showPlanButton ? 0 : -1}
+          >
+            <span className="flex h-10 w-10 items-center justify-center bg-[#c9a86a] text-[#071922]">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <span className="pr-5">
+              <span className="block text-[9px] uppercase tracking-[.2em] text-white/40">
+                Your Maldives
+              </span>
+              <span className="mt-0.5 block text-sm font-semibold text-white">Plan My Trip</span>
+            </span>
+          </Link>
 
-      <nav className="mobile-booking-bar md:hidden" aria-label="Quick booking navigation">
-        {mobileActions.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || (href !== "/booking" && pathname.startsWith(`${href}/`));
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`mobile-booking-action ${active ? "is-active" : ""}`}
-              aria-current={active ? "page" : undefined}
-            >
-              <Icon className="h-[18px] w-[18px]" />
-              <span>{label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+          <nav className="mobile-booking-bar md:hidden" aria-label="Quick booking navigation">
+            {mobileActions.map(({ href, label, icon: Icon }) => {
+              const active = pathname === href || (href !== "/booking" && pathname.startsWith(`${href}/`));
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`mobile-booking-action ${active ? "is-active" : ""}`}
+                  aria-current={active ? "page" : undefined}
+                >
+                  <Icon className="h-[18px] w-[18px]" />
+                  <span>{label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </>
+      )}
     </>
   );
 }
