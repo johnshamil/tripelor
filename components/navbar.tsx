@@ -73,7 +73,7 @@ export default function Navbar() {
             </Link>
           ))}
           <Link href="/account" className="nav-tab gap-2" aria-label="My Tripelor account">
-            <UserRound className="h-4 w-4" /> Account
+            <UserRound className="h-4 w-4" /> {user ? "My Trip" : "Sign In"}
           </Link>
           <Link href="/build-your-trip" className="btn-gold min-h-[44px] px-5 py-2">
             Plan My Trip
@@ -116,7 +116,7 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 className="flex min-h-[50px] items-center gap-2 text-white/70"
               >
-                <UserRound className="h-5 w-5 text-[#c9a86a]" /> My Tripelor Account
+                <UserRound className="h-5 w-5 text-[#c9a86a]" /> {user ? "My Tripelor Account" : "Sign In to Tripelor"}
               </Link>
               {user && (
                 <button
