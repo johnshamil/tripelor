@@ -49,6 +49,21 @@ export default function AdminCommandCenter() {
     }
   }
 
+  async function updateConcierge(id: string, status: "reviewed" | "confirmed") {
+    try {
+      const response = await fetch("/api/admin/pre-arrival", {
+        method: "PATCH",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id, status}),
+      });
+      const value = await response.json();
+      if (!response.ok) throw new Error(value.error || "Unable to update concierge request.");
+      await load();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to update concierge request.");
+    }
+  }
+
   useEffect(() => {
     load();
   }, []);
@@ -190,7 +205,7 @@ export default function AdminCommandCenter() {
         <div className="mt-4 grid gap-3 lg:grid-cols-2">
           {metrics.openConcierge.length ? (
             metrics.openConcierge.slice(0, 8).map((request: any) => (
-              <ConciergeRequest key={request.id} request={request} />
+              <ConciergeRequest key={request.id} request={request} onUpdate={updateConcierge} />
             ))
           ) : (
             <Empty />
@@ -225,7 +240,13 @@ export default function AdminCommandCenter() {
   );
 }
 
-function ConciergeRequest({request}: {request: any}) {
+function ConciergeRequest({
+  request,
+  onUpdate,
+}: {
+  request: any;
+  onUpdate: (id: string, status: "reviewed" | "confirmed") => void;
+}) {
   const booking = request.booking || {};
   const details = [
     request.flight_number && "Flight " + request.flight_number,
@@ -260,6 +281,16 @@ function ConciergeRequest({request}: {request: any}) {
         </div>
       )}
       {request.notes && <p className="mt-3 line-clamp-2 text-xs leading-5 text-gray-400">{request.notes}</p>}
+      <div className="mt-4 flex flex-wrap gap-2 border-t border-white/10 pt-3">
+        {String(request.status || "").toLowerCase() === "submitted" && (
+          <button onClick={() => onUpdate(request.id, "reviewed")} className="btn-outline px-3 py-2 text-[9px]">
+            Mark reviewed
+          </button>
+        )}
+        <button onClick={() => onUpdate(request.id, "confirmed")} className="btn-gold px-3 py-2 text-[9px]">
+          Confirm arrangements
+        </button>
+      </div>
     </article>
   );
 }
