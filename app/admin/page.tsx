@@ -1,14 +1,194 @@
 "use client";
+
 import Link from "next/link";
-import { useEffect,useState } from "react";
-import { CalendarDays, CheckCircle2, DollarSign, ShieldCheck, Users } from "lucide-react";
+import {useEffect, useState} from "react";
+import {CalendarDays, CheckCircle2, DollarSign, ShieldCheck, Users} from "lucide-react";
 import AdminCommandCenter from "@/components/admin-command-center";
-export default function AdminPage(){
- const[bookings,setBookings]=useState<any[]>([]);const[users,setUsers]=useState<any[]>([]);const[loading,setLoading]=useState(true);const[status,setStatus]=useState("");const[busyId,setBusyId]=useState("");const[rowStatus,setRowStatus]=useState<Record<string,string>>({});
- async function load(){const [br,ur]=await Promise.all([fetch("/api/admin/bookings",{cache:"no-store"}),fetch("/api/admin/users",{cache:"no-store"})]);const bx=await br.json();const ux=await ur.json();if(!br.ok)throw new Error(bx.error||"Unable to load bookings.");if(!ur.ok)throw new Error(ux.error||"Unable to load users.");setBookings(bx.bookings||[]);setUsers(ux.users||[]);}
- useEffect(()=>{(async()=>{try{const me=await fetch("/api/auth/me",{cache:"no-store"});const mx=await me.json();if(!mx.user){window.location.href="/login";return;}if(!mx.user.isAdmin){setStatus("You do not have admin access.");return;}await load();}catch(e){setStatus(e instanceof Error?e.message:"Unable to load admin dashboard.");}finally{setLoading(false)}})()},[]);
- async function changeStatus(id:string,nextStatus:string){if(!id)return;setBusyId(id);try{const r=await fetch("/api/admin/bookings/status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({reservationId:id,status:nextStatus})});const x=await r.json();if(!r.ok)throw new Error(x.error||"Unable to update booking.");setStatus(nextStatus==="completed"?`Stay completed. ${Number(x?.loyalty?.points_awarded||0)} loyalty points awarded.`:`Booking ${nextStatus}.`);await load()}catch(e){setStatus(e instanceof Error?e.message:"Unable to update booking.")}finally{setBusyId("")}}
- if(loading)return <main className="container py-20"><p className="text-gray-400">Loading admin dashboard...</p></main>;
- return <main className="container py-14 md:py-20"><div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><p className="flex items-center gap-2 text-sm uppercase tracking-[.3em] text-gold"><ShieldCheck className="h-4 w-4"/>Tripelor Admin</p><h1 className="mt-2 text-4xl font-bold md:text-5xl">Admin Command Center</h1><p className="mt-3 text-gray-400">One screen for operations, guests, bookings, payments and revenue.</p></div><div className="flex flex-wrap gap-3"><Link href="/admin/sales" className="btn-gold gap-2"><DollarSign className="h-4 w-4"/>Sales</Link><Link href="/admin/room-calendar" className="btn-outline gap-2"><CalendarDays className="h-4 w-4"/>Room Calendar</Link><Link href="/account" className="btn-outline">My Account</Link></div></div>{status&&<div className="card mt-6 border-gold/20 p-4 text-sm">{status}</div>}<AdminCommandCenter/>
- <section id="bookings" className="mt-12"><h2 className="text-2xl font-bold">Booking Operations</h2><div className="mt-5 overflow-x-auto rounded-3xl border border-white/10"><table className="min-w-full text-left text-sm"><thead className="bg-white/[.04] text-gray-300"><tr><th className="p-4">Guest</th><th className="p-4">Stay / Room</th><th className="p-4">Dates</th><th className="p-4">Payment</th><th className="p-4">Source</th><th className="p-4">Status</th><th className="p-4">Actions</th></tr></thead><tbody>{bookings.map((b,i)=>{const s=String(b.status||"pending").toLowerCase(),id=String(b.id||"");return <tr key={id||i} className="border-t border-white/10"><td className="p-4"><strong>{b.guest_name||"Guest"}</strong><div className="text-xs text-gray-500">{b.guest_email||""}</div></td><td className="p-4">{b.property_name}<div className="text-xs text-gray-500">{b.room_type}</div></td><td className="p-4">{b.check_in}<div className="text-xs text-gray-500">to {b.check_out}</div></td><td className="p-4"><span className={String(b.payment_status).toLowerCase()==="paid"?"text-green-300":"text-amber-300"}>{b.payment_status||"unpaid"}</span>{b.estimated_total&&<div className="text-xs text-gray-500">USD {Number(b.estimated_total).toFixed(2)}</div>}</td><td className="p-4">{b.booking_source||"website"}</td><td className="p-4 text-gold">{b.status||"pending"}</td><td className="p-4"><div className="flex min-w-[220px] flex-wrap gap-2">{s==="pending"&&<button disabled={busyId===id} onClick={()=>changeStatus(id,"confirmed")} className="rounded-full border border-gold/30 px-3 py-2 text-xs text-gold">Confirm</button>}{s==="confirmed"&&<button disabled={busyId===id} onClick={()=>changeStatus(id,"completed")} className="rounded-full bg-gold px-3 py-2 text-xs font-semibold text-black"><CheckCircle2 className="mr-1 inline h-3 w-3"/>Complete + Points</button>}{["pending","confirmed"].includes(s)&&<button disabled={busyId===id} onClick={()=>changeStatus(id,"cancelled")} className="rounded-full border border-red-500/30 px-3 py-2 text-xs text-red-300">Cancel</button>}</div></td></tr>})}</tbody></table></div></section>
- <section className="mt-12"><div className="flex items-center gap-3"><Users className="h-6 w-6 text-gold"/><h2 className="text-2xl font-bold">Registered Customers</h2></div><div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{users.map((u:any)=><div key={u.id} className="card p-5"><b>{u.fullName||"Tripelor Customer"}</b><p className="text-sm text-gray-400">{u.email}</p><p className="mt-2 text-xs text-gold">{u.isAdmin?"Admin":"Customer"} · {u.confirmedAt?"Email confirmed":"Email not confirmed"}</p></div>)}</div></section></main>}
+import AdminPreArrival from "@/components/admin-pre-arrival";
+
+export default function AdminPage() {
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState("");
+  const [busyId, setBusyId] = useState("");
+
+  async function load() {
+    const [br, ur] = await Promise.all([
+      fetch("/api/admin/bookings", {cache: "no-store"}),
+      fetch("/api/admin/users", {cache: "no-store"}),
+    ]);
+    const bx = await br.json();
+    const ux = await ur.json();
+    if (!br.ok) throw new Error(bx.error || "Unable to load bookings.");
+    if (!ur.ok) throw new Error(ux.error || "Unable to load users.");
+    setBookings(bx.bookings || []);
+    setUsers(ux.users || []);
+  }
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const me = await fetch("/api/auth/me", {cache: "no-store"});
+        const mx = await me.json();
+        if (!mx.user) {
+          window.location.href = "/login";
+          return;
+        }
+        if (!mx.user.isAdmin) {
+          setStatus("You do not have admin access.");
+          return;
+        }
+        await load();
+      } catch (e) {
+        setStatus(e instanceof Error ? e.message : "Unable to load admin dashboard.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  async function changeStatus(id: string, nextStatus: string) {
+    if (!id) return;
+    setBusyId(id);
+    try {
+      const r = await fetch("/api/admin/bookings/status", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({reservationId: id, status: nextStatus}),
+      });
+      const x = await r.json();
+      if (!r.ok) throw new Error(x.error || "Unable to update booking.");
+      setStatus(
+        nextStatus === "completed"
+          ? `Stay completed. ${Number(x?.loyalty?.points_awarded || 0)} loyalty points awarded.`
+          : `Booking ${nextStatus}.`,
+      );
+      await load();
+    } catch (e) {
+      setStatus(e instanceof Error ? e.message : "Unable to update booking.");
+    } finally {
+      setBusyId("");
+    }
+  }
+
+  if (loading) {
+    return (
+      <main className="container py-20">
+        <p className="text-gray-400">Loading admin dashboard...</p>
+      </main>
+    );
+  }
+
+  return (
+    <main className="container py-14 md:py-20">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="flex items-center gap-2 text-sm uppercase tracking-[.3em] text-gold">
+            <ShieldCheck className="h-4 w-4" /> Tripelor Admin
+          </p>
+          <h1 className="mt-2 text-4xl font-bold md:text-5xl">Admin Command Center</h1>
+          <p className="mt-3 text-gray-400">One screen for operations, guests, bookings, payments, concierge and revenue.</p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/admin/sales" className="btn-gold gap-2">
+            <DollarSign className="h-4 w-4" /> Sales
+          </Link>
+          <Link href="/admin/room-calendar" className="btn-outline gap-2">
+            <CalendarDays className="h-4 w-4" /> Room Calendar
+          </Link>
+          <Link href="#pre-arrival-concierge" className="btn-outline">Concierge</Link>
+          <Link href="/account" className="btn-outline">My Account</Link>
+        </div>
+      </div>
+
+      {status && <div className="card mt-6 border-gold/20 p-4 text-sm">{status}</div>}
+      <AdminCommandCenter />
+      <AdminPreArrival />
+
+      <section id="bookings" className="mt-12">
+        <h2 className="text-2xl font-bold">Booking Operations</h2>
+        <div className="mt-5 overflow-x-auto rounded-3xl border border-white/10">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-white/[.04] text-gray-300">
+              <tr>
+                <th className="p-4">Guest</th>
+                <th className="p-4">Stay / Room</th>
+                <th className="p-4">Dates</th>
+                <th className="p-4">Payment</th>
+                <th className="p-4">Source</th>
+                <th className="p-4">Status</th>
+                <th className="p-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.map((b, i) => {
+                const s = String(b.status || "pending").toLowerCase();
+                const id = String(b.id || "");
+                return (
+                  <tr key={id || i} className="border-t border-white/10">
+                    <td className="p-4">
+                      <strong>{b.guest_name || "Guest"}</strong>
+                      <div className="text-xs text-gray-500">{b.guest_email || ""}</div>
+                    </td>
+                    <td className="p-4">
+                      {b.property_name}
+                      <div className="text-xs text-gray-500">{b.room_type}</div>
+                    </td>
+                    <td className="p-4">
+                      {b.check_in}
+                      <div className="text-xs text-gray-500">to {b.check_out}</div>
+                    </td>
+                    <td className="p-4">
+                      <span className={String(b.payment_status).toLowerCase() === "paid" ? "text-green-300" : "text-amber-300"}>
+                        {b.payment_status || "unpaid"}
+                      </span>
+                      {b.estimated_total && <div className="text-xs text-gray-500">USD {Number(b.estimated_total).toFixed(2)}</div>}
+                    </td>
+                    <td className="p-4">{b.booking_source || "website"}</td>
+                    <td className="p-4 text-gold">{b.status || "pending"}</td>
+                    <td className="p-4">
+                      <div className="flex min-w-[220px] flex-wrap gap-2">
+                        {s === "pending" && (
+                          <button disabled={busyId === id} onClick={() => changeStatus(id, "confirmed")} className="rounded-full border border-gold/30 px-3 py-2 text-xs text-gold">
+                            Confirm
+                          </button>
+                        )}
+                        {s === "confirmed" && (
+                          <button disabled={busyId === id} onClick={() => changeStatus(id, "completed")} className="rounded-full bg-gold px-3 py-2 text-xs font-semibold text-black">
+                            <CheckCircle2 className="mr-1 inline h-3 w-3" /> Complete + Points
+                          </button>
+                        )}
+                        {["pending", "confirmed"].includes(s) && (
+                          <button disabled={busyId === id} onClick={() => changeStatus(id, "cancelled")} className="rounded-full border border-red-500/30 px-3 py-2 text-xs text-red-300">
+                            Cancel
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="mt-12">
+        <div className="flex items-center gap-3">
+          <Users className="h-6 w-6 text-gold" />
+          <h2 className="text-2xl font-bold">Registered Customers</h2>
+        </div>
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {users.map((u: any) => (
+            <div key={u.id} className="card p-5">
+              <b>{u.fullName || "Tripelor Customer"}</b>
+              <p className="text-sm text-gray-400">{u.email}</p>
+              <p className="mt-2 text-xs text-gold">{u.isAdmin ? "Admin" : "Customer"} · {u.confirmedAt ? "Email confirmed" : "Email not confirmed"}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
+}
