@@ -256,6 +256,15 @@ function ConciergeRequest({
     request.celebration_type && request.celebration_type !== "none" && request.celebration_type,
     request.early_check_in && "Early check-in",
     request.late_check_out && "Late checkout",
+    Array.isArray(request.preferred_activities) &&
+      request.preferred_activities.includes("professional_photography") &&
+      "Photography",
+    Array.isArray(request.preferred_activities) &&
+      request.preferred_activities.includes("professional_videography") &&
+      "Videography",
+    Array.isArray(request.preferred_activities) &&
+      request.preferred_activities.includes("drone_photo_video") &&
+      "Drone coverage",
   ].filter(Boolean);
 
   return (
