@@ -94,6 +94,9 @@ const activities = [
   {value: "sunset_fishing", label: "Sunset fishing", detail: "Traditional Maldivian outing"},
   {value: "island_hopping", label: "Island hopping", detail: "Discover local life"},
   {value: "shipwreck_snorkelling", label: "Shipwreck snorkelling", detail: "A signature underwater stop"},
+  {value: "professional_photography", label: "Professional photography", detail: "Beautiful portraits and island memories"},
+  {value: "professional_videography", label: "Cinematic videography", detail: "A professionally filmed journey"},
+  {value: "drone_photo_video", label: "Drone photo & video", detail: "Aerial views of your Maldives escape"},
 ];
 
 const fieldClass =
