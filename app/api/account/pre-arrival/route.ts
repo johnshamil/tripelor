@@ -10,6 +10,9 @@ const activityOptions = new Set([
   "sunset_fishing",
   "island_hopping",
   "shipwreck_snorkelling",
+  "professional_photography",
+  "professional_videography",
+  "drone_photo_video",
 ]);
 
 function config() {
@@ -91,7 +94,7 @@ export async function POST(request: Request) {
           new Set<string>(
             input.preferredActivities.map(String).filter((value: string) => activityOptions.has(value)),
           ),
-        ).slice(0, 7)
+        ).slice(0, activityOptions.size)
       : [];
 
     if (!celebrationTypes.has(celebrationType)) {
