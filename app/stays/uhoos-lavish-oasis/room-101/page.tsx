@@ -1,29 +1,15 @@
-import fs from "fs";
-import path from "path";
 import Link from "next/link";
 import { BedDouble, CheckCircle2, MapPin } from "lucide-react";
 import AvailabilityChecker from "@/components/availability-checker";
 
-const fallbackPhotos = [
-  "/properties/uhoos-lavish-oasis/20250518_001256.jpg",
+const photos = [
+  "/uhoos/room-101/01-room-101-bed.webp",
+  "/uhoos/room-101/02-room-101-dressing-area.webp",
+  "/uhoos/room-101/03-room-101-bathroom.webp",
+  "/uhoos/room-101/04-room-101-bathroom-amenities.webp",
 ];
 
-function getPhotos() {
-  const dir = path.join(process.cwd(), "public", "uhoos", "room-101");
-  try {
-    const roomPhotos = fs
-      .readdirSync(dir)
-      .filter((file) => /\.(jpe?g|png|webp|avif)$/i.test(file))
-      .map((file) => `/uhoos/room-101/${encodeURIComponent(file)}`);
-    return roomPhotos.length ? roomPhotos : fallbackPhotos;
-  } catch {
-    return fallbackPhotos;
-  }
-}
-
 export default function Room101Page() {
-  const photos = getPhotos();
-
   return (
     <main className="container py-8 pb-36 md:py-16 md:pb-20">
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
@@ -45,19 +31,27 @@ export default function Room101Page() {
       </div>
 
       <section className="mt-7 md:mt-10">
-        <div className={photos.length > 1 ? "grid gap-3 md:grid-cols-2 lg:grid-cols-3 md:gap-4" : ""}>
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 md:gap-4">
           {photos.map((src, index) => (
             <div
               key={src}
               className={`${
-                index === 0 && photos.length > 1
+                index === 0
                   ? "md:col-span-2 lg:col-span-2 lg:row-span-2"
                   : ""
               } relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-900 md:rounded-3xl`}
             >
               <img
                 src={src}
-                alt={`Room 101 photo ${index + 1}`}
+                alt={
+                  index === 0
+                    ? "Room 101 double bed at Uhoo's Lavish Oasis"
+                    : index === 1
+                      ? "Room 101 dressing area and mirror"
+                      : index === 2
+                        ? "Room 101 private bathroom and rain shower"
+                        : "Room 101 bathroom amenities"
+                }
                 className={`${
                   index === 0 ? "aspect-[4/3] md:min-h-[420px]" : "h-56 md:h-64"
                 } w-full object-cover transition duration-500 hover:scale-105`}
