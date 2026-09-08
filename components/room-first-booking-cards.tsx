@@ -39,12 +39,12 @@ const rooms: RoomCard[] = [
     property: "Uhoo's Lavish Oasis",
     propertySlug: "uhoos-lavish-oasis",
     location: "V. Felidhoo, Maldives",
-    image: "/properties/uhoos-lavish-oasis/20250517_193323.jpg",
+    image: "/uhoos/room-101/01-room-101-bed.webp",
     price: 85,
     mealPlan: "Bed & Breakfast",
     bookingMode: "instant",
     maxGuests: 2,
-    highlights: ["Local-island stay", "Breakfast included", "Tripelor support"],
+    highlights: ["Private island room", "Breakfast included", "Tripelor support"],
   },
   {
     id: "uhoo-102",
@@ -53,7 +53,7 @@ const rooms: RoomCard[] = [
     property: "Uhoo's Lavish Oasis",
     propertySlug: "uhoos-lavish-oasis",
     location: "V. Felidhoo, Maldives",
-    image: "/properties/uhoos-lavish-oasis/20250518_001256.jpg",
+    image: "/properties/uhoos-lavish-oasis/20250517_193323.jpg",
     price: 85,
     mealPlan: "Bed & Breakfast",
     bookingMode: "instant",
@@ -193,32 +193,21 @@ export default function RoomFirstBookingCards() {
               key={room.id}
               className="room-card-mobile group min-w-[86vw] snap-start overflow-hidden rounded-[1.5rem] border border-[#d5cab7] bg-[#faf7f1] shadow-[0_18px_55px_rgba(35,31,24,.08)] transition duration-500 hover:-translate-y-1.5 hover:shadow-[0_28px_70px_rgba(35,31,24,.14)] md:min-w-0 md:rounded-[1.75rem]"
             >
-              <div className="relative aspect-[4/3] overflow-hidden bg-[#d8d0c2]">
+              <div className="relative aspect-square overflow-hidden bg-[#d8d0c2] md:aspect-[4/3]">
                 <img
                   src={room.image}
                   alt={`${room.roomName} at ${room.property}`}
-                  className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.045]"
+                  className="h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.035]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/5" />
                 <div className="absolute left-3 top-3 flex flex-wrap gap-2 md:left-4 md:top-4">
-                  <span className="rounded-full border border-white/35 bg-black/25 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.11em] text-white backdrop-blur-md md:text-[10px] md:tracking-[.13em]">
+                  <span className="rounded-full border border-white/45 bg-black/30 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.11em] text-white backdrop-blur-md md:text-[10px] md:tracking-[.13em]">
                     {room.bookingMode === "instant" ? "Instant booking" : "Request to book"}
                   </span>
                   {room.seaView && (
-                    <span className="rounded-full border border-white/35 bg-black/25 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.11em] text-white backdrop-blur-md md:text-[10px] md:tracking-[.13em]">
+                    <span className="rounded-full border border-white/45 bg-black/30 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.11em] text-white backdrop-blur-md md:text-[10px] md:tracking-[.13em]">
                       Sea view
                     </span>
                   )}
-                </div>
-                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 text-white md:p-5">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[.16em] text-white/70">From</p>
-                    <p className="font-display text-3xl">${room.price}</p>
-                    <p className="text-[11px] text-white/65">per night</p>
-                  </div>
-                  <div className="max-w-[46%] rounded-full border border-white/30 bg-black/20 px-3 py-2 text-center text-[9px] uppercase tracking-[.1em] backdrop-blur-md md:text-[10px] md:tracking-[.14em]">
-                    Tripelor Points eligible
-                  </div>
                 </div>
               </div>
 
@@ -228,6 +217,17 @@ export default function RoomFirstBookingCards() {
                 </p>
                 <h3 className="font-display mt-3 text-2xl leading-tight md:text-3xl">{room.roomName}</h3>
                 <p className="mt-1 text-sm text-[#66727a]">{room.property}</p>
+
+                <div className="mt-4 flex items-end justify-between gap-4 rounded-2xl bg-[#f1ebdf] px-4 py-3.5">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-[#8d7037]">From</p>
+                    <p className="font-display text-3xl text-[#071922]">${room.price}</p>
+                    <p className="text-[11px] text-[#738087]">per night</p>
+                  </div>
+                  <span className="rounded-full border border-[#cbbd9f] bg-[#faf7f1] px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[.08em] text-[#6f5729]">
+                    Tripelor Points eligible
+                  </span>
+                </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-3 border-y border-[#ddd3c2] py-4 text-xs text-[#5c6670] md:mt-5">
                   <span className="flex items-center gap-2">
