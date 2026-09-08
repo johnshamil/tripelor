@@ -7,7 +7,7 @@ export type TripelorProperty = {
   description:string;
   startingFrom:number;
   currency:"USD";
-  bookingMode:"instant";
+  bookingMode:"instant"|"request";
   roomsLabel?:string;
   rates:PropertyRate[];
 };
@@ -16,8 +16,8 @@ export const properties:TripelorProperty[] = [
   {
     name:"Uhoo's Lavish Oasis", slug:"uhoos-lavish-oasis", location:"V. Felidhoo, Maldives",
     images:["/properties/uhoos-lavish-oasis/20250517_193323.jpg","/properties/uhoos-lavish-oasis/20250518_001256.jpg","/properties/uhoos-lavish-oasis/20250518_001936.jpg","/properties/uhoos-lavish-oasis/20250822_104240.jpg"],
-    description:"A cozy local-island stay in Felidhoo with two dedicated rooms, flexible meal plans and Tripelor support.", startingFrom:85,currency:"USD",bookingMode:"instant",roomsLabel:"2 rooms",
-    rates:[{label:"Bed & Breakfast",price:85},{label:"Half Board",price:95},{label:"Full Board",price:115}],
+    description:"A cozy local-island stay in Felidhoo with two dedicated rooms, flexible meal plans and Tripelor support.", startingFrom:75,currency:"USD",bookingMode:"instant",roomsLabel:"2 rooms",
+    rates:[{label:"Bed & Breakfast",price:75},{label:"Half Board",price:95},{label:"Full Board",price:115}],
   },
   {
     name:"Masfalhi View Inn",slug:"masfalhi-view-inn",location:"Maldives",
@@ -28,7 +28,7 @@ export const properties:TripelorProperty[] = [
   {
     name:"Rivethi Beach Hotel",slug:"rivethi-beach-hotel",location:"Hulhumalé, Maldives",
     images:["/properties/rivethi-beach-hotel/1719713475.jpeg","/properties/rivethi-beach-hotel/0584s12000ssx9b685F06_W_1280_853_R5.webp","/properties/rivethi-beach-hotel/604895445.jpg","/properties/rivethi-beach-hotel/816271360.jpg"],
-    description:"A beachfront Hulhumalé hotel close to Velana International Airport, ideal for stopovers, arrivals and departures.",startingFrom:70,currency:"USD",bookingMode:"instant",roomsLabel:"18 rooms",
+    description:"A beachfront Hulhumalé hotel close to Velana International Airport, ideal for stopovers, arrivals and departures.",startingFrom:70,currency:"USD",bookingMode:"request",roomsLabel:"Availability on request",
     rates:[
       {label:"Deluxe Double · RO",price:70,note:"SGL"},{label:"Deluxe Double · BB",price:80,note:"SGL"},{label:"Deluxe Double · HB",price:100,note:"SGL"},{label:"Deluxe Double · FB",price:120,note:"SGL"},
       {label:"Deluxe Double · RO",price:80,note:"DBL"},{label:"Deluxe Double · BB",price:90,note:"DBL"},{label:"Deluxe Double · HB",price:130,note:"DBL"},{label:"Deluxe Double · FB",price:170,note:"DBL"},
