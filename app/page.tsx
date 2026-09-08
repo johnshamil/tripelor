@@ -6,7 +6,6 @@ import {
   Compass,
   Headphones,
   Hotel,
-  MapPin,
   ShieldCheck,
   Ship,
   Sparkles,
@@ -16,7 +15,6 @@ import RewardsChecker from "@/components/rewards-checker";
 import HomeLiveAvailability from "@/components/home-live-availability";
 import SmartOffers from "@/components/smart-offers";
 import RoomFirstBookingCards from "@/components/room-first-booking-cards";
-import { properties } from "@/lib/properties";
 
 const escapes = [
   {
@@ -191,43 +189,6 @@ export default async function Home() {
                   <h3 className="font-display mt-3 text-4xl md:text-5xl">{escape.title}</h3>
                   <p className="mt-3 max-w-lg leading-7 text-white/75">{escape.text}</p>
                 </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section-shell">
-        <div className="container py-24">
-          <div className="flex flex-col gap-6 border-b border-white/10 pb-10 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="eyebrow">Selected stays</p>
-              <h2 className="section-title mt-4">A beautiful place to begin.</h2>
-            </div>
-            <Link href="/stays" className="btn-outline w-fit">
-              View All Properties
-            </Link>
-          </div>
-
-          <div>
-            {properties.map((property, index) => (
-              <Link href={`/stays/${property.slug}`} key={property.slug} className="property-row group">
-                <span className="font-display text-xl italic text-[#c9a86a]">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <div>
-                  <p className="flex items-center gap-2 text-xs uppercase tracking-[.2em] text-white/45">
-                    <MapPin className="h-3.5 w-3.5 text-[#c9a86a]" /> {property.location}
-                  </p>
-                  <h3 className="font-display mt-2 text-3xl text-white md:text-4xl">{property.name}</h3>
-                  <p className="mt-3 max-w-2xl leading-7 text-white/55">{property.description}</p>
-                </div>
-                <div className="md:text-right">
-                  <p className="text-xs uppercase tracking-[.18em] text-white/40">From</p>
-                  <p className="font-display mt-1 text-3xl text-[#d9bd7b]">${property.startingFrom}</p>
-                  <p className="text-xs text-white/40">per night</p>
-                </div>
-                <ArrowUpRight className="h-5 w-5 text-white/35 transition group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-[#d9bd7b]" />
               </Link>
             ))}
           </div>
