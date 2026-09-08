@@ -15,6 +15,7 @@ import {
 import RewardsChecker from "@/components/rewards-checker";
 import HomeLiveAvailability from "@/components/home-live-availability";
 import SmartOffers from "@/components/smart-offers";
+import RoomFirstBookingCards from "@/components/room-first-booking-cards";
 import { properties } from "@/lib/properties";
 
 const escapes = [
@@ -138,6 +139,7 @@ export default async function Home() {
       </section>
 
       <HomeLiveAvailability />
+      <RoomFirstBookingCards />
 
       <section className="section-shell overflow-hidden">
         <div className="container grid gap-12 py-24 lg:grid-cols-[.8fr_1.2fr] lg:items-end">
