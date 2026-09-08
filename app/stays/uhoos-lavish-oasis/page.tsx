@@ -1,6 +1,6 @@
 import LuxuryPropertyPage from "@/components/luxury-property-page";
 
-const room101Cover = "/uhoos/room-101/01-room-101-bed.webp";
+const room101Cover = "/uhoos/room-101/01-room-101-bed.jpg";
 
 const photos = [
   room101Cover,
