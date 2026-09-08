@@ -3,10 +3,10 @@ import { BedDouble, CheckCircle2, MapPin } from "lucide-react";
 import AvailabilityChecker from "@/components/availability-checker";
 
 const photos = [
-  "/uhoos/room-101/01-room-101-bed.webp",
-  "/uhoos/room-101/02-room-101-dressing-area.webp",
-  "/uhoos/room-101/03-room-101-bathroom.webp",
-  "/uhoos/room-101/04-room-101-bathroom-amenities.webp",
+  "/uhoos/room-101/01-room-101-bed.jpg",
+  "/properties/uhoos-lavish-oasis/20250517_193323.jpg",
+  "/properties/uhoos-lavish-oasis/20250822_104240.jpg",
+  "/properties/uhoos-lavish-oasis/20250822_104258(1).jpg",
 ];
 
 export default function Room101Page() {
@@ -43,15 +43,7 @@ export default function Room101Page() {
             >
               <img
                 src={src}
-                alt={
-                  index === 0
-                    ? "Room 101 double bed at Uhoo's Lavish Oasis"
-                    : index === 1
-                      ? "Room 101 dressing area and mirror"
-                      : index === 2
-                        ? "Room 101 private bathroom and rain shower"
-                        : "Room 101 bathroom amenities"
-                }
+                alt={index === 0 ? "Room 101 double bed at Uhoo's Lavish Oasis" : `Uhoo's Lavish Oasis photo ${index + 1}`}
                 className={`${
                   index === 0 ? "aspect-[4/3] md:min-h-[420px]" : "h-56 md:h-64"
                 } w-full object-cover transition duration-500 hover:scale-105`}
