@@ -1,9 +1,10 @@
 import LuxuryPropertyPage from "@/components/luxury-property-page";
 
+const room101Cover = "/uhoos/room-101/01-room-101-bed.webp";
+
 const photos = [
+  room101Cover,
   "/properties/uhoos-lavish-oasis/20250517_193323.jpg",
-  "/properties/uhoos-lavish-oasis/20250518_001256.jpg",
-  "/properties/uhoos-lavish-oasis/20250518_001936.jpg",
   "/properties/uhoos-lavish-oasis/20250822_104240.jpg",
   "/properties/uhoos-lavish-oasis/20250822_104258(1).jpg",
 ];
@@ -39,7 +40,7 @@ export default function Page() {
         rooms={[
           {
             name: "Room 101",
-            image: photos[1],
+            image: room101Cover,
             description: "A comfortable private room for two, ready for an unhurried Felidhoo escape.",
             details: ["Up to 2 guests", "BB, HB or FB", "Live availability", "Private room gallery"],
             href: "/stays/uhoos-lavish-oasis/room-101",
@@ -47,7 +48,7 @@ export default function Page() {
           },
           {
             name: "Room 102",
-            image: photos[2],
+            image: photos[1],
             description: "A relaxed private room with the same personal service and flexible dining choices.",
             details: ["Up to 2 guests", "BB, HB or FB", "Live availability", "Private room gallery"],
             href: "/stays/uhoos-lavish-oasis/room-102",
