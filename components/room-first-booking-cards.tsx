@@ -166,7 +166,7 @@ export default function RoomFirstBookingCards() {
           </Link>
         </div>
 
-        <div className="mt-9 flex gap-2 overflow-x-auto pb-2">
+        <div className="mobile-filter-row mt-8 flex gap-2 overflow-x-auto pb-2 md:mt-9">
           {filters.map((item) => {
             const active = filter === item.key;
             return (
@@ -174,7 +174,7 @@ export default function RoomFirstBookingCards() {
                 key={item.key}
                 type="button"
                 onClick={() => setFilter(item.key)}
-                className={`whitespace-nowrap rounded-full border px-4 py-2.5 text-xs font-semibold uppercase tracking-[.12em] transition ${
+                className={`min-h-[44px] whitespace-nowrap rounded-full border px-4 py-2.5 text-xs font-semibold uppercase tracking-[.1em] transition ${
                   active
                     ? "border-[#9c7d3d] bg-[#9c7d3d] text-white"
                     : "border-[#cfc4af] bg-[#f8f4ec] text-[#5c6670] hover:border-[#9c7d3d] hover:text-[#6f5729]"
@@ -187,11 +187,11 @@ export default function RoomFirstBookingCards() {
           })}
         </div>
 
-        <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="room-card-rail mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 md:mt-8 md:grid md:grid-cols-2 md:overflow-visible md:pb-0 xl:grid-cols-3">
           {visibleRooms.map((room) => (
             <article
               key={room.id}
-              className="group overflow-hidden rounded-[1.75rem] border border-[#d5cab7] bg-[#faf7f1] shadow-[0_18px_55px_rgba(35,31,24,.08)] transition duration-500 hover:-translate-y-1.5 hover:shadow-[0_28px_70px_rgba(35,31,24,.14)]"
+              className="room-card-mobile group min-w-[86vw] snap-start overflow-hidden rounded-[1.5rem] border border-[#d5cab7] bg-[#faf7f1] shadow-[0_18px_55px_rgba(35,31,24,.08)] transition duration-500 hover:-translate-y-1.5 hover:shadow-[0_28px_70px_rgba(35,31,24,.14)] md:min-w-0 md:rounded-[1.75rem]"
             >
               <div className="relative aspect-[4/3] overflow-hidden bg-[#d8d0c2]">
                 <img
@@ -200,78 +200,82 @@ export default function RoomFirstBookingCards() {
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.045]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/5" />
-                <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-white/35 bg-black/25 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.13em] text-white backdrop-blur-md">
+                <div className="absolute left-3 top-3 flex flex-wrap gap-2 md:left-4 md:top-4">
+                  <span className="rounded-full border border-white/35 bg-black/25 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.11em] text-white backdrop-blur-md md:text-[10px] md:tracking-[.13em]">
                     {room.bookingMode === "instant" ? "Instant booking" : "Request to book"}
                   </span>
                   {room.seaView && (
-                    <span className="rounded-full border border-white/35 bg-black/25 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.13em] text-white backdrop-blur-md">
+                    <span className="rounded-full border border-white/35 bg-black/25 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.11em] text-white backdrop-blur-md md:text-[10px] md:tracking-[.13em]">
                       Sea view
                     </span>
                   )}
                 </div>
-                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-white">
+                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 text-white md:p-5">
                   <div>
                     <p className="text-[10px] uppercase tracking-[.16em] text-white/70">From</p>
                     <p className="font-display text-3xl">${room.price}</p>
                     <p className="text-[11px] text-white/65">per night</p>
                   </div>
-                  <div className="rounded-full border border-white/30 bg-black/20 px-3 py-2 text-[10px] uppercase tracking-[.14em] backdrop-blur-md">
+                  <div className="max-w-[46%] rounded-full border border-white/30 bg-black/20 px-3 py-2 text-center text-[9px] uppercase tracking-[.1em] backdrop-blur-md md:text-[10px] md:tracking-[.14em]">
                     Tripelor Points eligible
                   </div>
                 </div>
               </div>
 
-              <div className="p-6 md:p-7">
-                <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.16em] text-[#8d7037]">
+              <div className="p-5 md:p-7">
+                <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-[#8d7037] md:tracking-[.16em]">
                   <MapPin className="h-3.5 w-3.5" /> {room.location}
                 </p>
-                <h3 className="font-display mt-3 text-3xl leading-tight">{room.roomName}</h3>
+                <h3 className="font-display mt-3 text-2xl leading-tight md:text-3xl">{room.roomName}</h3>
                 <p className="mt-1 text-sm text-[#66727a]">{room.property}</p>
 
-                <div className="mt-5 grid grid-cols-2 gap-3 border-y border-[#ddd3c2] py-4 text-xs text-[#5c6670]">
+                <div className="mt-4 grid grid-cols-2 gap-3 border-y border-[#ddd3c2] py-4 text-xs text-[#5c6670] md:mt-5">
                   <span className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-[#9c7d3d]" /> Up to {room.maxGuests} guests
+                    <Users className="h-4 w-4 shrink-0 text-[#9c7d3d]" /> Up to {room.maxGuests}
                   </span>
                   <span className="flex items-center gap-2">
-                    <Coffee className="h-4 w-4 text-[#9c7d3d]" /> {room.mealPlan}
+                    <Coffee className="h-4 w-4 shrink-0 text-[#9c7d3d]" /> {room.mealPlan}
                   </span>
                 </div>
 
-                <div className="mt-5 space-y-2.5">
+                <div className="mt-4 space-y-2 md:mt-5 md:space-y-2.5">
                   {room.highlights.map((highlight, index) => (
                     <p key={highlight} className="flex items-center gap-2.5 text-sm text-[#59666e]">
                       {index === 0 && room.seaView ? (
-                        <Waves className="h-4 w-4 text-[#9c7d3d]" />
+                        <Waves className="h-4 w-4 shrink-0 text-[#9c7d3d]" />
                       ) : index === 0 ? (
-                        <BedDouble className="h-4 w-4 text-[#9c7d3d]" />
+                        <BedDouble className="h-4 w-4 shrink-0 text-[#9c7d3d]" />
                       ) : (
-                        <Sparkles className="h-4 w-4 text-[#9c7d3d]" />
+                        <Sparkles className="h-4 w-4 shrink-0 text-[#9c7d3d]" />
                       )}
                       {highlight}
                     </p>
                   ))}
                 </div>
 
-                <div className="mt-7 grid grid-cols-2 gap-3">
+                <div className="touch-card-actions mt-6 grid grid-cols-2 gap-2.5 md:mt-7 md:gap-3">
                   <Link
                     href={`/stays/${room.propertySlug}`}
-                    className="inline-flex items-center justify-center rounded-full border border-[#bfb29c] px-4 py-3 text-xs font-semibold uppercase tracking-[.11em] text-[#4e5b63] transition hover:border-[#8d7037] hover:text-[#6f5729]"
+                    className="inline-flex items-center justify-center rounded-full border border-[#bfb29c] px-3 py-3 text-[11px] font-semibold uppercase tracking-[.09em] text-[#4e5b63] transition hover:border-[#8d7037] hover:text-[#6f5729] md:px-4 md:text-xs md:tracking-[.11em]"
                   >
                     View stay
                   </Link>
                   <Link
                     href={bookingHref(room)}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0b2731] px-4 py-3 text-xs font-semibold uppercase tracking-[.11em] text-white transition hover:bg-[#123743]"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0b2731] px-3 py-3 text-[11px] font-semibold uppercase tracking-[.09em] text-white transition hover:bg-[#123743] md:px-4 md:text-xs md:tracking-[.11em]"
                   >
                     {room.bookingMode === "instant" ? "Book room" : "Select room"}
-                    <ArrowRight className="h-3.5 w-3.5" />
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0" />
                   </Link>
                 </div>
               </div>
             </article>
           ))}
         </div>
+
+        <p className="mt-2 text-center text-xs text-[#7a817f] md:hidden">
+          Swipe to compare more rooms
+        </p>
       </div>
     </section>
   );

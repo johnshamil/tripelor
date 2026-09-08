@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { BedDouble, CalendarCheck, Compass, Sparkles } from "lucide-react";
+import { BedDouble, CalendarCheck, Home, Sparkles, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const mobileActions = [
+  { href: "/", label: "Home", icon: Home },
   { href: "/stays", label: "Stays", icon: BedDouble },
-  { href: "/island-adventures", label: "Packages", icon: Compass },
-  { href: "/booking", label: "Book", icon: CalendarCheck },
+  { href: "/booking", label: "Book", icon: CalendarCheck, primary: true },
+  { href: "/account", label: "My Trip", icon: UserRound },
 ];
 
 export default function SmoothExperience({ children }: { children: React.ReactNode }) {
@@ -80,17 +81,17 @@ export default function SmoothExperience({ children }: { children: React.ReactNo
             </span>
           </Link>
 
-          <nav className="mobile-booking-bar md:hidden" aria-label="Quick booking navigation">
-            {mobileActions.map(({ href, label, icon: Icon }) => {
-              const active = pathname === href || (href !== "/booking" && pathname.startsWith(`${href}/`));
+          <nav className="mobile-booking-bar md:hidden" aria-label="Quick mobile navigation">
+            {mobileActions.map(({ href, label, icon: Icon, primary }) => {
+              const active = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
               return (
                 <Link
                   key={href}
                   href={href}
-                  className={`mobile-booking-action ${active ? "is-active" : ""}`}
+                  className={`mobile-booking-action ${primary ? "is-primary" : ""} ${active ? "is-active" : ""}`}
                   aria-current={active ? "page" : undefined}
                 >
-                  <Icon className="h-[18px] w-[18px]" />
+                  <Icon className="h-[19px] w-[19px]" />
                   <span>{label}</span>
                 </Link>
               );

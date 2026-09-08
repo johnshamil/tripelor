@@ -1,0 +1,197 @@
+/* Mobile comfort layer: keeps Tripelor luxurious while making phone use faster and easier. */
+
+@media (max-width: 767px) {
+  html {
+    scroll-padding-top: 72px;
+    scroll-padding-bottom: 104px;
+  }
+
+  body {
+    padding-bottom: 5.8rem;
+  }
+
+  /* Reduce oversized desktop spacing on phones. */
+  .route-transition .py-24 {
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
+  }
+
+  .route-transition .py-20 {
+    padding-top: 3.5rem !important;
+    padding-bottom: 3.5rem !important;
+  }
+
+  /* Make the first screen useful sooner instead of forcing a long hero scroll. */
+  .luxury-hero {
+    min-height: 76svh;
+  }
+
+  .luxury-hero > .container {
+    min-height: 76svh !important;
+    padding-top: 4rem !important;
+    padding-bottom: 4.25rem !important;
+  }
+
+  .luxury-hero h1 {
+    font-size: clamp(2.9rem, 13.5vw, 4.15rem) !important;
+    line-height: .98 !important;
+  }
+
+  .luxury-hero .btn-gold,
+  .luxury-hero .btn-outline {
+    width: 100%;
+    min-height: 52px;
+    border-radius: 999px;
+  }
+
+  .luxury-hero-image {
+    animation: none;
+  }
+
+  /* Keep availability visually separate and easy to tap on a phone. */
+  .availability-shell {
+    margin-top: 0 !important;
+    padding-top: 1rem;
+  }
+
+  .availability-panel {
+    border-radius: 1.25rem;
+    box-shadow: 0 20px 60px rgba(0, 7, 10, .32);
+  }
+
+  .date-field,
+  .premium-control {
+    min-height: 52px;
+    border-radius: .85rem;
+  }
+
+  .field-label,
+  .premium-label {
+    gap: .6rem;
+  }
+
+  /* More comfortable touch targets across booking and CTA surfaces. */
+  button,
+  a {
+    touch-action: manipulation;
+  }
+
+  .btn-gold,
+  .btn-outline {
+    min-height: 50px;
+    border-radius: 999px;
+  }
+
+  /* Compact large visual cards so users see the next choice sooner. */
+  .escape-card {
+    min-height: 430px !important;
+    border-radius: 1.25rem;
+  }
+
+  .property-row {
+    grid-template-columns: minmax(0, 1fr) 22px !important;
+    gap: .8rem !important;
+    padding: 1.4rem .1rem !important;
+  }
+
+  .property-row > span:first-child {
+    display: none;
+  }
+
+  .property-row > div:first-of-type {
+    grid-column: 1;
+  }
+
+  .property-row > div:nth-of-type(2) {
+    grid-column: 1;
+    margin-top: .15rem;
+    text-align: left !important;
+  }
+
+  .property-row > svg {
+    grid-column: 2 !important;
+    grid-row: 1 / span 2 !important;
+    align-self: center;
+  }
+
+  /* Swipe rows feel native on mobile and don't show desktop scrollbars. */
+  .mobile-scroll,
+  .mobile-filter-row,
+  .room-card-rail {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .mobile-scroll::-webkit-scrollbar,
+  .mobile-filter-row::-webkit-scrollbar,
+  .room-card-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .room-card-rail {
+    scroll-padding-left: 1rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .room-card-mobile {
+    scroll-snap-align: start;
+  }
+
+  .room-card-mobile .touch-card-actions a {
+    min-height: 46px;
+  }
+
+  /* Persistent mobile nav: four simple destinations and one obvious booking action. */
+  .mobile-booking-bar {
+    inset-inline: .5rem;
+    bottom: .5rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    min-height: 66px;
+    border-radius: 1rem;
+    box-shadow: 0 14px 48px rgba(0, 6, 9, .44);
+  }
+
+  .mobile-booking-action {
+    min-height: 62px;
+    gap: .3rem;
+    font-size: 8px;
+    letter-spacing: .1em;
+  }
+
+  .mobile-booking-action.is-primary {
+    background: #c9a86a;
+    color: #071922;
+  }
+
+  .mobile-booking-action.is-primary.is-active {
+    background: #e3ca91;
+    color: #071922;
+  }
+
+  /* Faster, subtler reveals reduce visual fatigue and GPU work on phones. */
+  .smooth-reveal {
+    transform: translateY(14px);
+    transition-duration: .55s;
+  }
+}
+
+@media (max-width: 389px) {
+  .luxury-hero h1 {
+    font-size: clamp(2.65rem, 13vw, 3.4rem) !important;
+  }
+
+  .mobile-booking-action {
+    font-size: 7.5px;
+    letter-spacing: .07em;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .btn-gold:hover,
+  .btn-outline:hover,
+  .offer-card:hover,
+  .property-row:hover,
+  .room-card-mobile:hover {
+    transform: none;
+  }
+}
