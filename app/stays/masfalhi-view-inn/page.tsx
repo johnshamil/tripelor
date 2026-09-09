@@ -36,6 +36,23 @@ export default function Page() {
         photos={photos}
         startingFrom={97}
         bookingHref="/booking?property=Masfalhi%20View%20Inn&mealPlan=Bed%20%26%20Breakfast"
+        rooms={[
+          {
+            name: "Room 106",
+            image: "/images%20(3).jpeg",
+            description: "A sea-view double room with a high timber ceiling, private bathroom and comfortable in-room amenities.",
+            details: [
+              "Sea-view window",
+              "Double bed",
+              "Air conditioning",
+              "Mini refrigerator",
+              "Desk & mirror",
+              "Private rain shower",
+            ],
+            href: "/stays/masfalhi-view-inn/room-106",
+            bookingHref: "/booking?property=Masfalhi%20View%20Inn&roomType=ROOM%20106&mealPlan=Bed%20%26%20Breakfast",
+          },
+        ]}
         highlights={[
           { icon: "island", title: "Island atmosphere", text: "A slower, more personal way to experience everyday life in the Maldives." },
           { icon: "dining", title: "Flexible dining", text: "Choose Bed & Breakfast, Half Board or Full Board for your stay." },
