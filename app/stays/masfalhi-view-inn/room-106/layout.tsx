@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "ROOM 106 at Masfalhi View Inn | Maldives",
+  title: "Family Room with Sea View at Masfalhi View Inn | Felidhoo Maldives",
   description:
-    "View ROOM 106 at Masfalhi View Inn in the Maldives. See room details, check availability and book your local-island stay with Tripelor.",
+    "View the Family Room with Sea View at Masfalhi View Inn in V. Felidhoo, Maldives. See room details, check availability and book with Tripelor.",
   alternates: { canonical: "/stays/masfalhi-view-inn/room-106" },
   openGraph: {
     type: "website",
     url: "https://tripelor.com/stays/masfalhi-view-inn/room-106",
-    title: "ROOM 106 | Masfalhi View Inn, Maldives",
-    description: "Room details, availability and booking for ROOM 106 at Masfalhi View Inn.",
+    title: "Family Room with Sea View | Masfalhi View Inn",
+    description: "Sea-view family accommodation, availability and booking at Masfalhi View Inn in V. Felidhoo.",
   },
 };
 
