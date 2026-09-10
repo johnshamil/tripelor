@@ -19,8 +19,8 @@ const schema = {
   name: "Masfalhi View Inn",
   url: "https://tripelor.com/stays/masfalhi-view-inn",
   image: photos.map((photo) => `https://tripelor.com${photo}`),
-  description: "Maldives local island guesthouse with Bed & Breakfast, Half Board and Full Board room rates.",
-  address: { "@type": "PostalAddress", addressCountry: "MV" },
+  description: "Maldives local island guesthouse offering Standard Double Rooms and a Family Room with Sea View in V. Felidhoo.",
+  address: { "@type": "PostalAddress", addressLocality: "Felidhoo", addressRegion: "Vaavu Atoll", addressCountry: "MV" },
   priceRange: "USD 97-130 per room per night",
 };
 
@@ -31,41 +31,54 @@ export default function Page() {
       <LuxuryPropertyPage
         eyebrow="Relaxed island guesthouse"
         name="Masfalhi View Inn"
-        location="Maldives"
-        description="A comfortable six-room local-island guesthouse with flexible meal plans and a relaxed setting for an authentic Maldives stay."
+        location="V. Felidhoo, Maldives"
+        description="Choose the room style that suits your stay: a comfortable Standard Double Room for two or a spacious Family Room with Sea View for larger groups."
         photos={photos}
         startingFrom={97}
-        bookingHref="/booking?property=Masfalhi%20View%20Inn&mealPlan=Bed%20%26%20Breakfast"
+        bookingHref="/booking?property=Masfalhi%20View%20Inn&roomType=Standard%20Double%20Room&mealPlan=Bed%20%26%20Breakfast"
         rooms={[
           {
-            name: "Room 106",
-            image: "/images%20(3).jpeg",
-            description: "A sea-view double room with a high timber ceiling, private bathroom and comfortable in-room amenities.",
+            name: "Standard Double Room",
+            image: "/images.jpeg",
+            description: "A comfortable air-conditioned room for two with one twin bed, one full bed and a private bathroom.",
             details: [
-              "Sea-view window",
-              "Double bed",
+              "Sleeps up to 2 guests",
+              "1 twin bed + 1 full bed",
+              "Private bathroom",
               "Air conditioning",
-              "Mini refrigerator",
-              "Desk & mirror",
-              "Private rain shower",
+              "Free Wi-Fi",
+              "Flexible meal plans",
             ],
-            href: "/stays/masfalhi-view-inn/room-106",
-            bookingHref: "/booking?property=Masfalhi%20View%20Inn&roomType=ROOM%20106&mealPlan=Bed%20%26%20Breakfast",
+            bookingHref: "/booking?property=Masfalhi%20View%20Inn&roomType=Standard%20Double%20Room&mealPlan=Bed%20%26%20Breakfast",
+          },
+          {
+            name: "Family Room with Sea View",
+            image: "/images%20(3).jpeg",
+            description: "A spacious sea-view family room with flexible bedding for families and groups of up to five guests.",
+            details: [
+              "Sleeps up to 5 guests",
+              "3 twin beds + 1 queen bed",
+              "Sea view",
+              "Private bathroom",
+              "Air conditioning",
+              "Free Wi-Fi",
+            ],
+            bookingHref: "/booking?property=Masfalhi%20View%20Inn&roomType=Family%20Room%20with%20Sea%20View&mealPlan=Bed%20%26%20Breakfast",
           },
         ]}
         highlights={[
-          { icon: "island", title: "Island atmosphere", text: "A slower, more personal way to experience everyday life in the Maldives." },
+          { icon: "island", title: "Island atmosphere", text: "Stay in the heart of Felidhoo with an easy, personal local-island experience." },
           { icon: "dining", title: "Flexible dining", text: "Choose Bed & Breakfast, Half Board or Full Board for your stay." },
           { icon: "support", title: "Tripelor assistance", text: "Clear booking support from your first enquiry to arrival." },
         ]}
         rates={[
-          { name: "Bed & Breakfast", price: 97, detail: "Comfortable room with daily breakfast.", bookingHref: "/booking?property=Masfalhi%20View%20Inn&mealPlan=Bed%20%26%20Breakfast" },
-          { name: "Half Board", price: 110, detail: "Room with breakfast and dinner included.", bookingHref: "/booking?property=Masfalhi%20View%20Inn&mealPlan=Half%20Board" },
-          { name: "Full Board", price: 130, detail: "Room with breakfast, lunch and dinner.", bookingHref: "/booking?property=Masfalhi%20View%20Inn&mealPlan=Full%20Board" },
+          { name: "Bed & Breakfast", price: 97, detail: "Comfortable room with daily breakfast.", bookingHref: "/booking?property=Masfalhi%20View%20Inn&roomType=Standard%20Double%20Room&mealPlan=Bed%20%26%20Breakfast" },
+          { name: "Half Board", price: 110, detail: "Room with breakfast and dinner included.", bookingHref: "/booking?property=Masfalhi%20View%20Inn&roomType=Standard%20Double%20Room&mealPlan=Half%20Board" },
+          { name: "Full Board", price: 130, detail: "Room with breakfast, lunch and dinner.", bookingHref: "/booking?property=Masfalhi%20View%20Inn&roomType=Standard%20Double%20Room&mealPlan=Full%20Board" },
         ]}
         terms={[
-          { title: "Six-room availability", text: "Tripelor checks the current room pool for your dates before a reservation is confirmed." },
-          { title: "A clear booking journey", text: "Select your dates and meal plan online, then receive personal confirmation and payment guidance from Tripelor." },
+          { title: "Room-category availability", text: "Tripelor checks the available room pool for your selected category and dates before confirmation." },
+          { title: "A clear booking journey", text: "Choose your room category, dates and meal plan online, then receive personal confirmation and payment guidance from Tripelor." },
         ]}
       />
     </>
