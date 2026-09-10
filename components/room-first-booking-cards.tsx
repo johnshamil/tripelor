@@ -34,21 +34,21 @@ type RoomCard = {
 const rooms: RoomCard[] = [
   {
     id: "uhoo-101",
-    roomName: "Room 101",
+    roomName: "Deluxe Room",
     roomType: "ROOM 101",
     property: "Uhoo's Lavish Oasis",
     propertySlug: "uhoos-lavish-oasis",
     location: "V. Felidhoo, Maldives",
-    image: "/uhoos/room-101/01-room-101-bed.webp",
+    image: "/uhoos/room-101/01-room-101-bed.jpg",
     price: 85,
     mealPlan: "Bed & Breakfast",
     bookingMode: "instant",
     maxGuests: 2,
-    highlights: ["Private island room", "Breakfast included", "Tripelor support"],
+    highlights: ["Private deluxe room", "Breakfast included", "Tripelor support"],
   },
   {
     id: "uhoo-102",
-    roomName: "Room 102",
+    roomName: "Double Deluxe Room",
     roomType: "ROOM 102",
     property: "Uhoo's Lavish Oasis",
     propertySlug: "uhoos-lavish-oasis",
@@ -58,7 +58,7 @@ const rooms: RoomCard[] = [
     mealPlan: "Bed & Breakfast",
     bookingMode: "instant",
     maxGuests: 2,
-    highlights: ["Local-island stay", "Breakfast included", "Tripelor support"],
+    highlights: ["Double deluxe room", "Breakfast included", "Tripelor support"],
   },
   {
     id: "masfalhi-101",
@@ -151,17 +151,12 @@ export default function RoomFirstBookingCards() {
         <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <div className="max-w-3xl">
             <p className="eyebrow text-[#8d7037]">Choose the room first</p>
-            <h2 className="font-display mt-4 text-4xl leading-tight md:text-6xl">
-              Find the room that feels right.
-            </h2>
+            <h2 className="font-display mt-4 text-4xl leading-tight md:text-6xl">Find the room that feels right.</h2>
             <p className="mt-5 max-w-2xl leading-7 text-[#53616a]">
               Start with the room itself, compare the stay details at a glance, then continue to booking with your selection already prepared.
             </p>
           </div>
-          <Link
-            href="/stays"
-            className="inline-flex h-fit items-center gap-2 text-xs font-semibold uppercase tracking-[.16em] text-[#6f5729] transition hover:text-[#071922]"
-          >
+          <Link href="/stays" className="inline-flex h-fit items-center gap-2 text-xs font-semibold uppercase tracking-[.16em] text-[#6f5729] transition hover:text-[#071922]">
             Explore every stay <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -174,11 +169,7 @@ export default function RoomFirstBookingCards() {
                 key={item.key}
                 type="button"
                 onClick={() => setFilter(item.key)}
-                className={`min-h-[44px] whitespace-nowrap rounded-full border px-4 py-2.5 text-xs font-semibold uppercase tracking-[.1em] transition ${
-                  active
-                    ? "border-[#9c7d3d] bg-[#9c7d3d] text-white"
-                    : "border-[#cfc4af] bg-[#f8f4ec] text-[#5c6670] hover:border-[#9c7d3d] hover:text-[#6f5729]"
-                }`}
+                className={`min-h-[44px] whitespace-nowrap rounded-full border px-4 py-2.5 text-xs font-semibold uppercase tracking-[.1em] transition ${active ? "border-[#9c7d3d] bg-[#9c7d3d] text-white" : "border-[#cfc4af] bg-[#f8f4ec] text-[#5c6670] hover:border-[#9c7d3d] hover:text-[#6f5729]"}`}
               >
                 {active && <Check className="mr-1.5 inline h-3.5 w-3.5" />}
                 {item.label}
@@ -189,32 +180,19 @@ export default function RoomFirstBookingCards() {
 
         <div className="room-card-rail mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 md:mt-8 md:grid md:grid-cols-2 md:overflow-visible md:pb-0 xl:grid-cols-3">
           {visibleRooms.map((room) => (
-            <article
-              key={room.id}
-              className="room-card-mobile group min-w-[86vw] snap-start overflow-hidden rounded-[1.5rem] border border-[#d5cab7] bg-[#faf7f1] shadow-[0_18px_55px_rgba(35,31,24,.08)] transition duration-500 hover:-translate-y-1.5 hover:shadow-[0_28px_70px_rgba(35,31,24,.14)] md:min-w-0 md:rounded-[1.75rem]"
-            >
+            <article key={room.id} className="room-card-mobile group min-w-[86vw] snap-start overflow-hidden rounded-[1.5rem] border border-[#d5cab7] bg-[#faf7f1] shadow-[0_18px_55px_rgba(35,31,24,.08)] transition duration-500 hover:-translate-y-1.5 hover:shadow-[0_28px_70px_rgba(35,31,24,.14)] md:min-w-0 md:rounded-[1.75rem]">
               <div className="relative aspect-square overflow-hidden bg-[#d8d0c2] md:aspect-[4/3]">
-                <img
-                  src={room.image}
-                  alt={`${room.roomName} at ${room.property}`}
-                  className="h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.035]"
-                />
+                <img src={room.image} alt={`${room.roomName} at ${room.property}`} className="h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.035]" />
                 <div className="absolute left-3 top-3 flex flex-wrap gap-2 md:left-4 md:top-4">
                   <span className="rounded-full border border-white/45 bg-black/30 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.11em] text-white backdrop-blur-md md:text-[10px] md:tracking-[.13em]">
                     {room.bookingMode === "instant" ? "Instant booking" : "Request to book"}
                   </span>
-                  {room.seaView && (
-                    <span className="rounded-full border border-white/45 bg-black/30 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.11em] text-white backdrop-blur-md md:text-[10px] md:tracking-[.13em]">
-                      Sea view
-                    </span>
-                  )}
+                  {room.seaView && <span className="rounded-full border border-white/45 bg-black/30 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.11em] text-white backdrop-blur-md md:text-[10px] md:tracking-[.13em]">Sea view</span>}
                 </div>
               </div>
 
               <div className="p-5 md:p-7">
-                <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-[#8d7037] md:tracking-[.16em]">
-                  <MapPin className="h-3.5 w-3.5" /> {room.location}
-                </p>
+                <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-[#8d7037] md:tracking-[.16em]"><MapPin className="h-3.5 w-3.5" /> {room.location}</p>
                 <h3 className="font-display mt-3 text-2xl leading-tight md:text-3xl">{room.roomName}</h3>
                 <p className="mt-1 text-sm text-[#66727a]">{room.property}</p>
 
@@ -224,48 +202,27 @@ export default function RoomFirstBookingCards() {
                     <p className="font-display text-3xl text-[#071922]">${room.price}</p>
                     <p className="text-[11px] text-[#738087]">per night</p>
                   </div>
-                  <span className="rounded-full border border-[#cbbd9f] bg-[#faf7f1] px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[.08em] text-[#6f5729]">
-                    Tripelor Points eligible
-                  </span>
+                  <span className="rounded-full border border-[#cbbd9f] bg-[#faf7f1] px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[.08em] text-[#6f5729]">Tripelor Points eligible</span>
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-3 border-y border-[#ddd3c2] py-4 text-xs text-[#5c6670] md:mt-5">
-                  <span className="flex items-center gap-2">
-                    <Users className="h-4 w-4 shrink-0 text-[#9c7d3d]" /> Up to {room.maxGuests}
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Coffee className="h-4 w-4 shrink-0 text-[#9c7d3d]" /> {room.mealPlan}
-                  </span>
+                  <span className="flex items-center gap-2"><Users className="h-4 w-4 shrink-0 text-[#9c7d3d]" /> Up to {room.maxGuests}</span>
+                  <span className="flex items-center gap-2"><Coffee className="h-4 w-4 shrink-0 text-[#9c7d3d]" /> {room.mealPlan}</span>
                 </div>
 
                 <div className="mt-4 space-y-2 md:mt-5 md:space-y-2.5">
                   {room.highlights.map((highlight, index) => (
                     <p key={highlight} className="flex items-center gap-2.5 text-sm text-[#59666e]">
-                      {index === 0 && room.seaView ? (
-                        <Waves className="h-4 w-4 shrink-0 text-[#9c7d3d]" />
-                      ) : index === 0 ? (
-                        <BedDouble className="h-4 w-4 shrink-0 text-[#9c7d3d]" />
-                      ) : (
-                        <Sparkles className="h-4 w-4 shrink-0 text-[#9c7d3d]" />
-                      )}
+                      {index === 0 && room.seaView ? <Waves className="h-4 w-4 shrink-0 text-[#9c7d3d]" /> : index === 0 ? <BedDouble className="h-4 w-4 shrink-0 text-[#9c7d3d]" /> : <Sparkles className="h-4 w-4 shrink-0 text-[#9c7d3d]" />}
                       {highlight}
                     </p>
                   ))}
                 </div>
 
                 <div className="touch-card-actions mt-6 grid grid-cols-2 gap-2.5 md:mt-7 md:gap-3">
-                  <Link
-                    href={`/stays/${room.propertySlug}`}
-                    className="inline-flex items-center justify-center rounded-full border border-[#bfb29c] px-3 py-3 text-[11px] font-semibold uppercase tracking-[.09em] text-[#4e5b63] transition hover:border-[#8d7037] hover:text-[#6f5729] md:px-4 md:text-xs md:tracking-[.11em]"
-                  >
-                    View stay
-                  </Link>
-                  <Link
-                    href={bookingHref(room)}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0b2731] px-3 py-3 text-[11px] font-semibold uppercase tracking-[.09em] text-white transition hover:bg-[#123743] md:px-4 md:text-xs md:tracking-[.11em]"
-                  >
-                    {room.bookingMode === "instant" ? "Book room" : "Select room"}
-                    <ArrowRight className="h-3.5 w-3.5 shrink-0" />
+                  <Link href={`/stays/${room.propertySlug}`} className="inline-flex items-center justify-center rounded-full border border-[#bfb29c] px-3 py-3 text-[11px] font-semibold uppercase tracking-[.09em] text-[#4e5b63] transition hover:border-[#8d7037] hover:text-[#6f5729] md:px-4 md:text-xs md:tracking-[.11em]">View stay</Link>
+                  <Link href={bookingHref(room)} className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0b2731] px-3 py-3 text-[11px] font-semibold uppercase tracking-[.09em] text-white transition hover:bg-[#123743] md:px-4 md:text-xs md:tracking-[.11em]">
+                    {room.bookingMode === "instant" ? "Book room" : "Select room"}<ArrowRight className="h-3.5 w-3.5 shrink-0" />
                   </Link>
                 </div>
               </div>
@@ -273,9 +230,7 @@ export default function RoomFirstBookingCards() {
           ))}
         </div>
 
-        <p className="mt-2 text-center text-xs text-[#7a817f] md:hidden">
-          Swipe to compare more rooms
-        </p>
+        <p className="mt-2 text-center text-xs text-[#7a817f] md:hidden">Swipe to compare more rooms</p>
       </div>
     </section>
   );
