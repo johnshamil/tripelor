@@ -1,5 +1,8 @@
 type AvailabilityResult = { available: boolean; rooms_left: number; total_rooms: number };
 
+const MASFALHI_STANDARD_ROOMS = ["ROOM 101", "ROOM 102", "ROOM 103", "ROOM 104", "ROOM 105"];
+const MASFALHI_FAMILY_ROOMS = ["ROOM 106"];
+
 function config() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -47,6 +50,13 @@ async function checkOneRoom(input: {
   return rows?.[0] || { available: false, rooms_left: 0, total_rooms: 0 };
 }
 
+function masfalhiInternalRooms(roomType: string) {
+  const normalized = roomType.trim().toLowerCase();
+  if (normalized === "standard double room") return MASFALHI_STANDARD_ROOMS;
+  if (normalized === "family room with sea view") return MASFALHI_FAMILY_ROOMS;
+  return null;
+}
+
 export async function checkAvailability(input: {
   propertyName: string;
   roomType: string;
@@ -54,6 +64,22 @@ export async function checkAvailability(input: {
   checkOut: string;
   rooms: number;
 }): Promise<AvailabilityResult> {
+  if (input.propertyName.toLowerCase() === "masfalhi view inn") {
+    const internalRooms = masfalhiInternalRooms(input.roomType);
+    if (internalRooms) {
+      const results = await Promise.all(
+        internalRooms.map(roomType => checkOneRoom({ ...input, roomType, rooms: 1 })),
+      );
+      const roomsLeft = results.reduce((total, result) => total + result.rooms_left, 0);
+      const totalRooms = results.reduce((total, result) => total + result.total_rooms, 0);
+      return {
+        available: roomsLeft >= input.rooms,
+        rooms_left: roomsLeft,
+        total_rooms: totalRooms,
+      };
+    }
+  }
+
   const selected = await checkOneRoom(input);
 
   // Uhoo's Lavish Oasis has two separately bookable rooms. Return the total
@@ -69,7 +95,7 @@ export async function checkAvailability(input: {
   return selected;
 }
 
-export async function reserveRooms(input: {
+async function reserveOneRoom(input: {
   propertyName: string;
   roomType: string;
   checkIn: string;
@@ -89,6 +115,38 @@ export async function reserveRooms(input: {
     p_guest_email: input.guestEmail,
     p_guest_phone: input.guestPhone || null,
   });
+}
+
+export async function reserveRooms(input: {
+  propertyName: string;
+  roomType: string;
+  checkIn: string;
+  checkOut: string;
+  rooms: number;
+  guestName: string;
+  guestEmail: string;
+  guestPhone?: string;
+}): Promise<string> {
+  if (input.propertyName.toLowerCase() === "masfalhi view inn") {
+    const internalRooms = masfalhiInternalRooms(input.roomType);
+    if (internalRooms) {
+      if (input.rooms !== 1) throw new Error("ROOM_NOT_AVAILABLE");
+
+      for (const roomType of internalRooms) {
+        const available = await checkOneRoom({ ...input, roomType, rooms: 1 });
+        if (!available.available) continue;
+        try {
+          return await reserveOneRoom({ ...input, roomType, rooms: 1 });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "";
+          if (!message.includes("ROOM_NOT_AVAILABLE")) throw error;
+        }
+      }
+      throw new Error("ROOM_NOT_AVAILABLE");
+    }
+  }
+
+  return await reserveOneRoom(input);
 }
 
 export async function cancelReservation(id: string) {

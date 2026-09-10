@@ -21,15 +21,30 @@ import {
 import AvailabilityDatePicker from "@/components/availability-date-picker";
 
 const PACKAGE_HOTEL = "Uhoo's Lavish Oasis";
-const PROPERTY_ROOMS: Record<string, string[]> = {
-  "Uhoo's Lavish Oasis": ["ROOM 101", "ROOM 102"],
-  "Masfalhi View Inn": ["ROOM 101", "ROOM 102", "ROOM 103", "ROOM 104", "ROOM 105", "ROOM 106"],
-  "Rivethi Beach Hotel": ["Deluxe Double", "Deluxe Twin", "Deluxe Double Sea View"],
+
+type RoomOption = { value: string; label: string; maxGuests: number };
+
+const PROPERTY_ROOMS: Record<string, RoomOption[]> = {
+  "Uhoo's Lavish Oasis": [
+    { value: "ROOM 101", label: "Deluxe Room", maxGuests: 2 },
+    { value: "ROOM 102", label: "Double Deluxe Room", maxGuests: 2 },
+  ],
+  "Masfalhi View Inn": [
+    { value: "Standard Double Room", label: "Standard Double Room", maxGuests: 2 },
+    { value: "Family Room with Sea View", label: "Family Room with Sea View", maxGuests: 5 },
+  ],
+  "Rivethi Beach Hotel": [
+    { value: "Deluxe Double", label: "Deluxe Double", maxGuests: 2 },
+    { value: "Deluxe Twin", label: "Deluxe Twin", maxGuests: 2 },
+    { value: "Deluxe Double Sea View", label: "Deluxe Double Sea View", maxGuests: 2 },
+  ],
 };
+
 const STANDARD_RATES: Record<string, Record<string, number>> = {
   "Uhoo's Lavish Oasis": { "Bed & Breakfast": 85, "Half Board": 95, "Full Board": 115 },
   "Masfalhi View Inn": { "Bed & Breakfast": 97, "Half Board": 110, "Full Board": 130 },
 };
+
 const RIVETHI_RATES: Record<string, Record<string, [number, number]>> = {
   "Deluxe Double": { "Room Only": [85, 85], "Bed & Breakfast": [95, 95] },
   "Deluxe Twin": { "Room Only": [85, 85], "Bed & Breakfast": [95, 95] },
@@ -61,7 +76,7 @@ export default function BookingPageClientV2() {
   const [children, setChildren] = useState("0");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
-  const [roomType, setRoomType] = useState("ROOM 101");
+  const [roomType, setRoomType] = useState(PROPERTY_ROOMS[PACKAGE_HOTEL][0].value);
   const [mealPlan, setMealPlan] = useState("Bed & Breakfast");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -79,6 +94,13 @@ export default function BookingPageClientV2() {
   } | null>(null);
   const [checking, setChecking] = useState(false);
 
+  const roomOptions = PROPERTY_ROOMS[propertyName] || PROPERTY_ROOMS[PACKAGE_HOTEL];
+  const selectedRoom = roomOptions.find((room) => room.value === roomType) || roomOptions[0];
+  const roomLabel = selectedRoom?.label || roomType;
+  const maxGuests = selectedRoom?.maxGuests || 2;
+  const isRivethi = propertyName === "Rivethi Beach Hotel";
+  const isMasfalhi = propertyName === "Masfalhi View Inn";
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const property = params.get("property");
@@ -89,7 +111,7 @@ export default function BookingPageClientV2() {
 
     if (property) {
       setPropertyName(property);
-      setRoomType(PROPERTY_ROOMS[property]?.[0] || "ROOM 101");
+      setRoomType(PROPERTY_ROOMS[property]?.[0]?.value || PROPERTY_ROOMS[PACKAGE_HOTEL][0].value);
     }
     if (meal) setMealPlan(meal);
     if (room) setRoomType(room);
@@ -107,6 +129,7 @@ export default function BookingPageClientV2() {
       const cleanName = selectedPackage.replace(/\s*-\s*USD\s*\d+(?:\.\d+)?\s*$/i, "").trim();
       setPackageName(cleanName);
       setPropertyName(PACKAGE_HOTEL);
+      setRoomType(PROPERTY_ROOMS[PACKAGE_HOTEL][0].value);
       const priceMatch = selectedPackage.match(/USD\s*(\d+(?:\.\d+)?)/i);
       setPackagePrice(priceMatch ? Number(priceMatch[1]) : null);
       setAdults("2");
@@ -140,7 +163,6 @@ export default function BookingPageClientV2() {
     }
   }, [propertyName, roomType, mealPlan]);
 
-  const isRivethi = propertyName === "Rivethi Beach Hotel";
   const nights = useMemo(() => {
     if (!checkIn || !checkOut) return 0;
     const difference =
@@ -159,25 +181,38 @@ export default function BookingPageClientV2() {
   const roomTotal = packageName && packagePrice ? packagePrice : nightlyRate * nights;
   const estimatedTotal = planTotal || roomTotal + speedboatTotal;
   const location =
-    propertyName === PACKAGE_HOTEL
+    propertyName === PACKAGE_HOTEL || propertyName === "Masfalhi View Inn"
       ? "V. Felidhoo, Maldives"
       : propertyName === "Rivethi Beach Hotel"
         ? "Hulhumalé, Maldives"
         : "Maldives";
-  const roomOptions = PROPERTY_ROOMS[propertyName] || ["ROOM 101"];
+
   const mealOptions = isRivethi
     ? roomType === "Deluxe Double Sea View"
       ? ["Bed & Breakfast", "Full Board"]
       : ["Room Only", "Bed & Breakfast"]
     : ["Bed & Breakfast", "Half Board", "Full Board"];
 
+  const adultOptions = Array.from({ length: maxGuests }, (_, index) => index + 1);
+  const childOptions = Array.from({ length: Math.min(4, maxGuests) + 1 }, (_, index) => index);
+
   function handlePropertyChange(value: string) {
+    const firstRoom = PROPERTY_ROOMS[value]?.[0] || PROPERTY_ROOMS[PACKAGE_HOTEL][0];
     setPropertyName(value);
-    setRoomType(PROPERTY_ROOMS[value]?.[0] || "ROOM 101");
-    setMealPlan("Bed & Breakfast");
+    setRoomType(firstRoom.value);
+    setMealPlan(value === "Rivethi Beach Hotel" ? "Room Only" : "Bed & Breakfast");
     setAdults("2");
+    setChildren("0");
     setCheckIn("");
     setCheckOut("");
+    setAvailability(null);
+    setStatus("");
+  }
+
+  function handleRoomChange(value: string) {
+    setRoomType(value);
+    setAdults("2");
+    setChildren("0");
     setAvailability(null);
     setStatus("");
   }
@@ -228,6 +263,10 @@ export default function BookingPageClientV2() {
       setStatus(`This package is for exactly ${packageNights} nights.`);
       return false;
     }
+    if (Number(adults) + Number(children) > maxGuests) {
+      setStatus(`${roomLabel} accommodates up to ${maxGuests} guests. Please adjust the guest count or select another room.`);
+      return false;
+    }
     if (!fullName.trim()) {
       setStatus("Please enter your full name.");
       return false;
@@ -238,10 +277,6 @@ export default function BookingPageClientV2() {
     }
     if (!phone.trim()) {
       setStatus("Please enter your phone / WhatsApp number.");
-      return false;
-    }
-    if (isRivethi && Number(adults) > 2) {
-      setStatus("Rivethi room rate supports up to 2 adults per room. Please contact Tripelor for extra-bed arrangements.");
       return false;
     }
     return true;
@@ -263,7 +298,7 @@ export default function BookingPageClientV2() {
           ? `Speedboat requested: ${speedboatSeats} seat${speedboatSeats > 1 ? "s" : ""} at USD 50/person (USD ${speedboatTotal}).`
           : "";
       const requestNote = [
-        packageName ? `Couple package for 2 adults sharing ${roomType} at ${PACKAGE_HOTEL}.` : specialRequests.trim(),
+        packageName ? `Couple package for 2 adults sharing ${roomLabel} at ${PACKAGE_HOTEL}.` : specialRequests.trim(),
         builderNote,
       ]
         .filter(Boolean)
@@ -300,7 +335,7 @@ export default function BookingPageClientV2() {
       const result = await response.json();
       if (!response.ok) throw new Error(result?.error || "Unable to send booking request.");
 
-      const title = packageName || `${propertyName} · ${roomType}`;
+      const title = packageName || `${propertyName} · ${roomLabel}`;
       window.location.href = `/booking/confirmation?name=${encodeURIComponent(fullName.trim())}&title=${encodeURIComponent(
         title,
       )}&dates=${encodeURIComponent(`${formatDate(checkIn)} – ${formatDate(finalCheckOut)}`)}&ref=${encodeURIComponent(
@@ -401,9 +436,9 @@ export default function BookingPageClientV2() {
 
             <div className="mt-5 grid gap-5 md:grid-cols-2">
               <label className="premium-label">
-                <span><BedDouble className="h-4 w-4 text-[#9c7d3d]" /> Room</span>
-                <select value={roomType} onChange={(event) => setRoomType(event.target.value)} className="premium-control">
-                  {roomOptions.map((room) => <option key={room}>{room}</option>)}
+                <span><BedDouble className="h-4 w-4 text-[#9c7d3d]" /> Room type</span>
+                <select value={roomType} onChange={(event) => handleRoomChange(event.target.value)} className="premium-control">
+                  {roomOptions.map((room) => <option key={room.value} value={room.value}>{room.label}</option>)}
                 </select>
               </label>
               <label className="premium-label">
@@ -424,15 +459,21 @@ export default function BookingPageClientV2() {
                 <label className="premium-label">
                   <span><Users className="h-4 w-4 text-[#9c7d3d]" /> Adults</span>
                   <select value={adults} onChange={(event) => setAdults(event.target.value)} className="premium-control">
-                    {(isRivethi ? [1, 2] : [1, 2, 3, 4]).map((number) => <option key={number}>{number}</option>)}
+                    {adultOptions.map((number) => <option key={number}>{number}</option>)}
                   </select>
                 </label>
                 <label className="premium-label">
                   <span><Users className="h-4 w-4 text-[#9c7d3d]" /> Children</span>
                   <select value={children} onChange={(event) => setChildren(event.target.value)} className="premium-control">
-                    {[0, 1, 2, 3].map((number) => <option key={number}>{number}</option>)}
+                    {childOptions.map((number) => <option key={number}>{number}</option>)}
                   </select>
                 </label>
+              </div>
+            )}
+
+            {isMasfalhi && (
+              <div className="mt-5 border border-[#8ea99a]/45 bg-[#e5eee7] p-4 text-sm leading-6 text-[#40564a]">
+                <strong>Masfalhi room-category booking.</strong> Select the room type you prefer and Tripelor will assign an available room from that category after the live date check.
               </div>
             )}
 
@@ -453,14 +494,14 @@ export default function BookingPageClientV2() {
 
             {availability?.available && availability.rooms_left === 1 && (
               <div className="mt-5 flex items-center gap-3 border border-[#b9964f]/45 bg-[#efe2c5] p-4 text-[#745b2e]">
-                <Flame className="h-5 w-5" /> <strong>Only one room remains for these dates.</strong>
+                <Flame className="h-5 w-5" /> <strong>Only one room remains in this category for these dates.</strong>
               </div>
             )}
             {availability && (
               <div className={`mt-5 flex items-center gap-3 border p-4 text-sm ${availability.available ? "border-[#8ea99a]/45 bg-[#e5eee7] text-[#40564a]" : "border-[#c69292]/45 bg-[#f2dfdc] text-[#744740]"}`}>
                 <CheckCircle2 className="h-5 w-5 shrink-0" />
                 {availability.available
-                  ? `${roomType} is available · ${availability.rooms_left ?? ""} room${availability.rooms_left === 1 ? "" : "s"} left for these dates.`
+                  ? `${roomLabel} is available · ${availability.rooms_left ?? ""} room${availability.rooms_left === 1 ? "" : "s"} left for these dates.`
                   : "Sold out for the selected dates."}
               </div>
             )}
@@ -518,7 +559,7 @@ export default function BookingPageClientV2() {
           </p>
 
           <div className="mt-7 space-y-3 border-y border-white/10 py-6 text-sm text-white/60">
-            <p className="flex items-center justify-between gap-4"><span>Room</span><strong className="text-right text-white">{roomType}</strong></p>
+            <p className="flex items-center justify-between gap-4"><span>Room type</span><strong className="text-right text-white">{roomLabel}</strong></p>
             <p className="flex items-center justify-between gap-4"><span>Stay</span><strong className="text-white">{nights ? `${nights} night${nights === 1 ? "" : "s"}` : "Select dates"}</strong></p>
             <p className="flex items-center justify-between gap-4"><span>Dining</span><strong className="text-right text-white">{mealPlan}</strong></p>
             {nightlyRate > 0 && <p className="flex items-center justify-between gap-4"><span>Nightly rate</span><strong className="text-white">USD {nightlyRate}</strong></p>}
