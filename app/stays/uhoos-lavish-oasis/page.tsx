@@ -39,17 +39,17 @@ export default function Page() {
         ]}
         rooms={[
           {
-            name: "Room 101",
+            name: "Deluxe Room",
             image: room101Cover,
-            description: "A comfortable private room for two, ready for an unhurried Felidhoo escape.",
+            description: "A comfortable deluxe room for two, ready for an unhurried Felidhoo escape.",
             details: ["Up to 2 guests", "BB, HB or FB", "Live availability", "Private room gallery"],
             href: "/stays/uhoos-lavish-oasis/room-101",
             bookingHref: "/booking?property=Uhoo%27s%20Lavish%20Oasis&roomType=ROOM%20101&mealPlan=Bed%20%26%20Breakfast",
           },
           {
-            name: "Room 102",
+            name: "Double Deluxe Room",
             image: photos[1],
-            description: "A relaxed private room with the same personal service and flexible dining choices.",
+            description: "A relaxed double deluxe room with personal service and flexible dining choices.",
             details: ["Up to 2 guests", "BB, HB or FB", "Live availability", "Private room gallery"],
             href: "/stays/uhoos-lavish-oasis/room-102",
             bookingHref: "/booking?property=Uhoo%27s%20Lavish%20Oasis&roomType=ROOM%20102&mealPlan=Bed%20%26%20Breakfast",
