@@ -1,9 +1,15 @@
 import LuxuryPropertyPage from "@/components/luxury-property-page";
 
-const room101Cover = "/uhoos/room-101/01-room-101-bed.jpg";
+const deluxeRoomPhotos = [
+  "/uhoos/room-101/01-room-101-bed.webp?v=20260910-1",
+  "/uhoos/room-101/02-room-101-dressing-area.webp?v=20260910-1",
+  "/uhoos/room-101/03-room-101-bathroom.webp?v=20260910-1",
+  "/uhoos/room-101/04-room-101-bathroom-amenities.webp?v=20260910-1",
+];
 
 const photos = [
-  room101Cover,
+  deluxeRoomPhotos[0],
+  deluxeRoomPhotos[1],
   "/properties/uhoos-lavish-oasis/20250517_193323.jpg",
   "/properties/uhoos-lavish-oasis/20250822_104240.jpg",
   "/properties/uhoos-lavish-oasis/20250822_104258(1).jpg",
@@ -14,7 +20,7 @@ const schema = {
   "@type": "LodgingBusiness",
   name: "Uhoo's Lavish Oasis",
   url: "https://tripelor.com/stays/uhoos-lavish-oasis",
-  image: photos.map((photo) => `https://tripelor.com${photo}`),
+  image: photos.map((photo) => `https://tripelor.com${photo.split("?")[0]}`),
   description: "Comfortable local island guesthouse accommodation in V. Felidhoo, Maldives with Bed & Breakfast, Half Board and Full Board meal plans.",
   address: { "@type": "PostalAddress", addressLocality: "Felidhoo", addressRegion: "Vaavu Atoll", addressCountry: "MV" },
   priceRange: "USD 85-115 per room per night",
@@ -40,15 +46,15 @@ export default function Page() {
         rooms={[
           {
             name: "Deluxe Room",
-            image: room101Cover,
+            image: deluxeRoomPhotos[0],
             description: "A comfortable deluxe room for two, ready for an unhurried Felidhoo escape.",
-            details: ["Up to 2 guests", "BB, HB or FB", "Live availability", "Private room gallery"],
+            details: ["Up to 2 guests", "BB, HB or FB", "Live availability", "4-photo private room gallery"],
             href: "/stays/uhoos-lavish-oasis/room-101",
             bookingHref: "/booking?property=Uhoo%27s%20Lavish%20Oasis&roomType=ROOM%20101&mealPlan=Bed%20%26%20Breakfast",
           },
           {
             name: "Double Deluxe Room",
-            image: photos[1],
+            image: "/properties/uhoos-lavish-oasis/20250517_193323.jpg",
             description: "A relaxed double deluxe room with personal service and flexible dining choices.",
             details: ["Up to 2 guests", "BB, HB or FB", "Live availability", "Private room gallery"],
             href: "/stays/uhoos-lavish-oasis/room-102",
