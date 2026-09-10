@@ -4,10 +4,10 @@ import AvailabilityChecker from "@/components/availability-checker";
 
 const roomName = "Deluxe Room";
 const photos = [
-  "/uhoos/room-101/01-room-101-bed.webp?v=20260910-1",
-  "/uhoos/room-101/02-room-101-dressing-area.webp?v=20260910-1",
-  "/uhoos/room-101/03-room-101-bathroom.webp?v=20260910-1",
-  "/uhoos/room-101/04-room-101-bathroom-amenities.webp?v=20260910-1",
+  "/properties/uhoos-lavish-oasis/20250517_193323.jpg",
+  "/properties/uhoos-lavish-oasis/20250518_001256.jpg",
+  "/properties/uhoos-lavish-oasis/20250518_001936.jpg",
+  "/properties/uhoos-lavish-oasis/20250822_104240.jpg",
 ];
 
 export default function Room101Page() {
@@ -28,7 +28,7 @@ export default function Room101Page() {
         <div className="mb-4 flex items-end justify-between gap-4">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[.2em] text-gold">Deluxe Room Gallery</p>
-            <h2 className="mt-1 text-xl font-semibold text-white md:text-2xl">Room, dressing area and private bathroom</h2>
+            <h2 className="mt-1 text-xl font-semibold text-white md:text-2xl">A closer look at Uhoo&apos;s Lavish Oasis</h2>
           </div>
           <span className="shrink-0 text-xs text-gray-500">4 photos</span>
         </div>
@@ -37,8 +37,8 @@ export default function Room101Page() {
             <div key={src} className={`${index === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2" : ""} relative overflow-hidden rounded-2xl border border-white/10 bg-[#06151c] md:rounded-3xl`}>
               <img
                 src={src}
-                alt={index === 0 ? "Deluxe Room double bed at Uhoo's Lavish Oasis" : `Uhoo's Lavish Oasis Deluxe Room photo ${index + 1}`}
-                className={`${index === 0 ? "aspect-[3/4] md:aspect-[4/3] md:min-h-[420px]" : "aspect-[3/4] md:h-64"} w-full object-contain transition duration-500 hover:scale-[1.01]`}
+                alt={index === 0 ? "Deluxe Room at Uhoo's Lavish Oasis" : `Uhoo's Lavish Oasis Deluxe Room photo ${index + 1}`}
+                className={`${index === 0 ? "aspect-[3/4] md:aspect-[4/3] md:min-h-[420px]" : "aspect-[3/4] md:h-64"} w-full object-cover transition duration-500 hover:scale-[1.01]`}
               />
               {index === 0 && (
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 pt-14 md:p-5 md:pt-16">
