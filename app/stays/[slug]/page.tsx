@@ -9,6 +9,10 @@ function imageUrl(photo: string) {
   return `/api/property-photo/${photo}`;
 }
 
+function displayDate(value: string) {
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(new Date(`${value}T00:00:00`));
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const property = await findProperty(slug);
@@ -29,13 +33,20 @@ export default async function ManagedStayPage({ params }: { params: Promise<{ sl
     details: [`Up to ${room.capacity} guest${room.capacity === 1 ? "" : "s"}`, room.mealPlan, `${room.totalRooms} room${room.totalRooms === 1 ? "" : "s"} available`, property.amenities || "Tripelor support"],
     bookingHref: `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(room.name)}&mealPlan=${encodeURIComponent(room.mealPlan)}`,
   }));
-  const rates = property.rooms.map((room) => ({
+  const baseRates = property.rooms.map((room) => ({
     name: `${room.name} · ${room.mealPlan}`,
     price: room.sellingRate,
     detail: room.amenities || `${room.mealPlan} stay at ${property.name}.`,
     bookingHref: `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(room.name)}&mealPlan=${encodeURIComponent(room.mealPlan)}`,
   }));
-  const startingFrom = Math.min(...property.rooms.map((room) => room.sellingRate));
+  const seasonalRates = property.seasonalRates.map((rate) => ({
+    name: `${rate.name} · ${rate.roomName} · ${rate.mealPlan}`,
+    price: rate.sellingRate,
+    detail: `${displayDate(rate.startDate)} – ${displayDate(rate.endDate)} · ${rate.mealPlan}`,
+    bookingHref: `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(rate.roomName)}&mealPlan=${encodeURIComponent(rate.mealPlan)}&checkIn=${encodeURIComponent(rate.startDate)}`,
+  }));
+  const rates = [...baseRates, ...seasonalRates];
+  const startingFrom = Math.min(...property.rooms.map((room) => room.sellingRate), ...property.seasonalRates.map((rate) => rate.sellingRate));
 
   return <LuxuryPropertyPage
     eyebrow="A Tripelor partner stay"

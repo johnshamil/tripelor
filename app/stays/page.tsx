@@ -10,13 +10,15 @@ export default async function StaysPage() {
       .filter((room, index, all) => all.findIndex((candidate) => candidate.mealPlan === room.mealPlan) === index)
       .slice(0, 3)
       .map((room) => ({ label: room.mealPlan, price: room.sellingRate }));
+    const seasonalRate = property.seasonalRates.find((rate) => rate.sellingRate > 0);
+    if (seasonalRate) rates.push({ label: `${seasonalRate.name} · ${seasonalRate.mealPlan}`, price: seasonalRate.sellingRate });
     return {
       name: property.name,
       slug: property.slug,
       location: property.island,
       images: property.photos.map((photo) => `/api/property-photo/${photo}`),
       description: property.description,
-      startingFrom: Math.min(...property.rooms.map((room) => room.sellingRate).filter((rate) => rate > 0)),
+      startingFrom: Math.min(...property.rooms.map((room) => room.sellingRate), ...property.seasonalRates.map((rate) => rate.sellingRate)),
       currency: "USD" as const,
       bookingMode: "request" as const,
       roomsLabel: `${property.rooms.length} room type${property.rooms.length === 1 ? "" : "s"}`,
