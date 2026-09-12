@@ -1,3 +1,13 @@
+export const legacyPropertySlugs = ["uhoos-lavish-oasis", "masfalhi-view-inn", "rivethi-beach-hotel"] as const;
+
+export function isLegacyPhotoPath(value: string) {
+  return value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/api/") && !value.includes("..");
+}
+
+export function propertyPhotoUrl(photo: string) {
+  return isLegacyPhotoPath(photo) ? photo : `/api/property-photo/${encodeURIComponent(photo)}`;
+}
+
 export type Room = { name: string; capacity: number; totalRooms: number; amenities: string; mealPlan: string; sellingRate: number; contractedRate: number };
 export type SeasonalRate = {
   id: string;
@@ -83,10 +93,10 @@ export function validateProperty(input: any) {
   if(!input || !["draft","published"].includes(input.status)) throw new Error("Choose draft or published.");
   const name=text(input.name,150), slug=text(input.slug,100);
   if(!name || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error("Enter a name and a URL using lowercase letters, numbers and hyphens.");
-  if(["uhoos-lavish-oasis","masfalhi-view-inn","rivethi-beach-hotel"].includes(slug)) throw new Error("This URL belongs to an existing property. Choose another URL.");
+  const legacySlug = legacyPropertySlugs.includes(slug as (typeof legacyPropertySlugs)[number]);\n  if(legacySlug && !input.id) throw new Error("This URL belongs to an existing property. Choose another URL.");
   if(!Array.isArray(input.rooms)||input.rooms.length>40||!Array.isArray(input.photos)||input.photos.length>20) throw new Error("Use up to 40 room rates and 20 photographs.");
   const rooms:Room[]=input.rooms.map((r:any)=>{ const capacity=Number(r.capacity), totalRooms=Number(r.totalRooms); if(!Number.isInteger(capacity)||capacity<1||capacity>100) throw new Error("Guest capacity must be between 1 and 100."); if(!Number.isInteger(totalRooms)||totalRooms<0||totalRooms>100) throw new Error("Rooms available must be between 0 and 100."); return {name:text(r.name,150),capacity,totalRooms,amenities:text(r.amenities),mealPlan:text(r.mealPlan,100),sellingRate:money(r.sellingRate),contractedRate:money(r.contractedRate)}; });
-  const photos=input.photos.map((p:unknown)=>{ const s=text(p,200); if(!/^[0-9a-f-]{36}\.(jpg|png|webp)$/.test(s)) throw new Error("Use uploaded photographs."); return s; });
+  const photos=input.photos.map((p:unknown)=>{ const s=text(p,200); if(!/^[0-9a-f-]{36}\\.(jpg|png|webp)$/.test(s) && !(legacySlug && isLegacyPhotoPath(s))) throw new Error("Use uploaded photographs."); return s; });
   if(!Array.isArray(input.seasonalRates)||input.seasonalRates.length>100||!Array.isArray(input.inventoryRules)||input.inventoryRules.length>100) throw new Error("Use up to 100 seasonal rates and 100 inventory rules.");
   const seasonalRates:SeasonalRate[]=input.seasonalRates.map((r:any,index:number)=>{ const startDate=date(r.startDate), endDate=date(r.endDate); if(endDate<startDate) throw new Error("A seasonal rate end date must be after its start date."); return {id:rowId(r.id,index),name:text(r.name,120),startDate,endDate,roomName:text(r.roomName,150),mealPlan:text(r.mealPlan,100),sellingRate:money(r.sellingRate),contractedRate:money(r.contractedRate)}; });
   const inventoryRules:InventoryRule[]=input.inventoryRules.map((r:any,index:number)=>{ const startDate=date(r.startDate), endDate=date(r.endDate), roomsAvailable=Number(r.roomsAvailable); if(endDate<startDate) throw new Error("An inventory rule end date must be after its start date."); if(!Number.isInteger(roomsAvailable)||roomsAvailable<0||roomsAvailable>100) throw new Error("Inventory must be a whole number between 0 and 100."); return {id:rowId(r.id,index),roomName:text(r.roomName,150),startDate,endDate,roomsAvailable,stopSale:Boolean(r.stopSale),note:text(r.note,500)}; });
