@@ -19,6 +19,7 @@ import {
   Users,
 } from "lucide-react";
 import AvailabilityDatePicker from "@/components/availability-date-picker";
+import { propertyRateForDate, seasonalRateForDate } from "@/lib/property-model";
 import type { PublicProperty } from "@/lib/property-model";
 
 const PACKAGE_HOTEL = "Uhoo's Lavish Oasis";
@@ -66,6 +67,16 @@ function addDays(date: string, days: number) {
   return `${result.getUTCFullYear()}-${String(result.getUTCMonth() + 1).padStart(2, "0")}-${String(
     result.getUTCDate(),
   ).padStart(2, "0")}`;
+}
+
+function stayDates(checkIn: string, checkOut: string) {
+  const dates: string[] = [];
+  let current = checkIn;
+  while (current && checkOut && current < checkOut) {
+    dates.push(current);
+    current = addDays(current, 1);
+  }
+  return dates;
 }
 
 export default function BookingPageClientV2() {
@@ -199,13 +210,20 @@ export default function BookingPageClientV2() {
       return pair ? (Number(adults) <= 1 ? pair[0] : pair[1]) : 0;
     }
     if (managedProperty) {
-      return managedProperty.rooms.find((room) => room.name === roomType && room.mealPlan === mealPlan)?.sellingRate || 0;
+      return propertyRateForDate(managedProperty, roomType, mealPlan, checkIn);
     }
     return STANDARD_RATES[propertyName]?.[mealPlan] || 0;
-  }, [isRivethi, propertyName, roomType, mealPlan, adults, managedProperty]);
+  }, [isRivethi, propertyName, roomType, mealPlan, adults, managedProperty, checkIn]);
 
-  const roomTotal = packageName && packagePrice ? packagePrice : nightlyRate * nights;
+  const roomTotal = useMemo(() => {
+    if (packageName && packagePrice) return packagePrice;
+    if (managedProperty && checkIn && checkOut && nights > 0) {
+      return stayDates(checkIn, checkOut).reduce((total, date) => total + propertyRateForDate(managedProperty, roomType, mealPlan, date), 0);
+    }
+    return nightlyRate * nights;
+  }, [packageName, packagePrice, managedProperty, checkIn, checkOut, nights, roomType, mealPlan, nightlyRate]);
   const estimatedTotal = planTotal || roomTotal + speedboatTotal;
+  const activeSeason = managedProperty ? seasonalRateForDate(managedProperty, roomType, mealPlan, checkIn) : null;
   const location = managedProperty?.island || (
     propertyName === PACKAGE_HOTEL || propertyName === "Masfalhi View Inn"
       ? "V. Felidhoo, Maldives"
@@ -593,6 +611,7 @@ export default function BookingPageClientV2() {
             <p className="flex items-center justify-between gap-4"><span>Stay</span><strong className="text-white">{nights ? `${nights} night${nights === 1 ? "" : "s"}` : "Select dates"}</strong></p>
             <p className="flex items-center justify-between gap-4"><span>Dining</span><strong className="text-right text-white">{mealPlan}</strong></p>
             {nightlyRate > 0 && <p className="flex items-center justify-between gap-4"><span>Nightly rate</span><strong className="text-white">USD {nightlyRate}</strong></p>}
+            {activeSeason && <p className="flex items-center justify-between gap-4"><span>Rate period</span><strong className="text-right text-[#d9bd7b]">{activeSeason.name}</strong></p>}
           </div>
 
           <div className="py-6">
