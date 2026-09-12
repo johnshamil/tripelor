@@ -133,8 +133,9 @@ export async function POST(request: Request) {
     if (operation !== "saveSchedule") throw new Error("Choose a transfer action.");
     const dayOfWeek = Number(input.dayOfWeek);
     const departureTime = shortText(input.departureTime, 8);
-    const operator = shortText(input.operator, 100, "Dream Speed");
-    const route = shortText(input.route, 120, "Male to Felidhoo");
+    const operator = shortText(input.operator, 100);
+    const route = shortText(input.route, 120);
+    if (!route || !operator) throw new Error("Enter a route and operator name.");
     const notes = shortText(input.notes || "", 500);
     const capacity = Number(input.capacity);
     const pricePerPerson = Number(input.pricePerPerson);
