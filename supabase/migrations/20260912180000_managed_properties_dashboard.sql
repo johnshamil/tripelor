@@ -12,6 +12,7 @@ create index if not exists managed_properties_status_idx
 
 alter table public.managed_properties enable row level security;
 revoke all on table public.managed_properties from anon, authenticated;
+grant select, insert, update, delete on table public.managed_properties to service_role;
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('property-photos', 'property-photos', false, 3145728, array['image/jpeg', 'image/png', 'image/webp'])
