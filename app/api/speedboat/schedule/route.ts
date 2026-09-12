@@ -5,7 +5,7 @@ export async function GET(){
   const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if(!url||!key) return NextResponse.json({schedule:[]});
   try{
-    const r=await fetch(`${url}/rest/v1/speedboat_schedule?select=day_of_week,departure_time,operator,capacity,price_per_person,notes&active=eq.true&route=eq.Male%20to%20Felidhoo&order=day_of_week.asc,departure_time.asc`,{headers:{apikey:key,Authorization:`Bearer ${key}`},cache:"no-store"});
+    const r=await fetch(`${url}/rest/v1/speedboat_schedule?select=id,route,day_of_week,departure_time,operator,capacity,price_per_person&active=eq.true&order=day_of_week.asc,departure_time.asc`,{headers:{apikey:key,Authorization:`Bearer ${key}`},cache:"no-store"});
     if(!r.ok) throw new Error("Schedule unavailable");
     return NextResponse.json({schedule:await r.json()});
   }catch{return NextResponse.json({schedule:[]});}
