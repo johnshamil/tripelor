@@ -15,7 +15,7 @@ import { useMemo, useState } from "react";
 
 type FilterKey = "all" | "instant" | "under100" | "sea";
 
-type RoomCard = {
+export type RoomCard = {
   id: string;
   roomName: string;
   roomType: string;
@@ -150,15 +150,16 @@ function bookingHref(room: RoomCard) {
   return `/booking?${params.toString()}`;
 }
 
-export default function RoomFirstBookingCards() {
+export default function RoomFirstBookingCards({ extraRooms = [] }: { extraRooms?: RoomCard[] }) {
   const [filter, setFilter] = useState<FilterKey>("all");
+  const allRooms = useMemo(() => [...rooms, ...extraRooms], [extraRooms]);
 
   const visibleRooms = useMemo(() => {
-    if (filter === "instant") return rooms.filter((room) => room.bookingMode === "instant");
-    if (filter === "under100") return rooms.filter((room) => room.price < 100);
-    if (filter === "sea") return rooms.filter((room) => room.seaView);
-    return rooms;
-  }, [filter]);
+    if (filter === "instant") return allRooms.filter((room) => room.bookingMode === "instant");
+    if (filter === "under100") return allRooms.filter((room) => room.price < 100);
+    if (filter === "sea") return allRooms.filter((room) => room.seaView);
+    return allRooms;
+  }, [filter, allRooms]);
 
   return (
     <section className="bg-[#f1ebdf] text-[#071922]">

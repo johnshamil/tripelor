@@ -19,6 +19,7 @@ import {
   Users,
 } from "lucide-react";
 import AvailabilityDatePicker from "@/components/availability-date-picker";
+import type { PublicProperty } from "@/lib/property-model";
 
 const PACKAGE_HOTEL = "Uhoo's Lavish Oasis";
 
@@ -93,13 +94,26 @@ export default function BookingPageClientV2() {
     total_rooms?: number;
   } | null>(null);
   const [checking, setChecking] = useState(false);
+  const [managedProperties, setManagedProperties] = useState<PublicProperty[]>([]);
 
-  const roomOptions = PROPERTY_ROOMS[propertyName] || PROPERTY_ROOMS[PACKAGE_HOTEL];
+  const managedProperty = managedProperties.find((property) => property.name === propertyName);
+  const roomOptions = managedProperty
+    ? managedProperty.rooms
+        .filter((room, index, all) => all.findIndex((candidate) => candidate.name === room.name) === index)
+        .map((room) => ({ value: room.name, label: room.name, maxGuests: room.capacity }))
+    : PROPERTY_ROOMS[propertyName] || PROPERTY_ROOMS[PACKAGE_HOTEL];
   const selectedRoom = roomOptions.find((room) => room.value === roomType) || roomOptions[0];
   const roomLabel = selectedRoom?.label || roomType;
   const maxGuests = selectedRoom?.maxGuests || 2;
   const isRivethi = propertyName === "Rivethi Beach Hotel";
   const isMasfalhi = propertyName === "Masfalhi View Inn";
+
+  useEffect(() => {
+    fetch("/api/properties", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((result) => setManagedProperties(result.properties || []))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -136,6 +150,15 @@ export default function BookingPageClientV2() {
       setChildren("0");
     }
   }, []);
+
+  useEffect(() => {
+    if (!managedProperty) return;
+    const matchingRoom = managedProperty.rooms.find((room) => room.name === roomType);
+    if (!matchingRoom) setRoomType(managedProperty.rooms[0]?.name || "");
+    if (matchingRoom && !managedProperty.rooms.some((room) => room.name === roomType && room.mealPlan === mealPlan)) {
+      setMealPlan(matchingRoom.mealPlan);
+    }
+  }, [managedProperty, roomType, mealPlan]);
 
   useEffect(() => {
     fetch("/api/auth/me", { cache: "no-store" })
@@ -175,19 +198,25 @@ export default function BookingPageClientV2() {
       const pair = RIVETHI_RATES[roomType]?.[mealPlan];
       return pair ? (Number(adults) <= 1 ? pair[0] : pair[1]) : 0;
     }
+    if (managedProperty) {
+      return managedProperty.rooms.find((room) => room.name === roomType && room.mealPlan === mealPlan)?.sellingRate || 0;
+    }
     return STANDARD_RATES[propertyName]?.[mealPlan] || 0;
-  }, [isRivethi, propertyName, roomType, mealPlan, adults]);
+  }, [isRivethi, propertyName, roomType, mealPlan, adults, managedProperty]);
 
   const roomTotal = packageName && packagePrice ? packagePrice : nightlyRate * nights;
   const estimatedTotal = planTotal || roomTotal + speedboatTotal;
-  const location =
+  const location = managedProperty?.island || (
     propertyName === PACKAGE_HOTEL || propertyName === "Masfalhi View Inn"
       ? "V. Felidhoo, Maldives"
       : propertyName === "Rivethi Beach Hotel"
         ? "Hulhumalé, Maldives"
-        : "Maldives";
+        : "Maldives"
+  );
 
-  const mealOptions = isRivethi
+  const mealOptions = managedProperty
+    ? managedProperty.rooms.filter((room, index, all) => room.name === roomType && all.findIndex((candidate) => candidate.name === room.name && candidate.mealPlan === room.mealPlan) === index).map((room) => room.mealPlan)
+    : isRivethi
     ? roomType === "Deluxe Double Sea View"
       ? ["Bed & Breakfast", "Full Board"]
       : ["Room Only", "Bed & Breakfast"]
@@ -197,9 +226,9 @@ export default function BookingPageClientV2() {
   const childOptions = Array.from({ length: Math.min(4, maxGuests) + 1 }, (_, index) => index);
 
   function handlePropertyChange(value: string) {
-    const firstRoom = PROPERTY_ROOMS[value]?.[0] || PROPERTY_ROOMS[PACKAGE_HOTEL][0];
+    const firstRoom = PROPERTY_ROOMS[value]?.[0] || managedProperties.find((property) => property.name === value)?.rooms[0];
     setPropertyName(value);
-    setRoomType(firstRoom.value);
+    setRoomType(firstRoom && "value" in firstRoom ? firstRoom.value : firstRoom?.name || "ROOM 101");
     setMealPlan(value === "Rivethi Beach Hotel" ? "Room Only" : "Bed & Breakfast");
     setAdults("2");
     setChildren("0");
@@ -412,6 +441,7 @@ export default function BookingPageClientV2() {
                     <option>Uhoo&apos;s Lavish Oasis</option>
                     <option>Masfalhi View Inn</option>
                     <option>Rivethi Beach Hotel</option>
+                    {managedProperties.map((property) => <option key={property.id} value={property.name}>{property.name}</option>)}
                   </select>
                 </label>
                 <div className="premium-label">
