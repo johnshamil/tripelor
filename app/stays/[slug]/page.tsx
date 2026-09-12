@@ -7,7 +7,7 @@ import { findProperty } from "@/lib/property-store";
 export const dynamic = "force-dynamic";
 
 function imageUrl(photo: string) {
-  return `/api/property-photo/${photo}`;
+  return propertyPhotoUrl(photo);
 }
 
 function displayDate(value: string) {
@@ -27,13 +27,19 @@ export default async function ManagedStayPage({ params }: { params: Promise<{ sl
   if (!property) notFound();
 
   const photos = property.photos.map(imageUrl);
-  const rooms = property.rooms.map((room) => ({
-    name: room.name,
-    image: photos[0],
-    description: room.amenities || `${room.name} at ${property.name}.`,
-    details: [`Up to ${room.capacity} guest${room.capacity === 1 ? "" : "s"}`, room.mealPlan, `${room.totalRooms} room${room.totalRooms === 1 ? "" : "s"} available`, property.amenities || "Tripelor support"],
-    bookingHref: `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(room.name)}&mealPlan=${encodeURIComponent(room.mealPlan)}`,
-  }));
+  const rooms = property.rooms.map((room) => {
+    const roomPhotos = (room.photos || []).map(imageUrl);
+    const bathroomPhotos = (room.bathroomPhotos || []).map(imageUrl);
+    return {
+      name: room.name,
+      image: roomPhotos[0] || photos[0],
+      photos: roomPhotos,
+      bathroomPhotos,
+      description: room.amenities || `${room.name} at ${property.name}.`,
+      details: [`Up to ${room.capacity} guest${room.capacity === 1 ? "" : "s"}`, room.mealPlan, `${room.totalRooms} room${room.totalRooms === 1 ? "" : "s"} available`, property.amenities || "Tripelor support"],
+      bookingHref: `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(room.name)}&mealPlan=${encodeURIComponent(room.mealPlan)}`,
+    };
+  });
   const baseRates = property.rooms.map((room) => ({
     name: `${room.name} · ${room.mealPlan}`,
     price: room.sellingRate,
