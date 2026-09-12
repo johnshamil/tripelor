@@ -35,4 +35,5 @@ alter table public.speedboat_schedule add constraint speedboat_schedule_price_ch
 alter table public.transfer_requests enable row level security;
 revoke all on table public.transfer_requests from anon, authenticated;
 grant select, insert, update, delete on table public.transfer_requests to service_role;
+grant select on table public.speedboat_schedule to anon, authenticated;
 grant select, insert, update, delete on table public.speedboat_schedule to service_role;
