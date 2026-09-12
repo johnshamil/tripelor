@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
+  Building2,
   CheckCircle2,
   CircleDollarSign,
   Clock3,
@@ -188,6 +189,9 @@ export default function AdminPage() {
             </Link>
             <Link href="/admin/room-calendar" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
               <CalendarDays className="h-4 w-4" /> Calendar
+            </Link>
+            <Link href="/admin/properties" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
+              <Building2 className="h-4 w-4" /> Properties
             </Link>
             <Link href="#bookings" className="btn-outline min-h-[46px] px-4 text-xs">
               Bookings

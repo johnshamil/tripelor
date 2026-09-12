@@ -15,6 +15,7 @@ import RewardsChecker from "@/components/rewards-checker";
 import HomeLiveAvailability from "@/components/home-live-availability";
 import SmartOffers from "@/components/smart-offers";
 import RoomFirstBookingCards from "@/components/room-first-booking-cards";
+import { publishedProperties } from "@/lib/property-store";
 
 const escapes = [
   {
@@ -66,7 +67,21 @@ async function getReviews(): Promise<Review[]> {
 }
 
 export default async function Home() {
-  const reviews = await getReviews();
+  const [reviews, managedProperties] = await Promise.all([getReviews(), publishedProperties()]);
+  const managedRooms = managedProperties.flatMap((property) => property.rooms.map((room, index) => ({
+    id: `${property.id}-${index}`,
+    roomName: room.name,
+    roomType: room.name,
+    property: property.name,
+    propertySlug: property.slug,
+    location: property.island,
+    image: `/api/property-photo/${property.photos[0]}`,
+    price: room.sellingRate,
+    mealPlan: room.mealPlan,
+    bookingMode: "request" as const,
+    maxGuests: room.capacity,
+    highlights: [room.amenities || "Comfortable room", room.mealPlan, "Tripelor support"],
+  })));
 
   return (
     <>
@@ -137,7 +152,7 @@ export default async function Home() {
       </section>
 
       <HomeLiveAvailability />
-      <RoomFirstBookingCards />
+      <RoomFirstBookingCards extraRooms={managedRooms} />
 
       <section className="section-shell overflow-hidden">
         <div className="container grid gap-12 py-24 lg:grid-cols-[.8fr_1.2fr] lg:items-end">
