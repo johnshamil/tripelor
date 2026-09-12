@@ -89,9 +89,12 @@ begin
 end;
 $function$;
 
-revoke execute on function public.check_room_availability(text, text, date, date, integer) from anon, authenticated;
-revoke execute on function public.reserve_rooms(text, text, date, date, integer, text, text, text) from anon, authenticated;
-revoke execute on function public.get_room_calendar(text, text, date, date) from anon, authenticated;
+revoke execute on function public.check_room_availability(text, text, date, date, integer) from public;
+grant execute on function public.check_room_availability(text, text, date, date, integer) to service_role;
+revoke execute on function public.reserve_rooms(text, text, date, date, integer, text, text, text) from public;
+grant execute on function public.reserve_rooms(text, text, date, date, integer, text, text, text) to service_role;
+revoke execute on function public.get_room_calendar(text, text, date, date) from public;
+grant execute on function public.get_room_calendar(text, text, date, date) to service_role;
 
 create or replace function public.reserve_rooms(
   p_property_name text,
