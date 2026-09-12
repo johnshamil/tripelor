@@ -1,10 +1,42 @@
 import { propertyAdmin, propertyDB, propertyError, sameOrigin } from "@/lib/property-store";
 
+const BOOKING_EMAIL = "bookings@tripelor.com";
+
 const REQUEST_STATUSES = ["pending", "confirmed", "declined", "completed", "cancelled"];
 
 function shortText(value: unknown, max: number, fallback = "") {
   if (typeof value !== "string" || value.length > max) throw new Error("Please shorten the transfer details and try again.");
   return value.trim() || fallback;
+}
+
+function escapeHtml(value: unknown) {
+  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+async function sendResend(apiKey: string, payload: Record<string, unknown>) {
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const result = await response.json();
+  return { response, result };
+}
+
+function niceTime(value: unknown) {
+  if (typeof value !== "string" || !value) return "To be confirmed";
+  return new Date(`2000-01-01T${value.slice(0, 5)}:00`).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
+function confirmationHtml(transfer: Record<string, unknown>) {
+  const name = escapeHtml(transfer.guest_name);
+  const rows = [
+    ["Request reference", transfer.request_reference], ["Route", transfer.route], ["Operator", transfer.operator],
+    ["Arrival", `${transfer.arrival_date || "TBC"} at ${niceTime(transfer.arrival_time)}`],
+    ["Recommended departure", niceTime(transfer.requested_departure)], ["Flight", transfer.flight_number || "Not provided"],
+    ["Seats", transfer.seats], ["Total", `USD ${Number(transfer.total || 0).toFixed(2)}`],
+  ].map(([label, value]) => `<tr><td style="padding:8px 0;font-weight:bold">${escapeHtml(label)}</td><td>${escapeHtml(value)}</td></tr>`).join("");
+  return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:680px;margin:0 auto;color:#111;line-height:1.6"><div style="background:#071922;color:#d9bd7b;padding:22px 26px"><h1>Transfer Confirmed</h1></div><div style="padding:26px;border:1px solid #eee"><p>Dear ${name},</p><p>Greetings from Tripelor, Maldives. Your speedboat transfer to Felidhoo is confirmed.</p><table style="width:100%"><tbody>${rows}</tbody></table><p style="margin-top:22px"><strong>Important:</strong> Please be ready at the agreed pickup point at least 15 minutes before departure. Keep your flight details available for the transfer team.</p><p>${escapeHtml(transfer.admin_note || "If you need any assistance, reply to this email and our team will help you.")}</p><p>Thank you for choosing Tripelor.</p><p>Best regards,<br><strong>Tripelor</strong><br>Travel &amp; Accommodation Services<br><a href="https://www.tripelor.com">www.tripelor.com</a><br>${BOOKING_EMAIL}</p></div></div>`;
 }
 
 export async function GET() {
@@ -33,9 +65,26 @@ export async function POST(request: Request) {
       const status = String(input.status || "");
       if (!REQUEST_STATUSES.includes(status)) throw new Error("Choose a valid transfer status.");
       const adminNote = shortText(input.adminNote || "", 2000);
+      const existingRows = await propertyDB(`transfer_requests?id=eq.${input.id}&limit=1`);
+      const existing = existingRows[0];
+      if (!existing) return Response.json({ error: "Transfer request not found." }, { status: 404 });
+      const becameConfirmed = status === "confirmed" && existing.status !== "confirmed" && !existing.confirmation_sent_at;
       const rows = await propertyDB(`transfer_requests?id=eq.${input.id}`, { method: "PATCH", body: JSON.stringify({ status, admin_note: adminNote, updated_at: new Date().toISOString() }) });
       if (!rows.length) return Response.json({ error: "Transfer request not found." }, { status: 404 });
-      return Response.json({ request: rows[0] });
+      let emailWarning = "";
+      if (becameConfirmed) {
+        const apiKey = process.env.RESEND_API_KEY;
+        if (!apiKey) emailWarning = "Transfer confirmed, but email service is not configured.";
+        else {
+          try {
+            const sent = await sendResend(apiKey, { from: "Tripelor Transfers <bookings@tripelor.com>", to: [existing.guest_email], reply_to: BOOKING_EMAIL, subject: `Transfer confirmed ${existing.request_reference} - Tripelor`, html: confirmationHtml({ ...existing, status, admin_note: adminNote }) });
+            if (!sent.response.ok) emailWarning = sent.result?.message || "Transfer confirmed, but the customer email could not be sent.";
+            else await propertyDB(`transfer_requests?id=eq.${input.id}`, { method: "PATCH", body: JSON.stringify({ confirmation_sent_at: new Date().toISOString(), updated_at: new Date().toISOString() }) });
+          } catch (emailError) { console.error("Transfer confirmation email error", emailError); emailWarning = "Transfer confirmed, but the customer email could not be sent."; }
+        }
+      }
+      const refreshed = await propertyDB(`transfer_requests?id=eq.${input.id}&limit=1`);
+      return Response.json({ request: refreshed[0] || rows[0], emailWarning });
     }
 
     if (operation === "deleteSchedule") {
