@@ -17,7 +17,8 @@ create table if not exists public.transfer_requests (
   status text not null default 'pending' check (status in ('pending', 'confirmed', 'declined', 'completed', 'cancelled')),
   admin_note text not null default '',
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  confirmation_sent_at timestamptz
 );
 
 create index if not exists transfer_requests_status_arrival_idx
