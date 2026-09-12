@@ -98,6 +98,7 @@ export default function TransferManager() {
   return <main className="container py-8 pb-28 md:py-14">
     <div className="flex flex-col gap-5 border-b border-white/10 pb-7 lg:flex-row lg:items-end lg:justify-between"><div><p className="eyebrow flex items-center gap-2"><Ship className="h-4 w-4 text-gold" /> Operations</p><h1 className="mt-3 text-3xl font-semibold md:text-5xl">Transfer Manager</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">Keep speedboat departures, seat capacity and guest transfer requests in one operational view.</p></div><Link href="/admin" className="btn-outline w-full justify-center sm:w-auto">Admin dashboard</Link></div>
     {notice && <Notice tone="success">{notice}</Notice>}{error && <Notice tone="error">{error}</Notice>}
+    <ManualTransfer onCreated={(request) => { setRequests(current => [request, ...current]); setNotes(current => ({ ...current, [request.id]: request.admin_note || "" })); setNotice("Transfer added as pending. Confirm it in the inbox to email the customer."); }} />
     <section className="mt-8 grid gap-4 md:grid-cols-3"><Metric label="Active departures" value={activeSchedules.length} detail="Available to the public schedule" icon={<CalendarDays className="h-5 w-5" />}/><Metric label="Pending requests" value={pendingCount} detail="Need a Tripelor decision" icon={<Clock3 className="h-5 w-5" />}/><Metric label="Requests on file" value={requests.length} detail="Latest 300 transfer requests" icon={<Users className="h-5 w-5" />}/></section>
 
     <section className="mt-8 rounded-2xl border border-gold/20 bg-gold/[.04] p-5 md:p-6"><div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[10px] font-semibold uppercase tracking-[.22em] text-gold">Departure schedule</p><h2 className="mt-2 text-2xl font-semibold">Male → Felidhoo</h2><p className="mt-1 text-sm text-gray-400">These departures power the public Arrival Flight Assistant.</p></div><button type="button" onClick={() => setScheduleForm(blankSchedule())} className="btn-gold gap-2"><Plus className="h-4 w-4" /> Add departure</button></div>
@@ -116,3 +117,54 @@ function ScheduleEditor({ form, setForm, saving, onSave, onCancel }: { form: Sch
 function Metric({ label, value, detail, icon }: { label: string; value: number; detail: string; icon: React.ReactNode }) { return <div className="rounded-2xl border border-white/10 bg-white/[.025] p-5"><div className="flex items-center justify-between text-gold"><span className="text-[10px] font-semibold uppercase tracking-[.18em]">{label}</span>{icon}</div><p className="mt-3 text-3xl font-semibold">{value}</p><p className="mt-1 text-xs text-gray-500">{detail}</p></div>; }
 function Info({ label, value }: { label: string; value: string }) { return <div className="rounded-xl border border-white/10 bg-white/[.02] p-3"><p className="text-xs text-gray-500">{label}</p><p className="mt-1 leading-5 text-gray-300">{value}</p></div>; }
 function Notice({ tone, children }: { tone: "success" | "error"; children: React.ReactNode }) { return <div className={`mt-5 rounded-xl border p-4 text-sm ${tone === "success" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200" : "border-red-500/30 bg-red-500/10 text-red-200"}`}>{children}</div>; }
+
+function ManualTransfer({ onCreated }: { onCreated: (request: TransferRequest) => void }) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy) return;
+    const form = event.currentTarget;
+    const input = Object.fromEntries(new FormData(form).entries());
+    setBusy(true); setError("");
+    try {
+      const response = await fetch("/api/admin/transfers", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, operation: "createRequest" }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Unable to add transfer.");
+      onCreated(result.request);
+      form.reset(); setOpen(false);
+    } catch (err) { setError(err instanceof Error ? err.message : "Unable to add transfer."); }
+    finally { setBusy(false); }
+  }
+  const fields = [
+    ["route", "Route / islands", "text", "e.g. Malé Airport → Maafushi", 120],
+    ["operator", "Boat / transfer operator", "text", "Operator name", 100],
+    ["guestName", "Customer name", "text", "Full name", 160],
+    ["guestEmail", "Customer email", "email", "Customer confirmation address", 240],
+    ["guestPhone", "Phone / WhatsApp", "tel", "+960…", 80],
+    ["travelDate", "Transfer date", "date", "", 10],
+    ["arrivalTime", "Arrival / ready time", "time", "", 5],
+    ["departureTime", "Departure time", "time", "", 5],
+    ["flightNumber", "Flight number (optional)", "text", "If applicable", 30],
+  ] as const;
+  return <section className="mt-6 rounded-2xl border border-gold/25 bg-gold/[.04] p-5">
+    <div className="flex flex-wrap items-center justify-between gap-4">
+      <div><h2 className="text-xl font-semibold">Manual transfers</h2><p className="mt-2 text-sm text-gray-400">Add a customer transfer for any island, including return journeys.</p></div>
+      <button type="button" className="btn-gold" disabled={busy} onClick={() => setOpen(!open)}>{open ? "Close form" : "Add transfer"}</button>
+    </div>
+    {open && <form onSubmit={submit} className="mt-5">
+      <p className="mb-4 text-sm text-gray-400">All times are Maldives local time (UTC+5). Saved as pending; no email is sent until you confirm in the inbox.</p>
+      <fieldset disabled={busy} className="grid gap-4 md:grid-cols-2">
+        {fields.map(([name, label, type, placeholder, max]) => <label key={name} className="grid gap-2 text-sm">
+          <span>{label}</span><input name={name} type={type} required={name !== "flightNumber"} maxLength={max} placeholder={placeholder} className="min-w-0 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-base" />
+        </label>)}
+        <label className="grid gap-2 text-sm"><span>Passengers</span><input name="seats" type="number" required min="1" max="100" defaultValue="1" className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-base" /></label>
+        <label className="grid gap-2 text-sm"><span>Fare per person (USD)</span><input name="pricePerPerson" type="number" required min="0" max="100000" step="0.01" className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-base" /></label>
+        <label className="grid gap-2 text-sm"><span>Private admin note — not emailed</span><textarea name="adminNote" maxLength={2000} rows={2} className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-base" /></label>
+      </fieldset>
+      {error && <p role="alert" className="mt-4 text-sm text-red-200">{error}</p>}
+      <button type="submit" disabled={busy} className="btn-gold mt-5 disabled:opacity-50">{busy ? "Saving…" : "Save pending transfer"}</button>
+    </form>}
+  </section>;
+}
