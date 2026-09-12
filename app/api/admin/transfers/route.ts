@@ -36,7 +36,7 @@ function confirmationHtml(transfer: Record<string, unknown>) {
     ["Recommended departure", niceTime(transfer.requested_departure)], ["Flight", transfer.flight_number || "Not provided"],
     ["Seats", transfer.seats], ["Total", `USD ${Number(transfer.total || 0).toFixed(2)}`],
   ].map(([label, value]) => `<tr><td style="padding:8px 0;font-weight:bold">${escapeHtml(label)}</td><td>${escapeHtml(value)}</td></tr>`).join("");
-  return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:680px;margin:0 auto;color:#111;line-height:1.6"><div style="background:#071922;color:#d9bd7b;padding:22px 26px"><h1>Transfer Confirmed</h1></div><div style="padding:26px;border:1px solid #eee"><p>Dear ${name},</p><p>Greetings from Tripelor, Maldives. Your speedboat transfer to Felidhoo is confirmed.</p><table style="width:100%"><tbody>${rows}</tbody></table><p style="margin-top:22px"><strong>Important:</strong> Please be ready at the agreed pickup point at least 15 minutes before departure. Keep your flight details available for the transfer team.</p><p>${escapeHtml(transfer.admin_note || "If you need any assistance, reply to this email and our team will help you.")}</p><p>Thank you for choosing Tripelor.</p><p>Best regards,<br><strong>Tripelor</strong><br>Travel &amp; Accommodation Services<br><a href="https://www.tripelor.com">www.tripelor.com</a><br>${BOOKING_EMAIL}</p></div></div>`;
+  return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:680px;margin:0 auto;color:#111;line-height:1.6"><div style="background:#071922;color:#d9bd7b;padding:22px 26px"><h1>Transfer Confirmed</h1></div><div style="padding:26px;border:1px solid #eee"><p>Dear ${name},</p><p>Greetings from Tripelor, Maldives. Your transfer for ${escapeHtml(transfer.route)} is confirmed.</p><table style="width:100%"><tbody>${rows}</tbody></table><p style="margin-top:22px"><strong>Important:</strong> Please be ready at the agreed pickup point at least 15 minutes before departure. Keep your flight details available for the transfer team.</p><p>If you need assistance, reply to this email and our team will help you.</p><p>Thank you for choosing Tripelor.</p><p>Best regards,<br><strong>Tripelor</strong><br>Travel &amp; Accommodation Services<br><a href="https://www.tripelor.com">www.tripelor.com</a><br>${BOOKING_EMAIL}</p></div></div>`;
 }
 
 export async function GET() {
@@ -60,6 +60,41 @@ export async function POST(request: Request) {
     if (body.length > 12000) throw new Error("Transfer details are too large.");
     const input = JSON.parse(body);
     const operation = String(input?.operation || "");
+
+    if (operation === "createRequest") {
+      const required = (value: unknown, max: number) => {
+        const text = shortText(value, max);
+        if (!text) throw new Error("Please complete all required transfer details.");
+        return text;
+      };
+      const route = required(input.route, 120);
+      const operator = required(input.operator, 100);
+      const guestName = required(input.guestName, 160);
+      const guestEmail = required(input.guestEmail, 240).toLowerCase();
+      const guestPhone = required(input.guestPhone, 80);
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) throw new Error("Enter a valid customer email.");
+      const date = required(input.travelDate, 10);
+      const arrival = required(input.arrivalTime, 5);
+      const departure = required(input.departureTime, 5);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date + "T12:00:00Z")) || new Date(date + "T12:00:00Z").toISOString().slice(0, 10) !== date) throw new Error("Enter a valid travel date.");
+      if (![arrival, departure].every(time => /^([01]\d|2[0-3]):[0-5]\d$/.test(time))) throw new Error("Enter valid times.");
+      if (departure < arrival) throw new Error("Departure must be on or after the ready time. Use the departure date for overnight transfers.");
+      const seats = Number(input.seats);
+      const fare = Number(input.pricePerPerson);
+      if (!Number.isInteger(seats) || seats < 1 || seats > 100) throw new Error("Enter 1 to 100 passengers.");
+      if (input.pricePerPerson === "" || !Number.isFinite(fare) || fare < 0 || fare > 100000) throw new Error("Enter a valid fare.");
+      const rows = await propertyDB("transfer_requests", { method: "POST", body: JSON.stringify({
+        request_reference: "TR-" + crypto.randomUUID().slice(0, 8).toUpperCase(),
+        route, operator, guest_name: guestName, guest_email: guestEmail, guest_phone: guestPhone,
+        arrival_date: date, arrival_time: arrival, requested_departure: departure,
+        flight_number: shortText(input.flightNumber || "", 30),
+        seats, price_per_person: Math.round(fare * 100) / 100,
+        total: Math.round(fare * 100) * seats / 100,
+        admin_note: shortText(input.adminNote || "", 2000), notes: "", status: "pending"
+      }) });
+      if (!rows[0]) throw new Error("Unable to create transfer.");
+      return Response.json({ request: rows[0] }, { status: 201 });
+    }
     if (operation === "updateRequest") {
       if (typeof input.id !== "string" || !/^[0-9a-f-]{36}$/.test(input.id)) throw new Error("Choose a valid transfer request.");
       const status = String(input.status || "");
