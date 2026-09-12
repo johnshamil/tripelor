@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import type { InventoryRule, ManagedProperty, Room, SeasonalRate } from "@/lib/property-model";
+import PropertySubmissionInbox from "@/components/property-submission-inbox";
 
 type FormRoom = Room;
 type FormState = Omit<ManagedProperty, "id" | "updated_at"> & { id?: string; updated_at?: string };
@@ -101,6 +102,7 @@ export default function PropertyDashboard() {
     </div>
     {notice && !form && <Notice tone="success">{notice}</Notice>}
     {error && !form && <Notice tone="error">{error}</Notice>}
+    {!form && <PropertySubmissionInbox onApproved={(property) => setProperties((current) => [property, ...current.filter((item) => item.id !== property.id)])} />}
     {form ? <PropertyForm form={form} update={update} updateRoom={updateRoom} updateSeasonalRate={updateSeasonalRate} updateInventoryRule={updateInventoryRule} setForm={setForm} openSections={openSections} toggle={toggle} onUpload={uploadPhotos} uploading={uploading} saving={saving} onSave={save} onCancel={closeForm} notice={notice} error={error} /> : <PropertyList properties={sortedProperties} onEdit={edit} onNew={openNew} />}
   </main>;
 }

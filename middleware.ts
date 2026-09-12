@@ -9,10 +9,12 @@ const PROTECTED_PREFIXES = [
   "/booking",
   "/build-your-trip",
   "/speedboat",
+  "/partner",
   "/api/account",
   "/api/admin",
   "/api/booking",
   "/api/speedboat",
+  "/api/partner",
 ];
 
 const PUBLIC_EXCEPTIONS = new Set([

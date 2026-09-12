@@ -13,6 +13,7 @@ function serviceName(path: string) {
   if (path.startsWith("/booking")) return "your private booking";
   if (path.startsWith("/build-your-trip")) return "the Private Trip Planner";
   if (path.startsWith("/speedboat")) return "the transfer concierge";
+  if (path.startsWith("/partner")) return "the partner portal";
   if (path.startsWith("/account/guest-portal")) return "guest services";
   if (path.startsWith("/account")) return "My Tripelor";
   return "Tripelor services";
@@ -63,6 +64,7 @@ export default function LoginPage() {
   }
 
   const destination = serviceName(nextPath);
+  const partnerAccess = nextPath.startsWith("/partner");
   const signupHref = nextPath ? `/signup?next=${encodeURIComponent(nextPath)}` : "/signup";
 
   return (
@@ -103,7 +105,7 @@ export default function LoginPage() {
             <p className="eyebrow mt-10 text-[#8d7037]">Welcome back</p>
             <h2 className="font-display mt-3 text-4xl leading-tight md:text-5xl">Continue to {destination}.</h2>
             <p className="mt-4 text-sm leading-7 text-[#687377]">
-              Sign in so your request, preferences and concierge support remain connected to your Tripelor account.
+              {partnerAccess ? "Sign in with the partner email Tripelor has assigned to your property." : "Sign in so your request, preferences and concierge support remain connected to your Tripelor account."}
             </p>
 
             <form onSubmit={submit} className="mt-8 grid gap-5">
@@ -155,7 +157,7 @@ export default function LoginPage() {
             <div className="mt-6 border border-[#d8cdb8] bg-[#f8f4ec] p-4 text-sm text-[#58656c]">
               <p className="flex items-start gap-3 leading-6">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#8d7037]" />
-                You can explore Tripelor freely. Sign-in is requested only when you use a booking or travel service.
+                {partnerAccess ? "Partner access is limited to the property assigned to this email. Tripelor reviews updates before publication." : "You can explore Tripelor freely. Sign-in is requested only when you use a booking or travel service."}
               </p>
             </div>
 
