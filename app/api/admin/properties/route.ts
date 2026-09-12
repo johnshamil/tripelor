@@ -1,6 +1,6 @@
-import { propertyAdmin, propertyDB, propertyError, sameOrigin, managedProperties } from "@/lib/property-store";
+import { propertyAdmin, propertyDB, propertyError, sameOrigin, managedProperties, ensureLegacyProperties } from "@/lib/property-store";
 import { validateProperty } from "@/lib/property-model";
-export async function GET(){try{await propertyAdmin();return Response.json({properties:await managedProperties()},{headers:{"Cache-Control":"no-store"}});}catch(e){return propertyError(e);}}
+export async function GET(){try{await propertyAdmin();await ensureLegacyProperties();return Response.json({properties:await managedProperties()},{headers:{"Cache-Control":"no-store"}});}catch(e){return propertyError(e);}}
 export async function POST(r:Request){try{await propertyAdmin();sameOrigin(r);const body=await r.text();if(body.length>150000)throw new Error("Property details are too large.");const input=JSON.parse(body), value=validateProperty(input);let rows;
 if(input.id){if(!/^[0-9a-f-]{36}$/.test(input.id)||typeof input.updated_at!=="string")throw new Error("Invalid property version."); rows=await propertyDB(`managed_properties?id=eq.${input.id}&updated_at=eq.${encodeURIComponent(input.updated_at)}`,{method:"PATCH",body:JSON.stringify({...value,updated_at:new Date().toISOString()})}); if(!rows.length)return Response.json({error:"This property changed in another session. Reload before saving."},{status:409});}
 else rows=await propertyDB("managed_properties",{method:"POST",body:JSON.stringify(value)});
