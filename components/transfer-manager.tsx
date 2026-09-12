@@ -86,7 +86,7 @@ export default function TransferManager() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Unable to update transfer request.");
       setRequests((current) => current.map((item) => item.id === request.id ? result.request : item));
-      setNotice(`Transfer ${request.request_reference} updated.`);
+      setNotice(result.emailWarning || `Transfer ${request.request_reference} updated.`);
     } catch (updateError) {
       setError(updateError instanceof Error ? updateError.message : "Unable to update transfer request.");
     } finally {
