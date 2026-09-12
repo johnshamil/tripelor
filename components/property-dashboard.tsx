@@ -21,6 +21,8 @@ import PropertySubmissionInbox from "@/components/property-submission-inbox";
 type FormRoom = Room;
 type FormState = Omit<ManagedProperty, "id" | "updated_at"> & { id?: string; updated_at?: string };
 
+const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+
 const emptyRoom = (): FormRoom => ({ name: "", capacity: 2, amenities: "", mealPlan: "Bed & Breakfast", sellingRate: 0, contractedRate: 0, totalRooms: 1 });
 const emptySeasonalRate = (): SeasonalRate => ({ id: crypto.randomUUID(), name: "", startDate: "", endDate: "", roomName: "", mealPlan: "Bed & Breakfast", sellingRate: 0, contractedRate: 0 });
 const emptyInventoryRule = (): InventoryRule => ({ id: crypto.randomUUID(), roomName: "", startDate: "", endDate: "", roomsAvailable: 0, stopSale: false, note: "" });
@@ -69,11 +71,30 @@ export default function PropertyDashboard() {
     try {
       const added: string[] = [];
       for (const file of Array.from(files)) {
-        const body = new FormData(); body.set("photo", file);
-        const response = await fetch("/api/admin/properties/photos", { method: "POST", body });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "Photo upload failed.");
-        added.push(result.photo);
+        const extension = file.name.toLowerCase().split(".").pop() || "";
+        const contentType = file.type.toLowerCase() || ({
+          jpg: "image/jpeg",
+          jpeg: "image/jpeg",
+          png: "image/png",
+          webp: "image/webp",
+        } as Record<string, string>)[extension] || "";
+        if (!["image/jpeg", "image/png", "image/webp"].includes(contentType) || file.size <= 0 || file.size > MAX_PHOTO_BYTES) {
+          throw new Error("Choose JPG, PNG or WebP photographs up to 10 MB each.");
+        }
+        const signResponse = await fetch("/api/admin/properties/photos/sign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contentType, size: file.size }),
+        });
+        const signResult = await signResponse.json();
+        if (!signResponse.ok || !signResult.signedUrl) throw new Error(signResult.error || "Photo upload failed.");
+        const uploadResponse = await fetch(signResult.signedUrl, {
+          method: "PUT",
+          headers: { "Content-Type": contentType },
+          body: file,
+        });
+        if (!uploadResponse.ok) throw new Error("Photo upload failed. Please try again.");
+        added.push(signResult.photo);
       }
       update("photos", [...form.photos, ...added]); setNotice(`${added.length} photo${added.length === 1 ? "" : "s"} uploaded. Save the property to keep the changes.`);
     } catch (e) { setError(e instanceof Error ? e.message : "Photo upload failed."); }
@@ -138,7 +159,7 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
         </Panel>
       </div>
       <div className="space-y-5">
-        <Panel title="Photographs" subtitle="Upload JPG, PNG or WebP images under 3 MB." open={true} onToggle={() => {}} collapsible={false}><label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-gold/35 bg-gold/[.04] p-7 text-center transition hover:bg-gold/[.08]"><ImagePlus className="h-7 w-7 text-gold"/><span className="mt-3 text-sm font-semibold">{uploading ? "Uploading..." : "Add property photographs"}</span><span className="mt-1 text-xs text-gray-500">Choose multiple images</span><input type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" disabled={uploading} onChange={e => { onUpload(e.target.files); e.currentTarget.value = ""; }}/></label>{form.photos.length > 0 && <div className="mt-4 grid grid-cols-2 gap-3">{form.photos.map((photo, index) => <div key={photo} className="group relative aspect-square overflow-hidden rounded-xl border border-white/10"><img src={propertyPhotoUrl(photo)} alt={`Property photo ${index + 1}`} className="h-full w-full object-cover"/><button type="button" onClick={() => update("photos", form.photos.filter(item => item !== photo))} className="absolute right-2 top-2 rounded-full bg-black/70 p-2 text-white opacity-0 transition group-hover:opacity-100" aria-label="Remove photo"><X className="h-3.5 w-3.5" /></button>{index === 0 && <span className="absolute bottom-2 left-2 rounded-full bg-black/70 px-2 py-1 text-[9px] uppercase tracking-[.1em] text-gold">Cover</span>}</div>)}</div>}</Panel>
+        <Panel title="Photographs" subtitle="Upload JPG, PNG or WebP images up to 10 MB each." open={true} onToggle={() => {}} collapsible={false}><label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-gold/35 bg-gold/[.04] p-7 text-center transition hover:bg-gold/[.08]"><ImagePlus className="h-7 w-7 text-gold"/><span className="mt-3 text-sm font-semibold">{uploading ? "Uploading..." : "Add property photographs"}</span><span className="mt-1 text-xs text-gray-500">Choose multiple images</span><input type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" disabled={uploading} onChange={e => { onUpload(e.target.files); e.currentTarget.value = ""; }}/></label>{form.photos.length > 0 && <div className="mt-4 grid grid-cols-2 gap-3">{form.photos.map((photo, index) => <div key={photo} className="group relative aspect-square overflow-hidden rounded-xl border border-white/10"><img src={propertyPhotoUrl(photo)} alt={`Property photo ${index + 1}`} className="h-full w-full object-cover"/><button type="button" onClick={() => update("photos", form.photos.filter(item => item !== photo))} className="absolute right-2 top-2 rounded-full bg-black/70 p-2 text-white opacity-0 transition group-hover:opacity-100" aria-label="Remove photo"><X className="h-3.5 w-3.5" /></button>{index === 0 && <span className="absolute bottom-2 left-2 rounded-full bg-black/70 px-2 py-1 text-[9px] uppercase tracking-[.1em] text-gold">Cover</span>}</div>)}</div>}</Panel>
         <Panel title={`Inventory & stop-sale · ${form.inventoryRules.length}`} subtitle="Override room quantities for date ranges or stop sales." open={openSections.inventory} onToggle={() => toggle("inventory")}>
           <div className="space-y-4">{form.inventoryRules.map((rule, index) => <div key={rule.id || index} className="rounded-2xl border border-white/10 bg-black/20 p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-gold">Inventory rule {String(index + 1).padStart(2, "0")}</p><button type="button" onClick={() => setForm(current => current ? { ...current, inventoryRules: current.inventoryRules.filter((_, i) => i !== index) } : current)} className="rounded-full p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300" aria-label="Remove inventory rule"><Trash2 className="h-4 w-4" /></button></div><div className="mt-4 grid gap-4 md:grid-cols-2"><label className="grid gap-2 text-sm"><span className="font-medium text-white/85">Room type</span><select value={rule.roomName} onChange={e => updateInventoryRule(index, "roomName", e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 outline-none transition focus:border-gold"><option value="">Choose a room</option>{form.rooms.filter(room => room.name).map(room => <option key={room.name} value={room.name}>{room.name}</option>)}</select></label><NumberField label="Rooms available" value={rule.roomsAvailable} onChange={v => updateInventoryRule(index, "roomsAvailable", v)} min={0} max={100} hint="Set 0 with Stop-sale for a closed period."/><Field label="Start date" type="date" value={rule.startDate} onChange={v => updateInventoryRule(index, "startDate", v)}/><Field label="End date" type="date" value={rule.endDate} onChange={v => updateInventoryRule(index, "endDate", v)}/></div><label className="mt-4 flex items-center gap-3 text-sm"><input type="checkbox" checked={rule.stopSale} onChange={e => updateInventoryRule(index, "stopSale", e.currentTarget.checked)} className="h-4 w-4 accent-[#d9bd7b]"/><span><strong>Stop sale</strong><span className="ml-2 text-xs text-gray-500">Block new bookings during this period</span></span></label><TextArea label="Internal note" value={rule.note} onChange={v => updateInventoryRule(index, "note", v)} placeholder="e.g. Owner use, maintenance, local event..."/></div>)}</div><button type="button" onClick={() => setForm(current => current ? { ...current, inventoryRules: [...current.inventoryRules, { ...emptyInventoryRule(), roomName: current.rooms.find(room => room.name)?.name || "" }] } : current)} className="btn-outline mt-4 gap-2"><Plus className="h-4 w-4" /> Add inventory rule</button><p className="mt-3 text-xs leading-5 text-gray-500">Rules apply to each night in the date range. Bookings already made remain visible in your regular availability records.</p>
         </Panel>
