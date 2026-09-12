@@ -9,14 +9,16 @@ function imageUrl(photo: string) {
   return `/api/property-photo/${photo}`;
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const property = await findProperty(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const property = await findProperty(slug);
   if (!property) return { title: "Stay not found" };
   return { title: property.name, description: property.description };
 }
 
-export default async function ManagedStayPage({ params }: { params: { slug: string } }) {
-  const property = await findProperty(params.slug);
+export default async function ManagedStayPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const property = await findProperty(slug);
   if (!property) notFound();
 
   const photos = property.photos.map(imageUrl);

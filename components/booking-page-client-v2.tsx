@@ -226,9 +226,9 @@ export default function BookingPageClientV2() {
   const childOptions = Array.from({ length: Math.min(4, maxGuests) + 1 }, (_, index) => index);
 
   function handlePropertyChange(value: string) {
-    const firstRoom = PROPERTY_ROOMS[value]?.[0] || managedProperties.find((property) => property.name === value)?.rooms[0];
+    const firstRoomValue = PROPERTY_ROOMS[value]?.[0]?.value || managedProperties.find((property) => property.name === value)?.rooms[0]?.name || "ROOM 101";
     setPropertyName(value);
-    setRoomType(firstRoom && "value" in firstRoom ? firstRoom.value : firstRoom?.name || "ROOM 101");
+    setRoomType(firstRoomValue);
     setMealPlan(value === "Rivethi Beach Hotel" ? "Room Only" : "Bed & Breakfast");
     setAdults("2");
     setChildren("0");
