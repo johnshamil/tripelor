@@ -1,23 +1,30 @@
 import { managedProperties, propertyConfig, propertyDB } from "@/lib/property-store";
 import { currentUser, isAdminEmail } from "@/lib/auth-server";
 export const dynamic="force-dynamic";
+
+function containsPhoto(value: any, photo: string) {
+  if (Array.isArray(value?.photos) && value.photos.includes(photo)) return true;
+  return Array.isArray(value?.rooms) && value.rooms.some((room: any) =>
+    [room?.photos, room?.bathroomPhotos].some((photos: any) => Array.isArray(photos) && photos.includes(photo)),
+  );
+}
 export async function GET(_request: Request, { params }: { params: Promise<{ photo: string }> }) {
   try {
     const { photo } = await params;
     if (!/^[0-9a-f-]{36}\.(jpg|png|webp)$/.test(photo)) return new Response(null, { status: 404 });
     const rows = await propertyDB("managed_properties?select=id,data&status=eq.published");
-    const listed = rows.some((row: any) => Array.isArray(row.data?.photos) && row.data.photos.includes(photo));
+    const listed = rows.some((row: any) => containsPhoto(row.data, photo));
     if (!listed) {
       const user = await currentUser();
       if (!user) return new Response(null, { status: 404 });
       if (!isAdminEmail(user.email)) {
         const email = typeof user.email === "string" ? user.email.trim().toLowerCase() : "";
         const assigned = (await managedProperties()).some(
-          (property) => (property.partnerEmail || "").trim().toLowerCase() === email && (property.photos || []).includes(photo),
+          (property) => (property.partnerEmail || "").trim().toLowerCase() === email && containsPhoto(property, photo),
         );
         if (!assigned) {
           const pending = await propertyDB(`property_partner_submissions?partner_email=eq.${encodeURIComponent(email)}&status=eq.pending&select=data`);
-          const pendingPhoto = pending.some((row: any) => Array.isArray(row.data?.photos) && row.data.photos.includes(photo));
+          const pendingPhoto = pending.some((row: any) => containsPhoto(row.data, photo));
           if (!pendingPhoto) return new Response(null, { status: 404 });
         }
       }
