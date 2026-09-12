@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import LuxuryPropertyPage from "@/components/luxury-property-page";
+import { propertyPhotoUrl } from "@/lib/property-model";
 import { findProperty } from "@/lib/property-store";
 
 export const dynamic = "force-dynamic";
