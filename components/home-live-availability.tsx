@@ -76,7 +76,7 @@ export default function HomeLiveAvailability() {
               <h2 className="font-display mt-2 text-2xl text-white md:text-3xl">Find your island dates.</h2>
             </div>
             <p className="max-w-md text-xs leading-5 text-white/40">
-              Select your travel dates to see available rooms before creating your booking.
+              Select your travel dates to see available rooms. Booking requests require final confirmation from Tripelor.
             </p>
           </div>
 
@@ -129,7 +129,7 @@ export default function HomeLiveAvailability() {
                     href={`/booking?property=${encodeURIComponent(property.name)}&mealPlan=Bed%20%26%20Breakfast&checkIn=${checkIn}&checkOut=${checkOut}`}
                     className="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.12em] text-white/65 transition hover:text-[#d9bd7b]"
                   >
-                    {count === 0 ? "Try other dates" : "Reserve"} <ArrowRight className="h-3.5 w-3.5" />
+                    {count === 0 ? "Try other dates" : "Request to book"} <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
               );

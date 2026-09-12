@@ -136,7 +136,7 @@ const rooms: RoomCard[] = [
 
 const filters: { key: FilterKey; label: string }[] = [
   { key: "all", label: "All rooms" },
-  { key: "instant", label: "Instant booking" },
+  { key: "instant", label: "Live availability" },
   { key: "under100", label: "Under $100" },
   { key: "sea", label: "Sea view" },
 ];
@@ -168,7 +168,7 @@ export default function RoomFirstBookingCards() {
             <p className="eyebrow text-[#8d7037]">Choose the room first</p>
             <h2 className="font-display mt-4 text-4xl leading-tight md:text-6xl">Find the room that feels right.</h2>
             <p className="mt-5 max-w-2xl leading-7 text-[#53616a]">
-              Start with the room itself, compare the stay details at a glance, then continue to booking with your selection already prepared.
+              Start with the room itself, compare the stay details at a glance, then send a booking request with your selection already prepared. Your reservation is confirmed only after Tripelor sends final confirmation.
             </p>
           </div>
           <Link href="/stays" className="inline-flex h-fit items-center gap-2 text-xs font-semibold uppercase tracking-[.16em] text-[#6f5729] transition hover:text-[#071922]">
@@ -200,7 +200,7 @@ export default function RoomFirstBookingCards() {
                 <img src={room.image} alt={`${room.roomName} at ${room.property}`} className="h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.035]" />
                 <div className="absolute left-3 top-3 flex flex-wrap gap-2 md:left-4 md:top-4">
                   <span className="rounded-full border border-white/45 bg-black/30 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.11em] text-white backdrop-blur-md md:text-[10px] md:tracking-[.13em]">
-                    {room.bookingMode === "instant" ? "Instant booking" : "Request to book"}
+                    {room.bookingMode === "instant" ? "Live availability" : "Request to book"}
                   </span>
                   {room.seaView && <span className="rounded-full border border-white/45 bg-black/30 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[.11em] text-white backdrop-blur-md md:text-[10px] md:tracking-[.13em]">Sea view</span>}
                 </div>
@@ -237,7 +237,7 @@ export default function RoomFirstBookingCards() {
                 <div className="touch-card-actions mt-6 grid grid-cols-2 gap-2.5 md:mt-7 md:gap-3">
                   <Link href={`/stays/${room.propertySlug}`} className="inline-flex items-center justify-center rounded-full border border-[#bfb29c] px-3 py-3 text-[11px] font-semibold uppercase tracking-[.09em] text-[#4e5b63] transition hover:border-[#8d7037] hover:text-[#6f5729] md:px-4 md:text-xs md:tracking-[.11em]">View stay</Link>
                   <Link href={bookingHref(room)} className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0b2731] px-3 py-3 text-[11px] font-semibold uppercase tracking-[.09em] text-white transition hover:bg-[#123743] md:px-4 md:text-xs md:tracking-[.11em]">
-                    {room.bookingMode === "instant" ? "Book room" : "Select room"}<ArrowRight className="h-3.5 w-3.5 shrink-0" />
+                    Request to book<ArrowRight className="h-3.5 w-3.5 shrink-0" />
                   </Link>
                 </div>
               </div>
