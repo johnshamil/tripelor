@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Maldives Speedboat Transfer to Felidhoo | USD 50 Per Person",
+  title: "Maldives Speedboat Transfer to Felidhoo | Tripelor",
   description:
-    "Request a speedboat transfer to V. Felidhoo with Tripelor. Fare is USD 50 per person. Submit arrival date, time and seats at least 24 hours before arrival.",
+    "Request a speedboat transfer to V. Felidhoo with Tripelor. Live departures show the current fare and seat capacity. Submit arrival date, time and seats at least 24 hours before arrival.",
   keywords: [
     "Felidhoo speedboat",
     "Male to Felidhoo speedboat",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     url: "https://tripelor.com/speedboat",
     title: "Speedboat Transfer to Felidhoo | Tripelor",
     description:
-      "Book a Maldives speedboat transfer to Felidhoo for USD 50 per person. Request seats at least 24 hours before arrival.",
+      "Request a Maldives speedboat transfer to Felidhoo with Tripelor. Check live departures and request seats at least 24 hours before arrival.",
   },
 };
 

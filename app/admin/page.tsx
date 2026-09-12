@@ -11,6 +11,7 @@ import {
   CreditCard,
   Search,
   ShieldCheck,
+  Ship,
   Users,
   XCircle,
 } from "lucide-react";
@@ -192,6 +193,9 @@ export default function AdminPage() {
             </Link>
             <Link href="/admin/properties" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
               <Building2 className="h-4 w-4" /> Properties
+            </Link>
+            <Link href="/admin/transfers" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
+              <Ship className="h-4 w-4" /> Transfers
             </Link>
             <Link href="#bookings" className="btn-outline min-h-[46px] px-4 text-xs">
               Bookings
