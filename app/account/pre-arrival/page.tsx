@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   ArrowLeft,
   CalendarDays,
+  Camera,
   CheckCircle2,
   Clock3,
   Headphones,
@@ -72,6 +73,12 @@ const experiences = [
   "Sandbank escape",
   "Dolphin cruise",
   "Night fishing",
+];
+
+const mediaServices = [
+  "Professional island photography",
+  "Cinematic trip videography",
+  "Drone photography & videography",
 ];
 
 const fieldClass =
@@ -410,6 +417,28 @@ export default function PreArrivalConciergePage() {
                     key={item}
                     onClick={() => toggleExperience(item)}
                     className={`flex min-h-14 items-center justify-between border px-4 text-left text-sm transition ${active ? "border-[#c9a86a]/60 bg-[#c9a86a]/10 text-white" : "border-white/10 bg-white/[.025] text-white/55 hover:border-white/25"}`}
+                  >
+                    {item}
+                    {active && <CheckCircle2 className="h-4 w-4 shrink-0 text-[#e3ca91]" />}
+                  </button>
+                );
+              })}
+            </div>
+          </ConciergeSection>
+
+          <ConciergeSection icon={Camera} eyebrow="Capture the journey" title="Preserve your Maldives memories beautifully">
+            <p className="mb-5 max-w-2xl text-sm leading-6 text-white/45">
+              Request a professional creator for portraits, cinematic travel footage or premium aerial coverage. Tripelor will confirm availability and pricing before your stay.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {mediaServices.map(item => {
+                const active = draft.interests.includes(item);
+                return (
+                  <button
+                    type="button"
+                    key={item}
+                    onClick={() => toggleExperience(item)}
+                    className={`flex min-h-20 items-center justify-between border px-4 text-left text-sm transition ${active ? "border-[#c9a86a]/60 bg-[#c9a86a]/10 text-white" : "border-white/10 bg-white/[.025] text-white/55 hover:border-white/25"}`}
                   >
                     {item}
                     {active && <CheckCircle2 className="h-4 w-4 shrink-0 text-[#e3ca91]" />}
