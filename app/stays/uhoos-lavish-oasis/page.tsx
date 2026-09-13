@@ -1,3 +1,6 @@
+import ManagedStayPage from "../[slug]/page";
+import { findProperty } from "@/lib/property-store";
+export const dynamic = "force-dynamic";
 import LuxuryPropertyPage from "@/components/luxury-property-page";
 
 const deluxeRoomCover = "/properties/uhoos-lavish-oasis/20250517_193323.jpg";
@@ -21,7 +24,8 @@ const schema = {
   priceRange: "USD 85-115 per room per night",
 };
 
-export default function Page() {
+export default async function Page() {
+  if (await findProperty("uhoos-lavish-oasis")) return <ManagedStayPage params={Promise.resolve({ slug: "uhoos-lavish-oasis" })} />;
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />

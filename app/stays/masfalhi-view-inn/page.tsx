@@ -1,3 +1,6 @@
+import ManagedStayPage from "../[slug]/page";
+import { findProperty } from "@/lib/property-store";
+export const dynamic = "force-dynamic";
 import LuxuryPropertyPage from "@/components/luxury-property-page";
 
 const photos = [
@@ -24,7 +27,8 @@ const schema = {
   priceRange: "USD 97-130 per room per night",
 };
 
-export default function Page() {
+export default async function Page() {
+  if (await findProperty("masfalhi-view-inn")) return <ManagedStayPage params={Promise.resolve({ slug: "masfalhi-view-inn" })} />;
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />

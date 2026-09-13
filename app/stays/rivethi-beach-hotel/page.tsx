@@ -1,3 +1,6 @@
+import ManagedStayPage from "../[slug]/page";
+import { findProperty } from "@/lib/property-store";
+export const dynamic = "force-dynamic";
 import LuxuryPropertyPage from "@/components/luxury-property-page";
 
 const photos = [
@@ -8,7 +11,8 @@ const photos = [
   "/properties/rivethi-beach-hotel/7143733a-088c-4eea-b23a-117a50d93240.webp",
 ];
 
-export default function RivethiBeach() {
+export default async function RivethiBeach() {
+  if (await findProperty("rivethi-beach-hotel")) return <ManagedStayPage params={Promise.resolve({ slug: "rivethi-beach-hotel" })} />;
   return (
     <LuxuryPropertyPage
       eyebrow="Beachfront Hulhumalé stay"
