@@ -27,32 +27,40 @@ export default async function ManagedStayPage({ params }: { params: Promise<{ sl
   if (!property) notFound();
 
   const photos = property.photos.map(imageUrl);
-  const rooms = property.rooms.map((room) => {
-    const roomPhotos = (room.photos || []).map(imageUrl);
-    const bathroomPhotos = (room.bathroomPhotos || []).map(imageUrl);
+  const roomGroups = new Map<string, typeof property.rooms>();
+  for (const room of property.rooms) {
+    const group = roomGroups.get(room.name) || [];
+    group.push(room);
+    roomGroups.set(room.name, group);
+  }
+  const rooms = Array.from(roomGroups.values()).map((variants) => {
+    const room = variants[0];
+    const roomPhotos = Array.from(new Set(variants.flatMap(item => item.photos || []))).map(imageUrl);
+    const bathroomPhotos = Array.from(new Set(variants.flatMap(item => item.bathroomPhotos || []))).map(imageUrl);
+    const mealPlans = variants.map(variant => ({
+      name: variant.mealPlan,
+      price: variant.sellingRate,
+      detail: variant.mealPlan === "Bed & Breakfast" ? "Breakfast included" : variant.mealPlan === "Half Board" ? "Breakfast and dinner included" : variant.mealPlan === "Full Board" ? "Breakfast, lunch and dinner included" : variant.mealPlan,
+      bookingHref: `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(room.name)}&mealPlan=${encodeURIComponent(variant.mealPlan)}`,
+    }));
     return {
       name: room.name,
       image: roomPhotos[0] || photos[0],
       photos: roomPhotos,
       bathroomPhotos,
       description: room.amenities || `${room.name} at ${property.name}.`,
-      details: [`Up to ${room.capacity} guest${room.capacity === 1 ? "" : "s"}`, room.mealPlan, `${room.totalRooms} room${room.totalRooms === 1 ? "" : "s"} available`, property.amenities || "Tripelor support"],
-      bookingHref: `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(room.name)}&mealPlan=${encodeURIComponent(room.mealPlan)}`,
+      details: [`Up to ${room.capacity} guests`, property.amenities || "Tripelor support"],
+      mealPlans,
+      bookingHref: mealPlans[0].bookingHref,
     };
   });
-  const baseRates = property.rooms.map((room) => ({
-    name: `${room.name} · ${room.mealPlan}`,
-    price: room.sellingRate,
-    detail: room.amenities || `${room.mealPlan} stay at ${property.name}.`,
-    bookingHref: `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(room.name)}&mealPlan=${encodeURIComponent(room.mealPlan)}`,
-  }));
   const seasonalRates = property.seasonalRates.map((rate) => ({
     name: `${rate.name} · ${rate.roomName} · ${rate.mealPlan}`,
     price: rate.sellingRate,
     detail: `${displayDate(rate.startDate)} – ${displayDate(rate.endDate)} · ${rate.mealPlan}`,
     bookingHref: `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(rate.roomName)}&mealPlan=${encodeURIComponent(rate.mealPlan)}&checkIn=${encodeURIComponent(rate.startDate)}`,
   }));
-  const rates = [...baseRates, ...seasonalRates];
+  const rates = seasonalRates;
   const startingFrom = Math.min(...property.rooms.map((room) => room.sellingRate), ...property.seasonalRates.map((rate) => rate.sellingRate));
 
   return <LuxuryPropertyPage
