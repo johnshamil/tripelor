@@ -27,9 +27,7 @@ export async function POST(r: Request) {
         throw new Error("Invalid property version.");
       }
 
-      // Compare timestamps as instants before updating by id. Supabase can return
-      // equivalent timestamps with different ISO formatting (for example, +00:00
-      // versus Z), which previously caused a false conflict.
+      // Read the current version, then retain an atomic version filter on PATCH.
       const currentRows = await propertyDB(
         `managed_properties?id=eq.${input.id}&select=id,updated_at&limit=1`,
       ) as Array<{ id: string; updated_at: string }>;
@@ -46,10 +44,11 @@ export async function POST(r: Request) {
         );
       }
 
-      rows = await propertyDB(`managed_properties?id=eq.${input.id}`, {
+      rows = await propertyDB(`managed_properties?id=eq.${input.id}&updated_at=eq.${encodeURIComponent(currentRows[0].updated_at)}`, {
         method: "PATCH",
         body: JSON.stringify({ ...value, updated_at: new Date().toISOString() }),
       }) as any[];
+      if (!rows.length) return Response.json({ error: "This property was updated in another session. Reload it before saving your changes." }, { status: 409 });
     } else {
       rows = await propertyDB("managed_properties", {
         method: "POST",
@@ -63,14 +62,19 @@ export async function POST(r: Request) {
         `property_inventory?property_name=eq.${encodeURIComponent(saved.data.name)}&active=eq.true`,
         { method: "PATCH", body: JSON.stringify({ active: false }) },
       );
-      const inventory = saved.data.rooms.map((room: any) => ({
+      // Meal plans share the same physical room inventory; never sum them.
+      const roomCounts = new Map<string, number>();
+      for (const room of saved.data.rooms) {
+        roomCounts.set(room.name, Math.max(roomCounts.get(room.name) || 0, room.totalRooms));
+      }
+      const inventory = Array.from(roomCounts, ([room_type, total_rooms]) => ({
         property_name: saved.data.name,
-        room_type: room.name,
-        total_rooms: room.totalRooms,
+        room_type,
+        total_rooms,
         active: true,
       }));
       if (inventory.length) {
-        await propertyDB("property_inventory", {
+        await propertyDB("property_inventory?on_conflict=property_name,room_type", {
           method: "POST",
           headers: { Prefer: "resolution=merge-duplicates,return=representation" },
           body: JSON.stringify(inventory),
