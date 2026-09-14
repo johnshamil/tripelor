@@ -12,6 +12,7 @@ import {
   Sparkles,
   Star,
 } from "lucide-react";
+import IslandMoment from "@/components/island-moment";
 import SaveTripButton from "@/components/save-trip-button";
 import { propertyPhotoUrl } from "@/lib/property-model";
 import RewardsChecker from "@/components/rewards-checker";
@@ -161,6 +162,8 @@ export default async function Home() {
       </section>
 
       <PropertyCards managedProperties={managedProperties} featured />
+
+      <IslandMoment />
 
       {experiences.length > 0 && (
         <section id="discover-experiences" aria-labelledby="discover-experiences-title" className="scroll-mt-24 border-b border-white/10 bg-[#06151c] text-white">
