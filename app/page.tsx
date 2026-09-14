@@ -160,6 +160,13 @@ export default async function Home() {
         </div>
       </section>
 
+      <section className="border-b border-gold/20 bg-[#0b2731]">
+        <div className="container grid items-center gap-6 py-12 md:grid-cols-[1fr_auto]">
+          <div><p className="eyebrow">Dream it. Choose it. Let us help plan it.</p><h2 className="font-display mt-4 text-3xl md:text-4xl">What is on your Maldives wishlist?</h2><p className="mt-3 max-w-2xl leading-7 text-white/65">Pick the moments you want, discover matching stays and experiences, and send us your holiday wishes.</p></div>
+          <Link href="/wishlist" className="btn-gold">Build My Wishlist <ArrowRight className="h-4 w-4"/></Link>
+        </div>
+      </section>
+
       <PropertyCards managedProperties={managedProperties} featured />
 
       {experiences.length > 0 && (
