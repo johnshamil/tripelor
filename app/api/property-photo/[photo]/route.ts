@@ -4,6 +4,7 @@ export const dynamic="force-dynamic";
 
 function containsPhoto(value: any, photo: string) {
   if (Array.isArray(value?.photos) && value.photos.includes(photo)) return true;
+  if (Array.isArray(value?.experiences) && value.experiences.some((item:any)=>item.enabled === true && Array.isArray(item.photos) && item.photos.includes(photo))) return true;
   return Array.isArray(value?.rooms) && value.rooms.some((room: any) =>
     [room?.photos, room?.bathroomPhotos].some((photos: any) => Array.isArray(photos) && photos.includes(photo)),
   );
