@@ -18,8 +18,9 @@ import { propertyPhotoUrl } from "@/lib/property-model";
 import type { InventoryRule, ManagedProperty, Room, SeasonalRate } from "@/lib/property-model";
 import PropertySubmissionInbox from "@/components/property-submission-inbox";
 
-type FormRoom = Room;
-type FormState = Omit<ManagedProperty, "id" | "updated_at"> & { id?: string; updated_at?: string };
+type MealRate = Pick<Room, "mealPlan" | "sellingRate" | "contractedRate">;
+type FormRoom = Room & { mealRates: MealRate[] };
+type FormState = Omit<ManagedProperty, "id" | "updated_at" | "rooms"> & { id?: string; updated_at?: string; rooms: FormRoom[] };
 type PhotoTarget =
   | { kind: "property" }
   | { kind: "room"; roomIndex: number }
@@ -27,7 +28,7 @@ type PhotoTarget =
 
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
 
-const emptyRoom = (): FormRoom => ({ name: "", capacity: 2, amenities: "", mealPlan: "Bed & Breakfast", sellingRate: 0, contractedRate: 0, totalRooms: 1, photos: [], bathroomPhotos: [] });
+const emptyRoom = (): FormRoom => ({ name: "", capacity: 2, amenities: "", mealPlan: "Bed & Breakfast", sellingRate: 0, contractedRate: 0, totalRooms: 1, photos: [], bathroomPhotos: [], mealRates: [{ mealPlan: "Bed & Breakfast", sellingRate: 0, contractedRate: 0 }] });
 const emptySeasonalRate = (): SeasonalRate => ({ id: crypto.randomUUID(), name: "", startDate: "", endDate: "", roomName: "", mealPlan: "Bed & Breakfast", sellingRate: 0, contractedRate: 0 });
 const emptyInventoryRule = (): InventoryRule => ({ id: crypto.randomUUID(), roomName: "", startDate: "", endDate: "", roomsAvailable: 0, stopSale: false, note: "" });
 const emptyForm = (): FormState => ({
@@ -35,6 +36,35 @@ const emptyForm = (): FormState => ({
   seasonalRates: [], inventoryRules: [],
   taxes: "", transfers: "", cancellation: "", payment: "", partnerName: "", partnerEmail: "", partnerPhone: "",
 });
+
+
+function propertyToForm(property: ManagedProperty): FormState {
+  const groups = new Map<string, FormRoom>();
+  property.rooms.forEach((room, index) => {
+    const key = room.name || `unnamed-${index}`;
+    const rate = { mealPlan: room.mealPlan, sellingRate: room.sellingRate, contractedRate: room.contractedRate };
+    const existing = groups.get(key);
+    if (existing) {
+      existing.mealRates.push(rate);
+      existing.photos = Array.from(new Set([...(existing.photos || []), ...(room.photos || [])]));
+      existing.bathroomPhotos = Array.from(new Set([...(existing.bathroomPhotos || []), ...(room.bathroomPhotos || [])]));
+    } else {
+      groups.set(key, { ...room, photos: [...(room.photos || [])], bathroomPhotos: [...(room.bathroomPhotos || [])], mealRates: [rate] });
+    }
+  });
+  return { ...property, rooms: Array.from(groups.values()) };
+}
+
+function roomsForSave(rooms: FormRoom[]): Room[] {
+  const names = rooms.map(room => room.name.trim().toLowerCase()).filter(Boolean);
+  if (new Set(names).size !== names.length) throw new Error("Use one room editor per room name. Add meal plans inside that room.");
+  return rooms.flatMap(({ mealRates, ...room }) => {
+    if (!mealRates.length) throw new Error("Add at least one meal plan to each room.");
+    const plans = mealRates.map(rate => rate.mealPlan.trim().toLowerCase());
+    if (new Set(plans).size !== plans.length) throw new Error(`Use each meal plan only once for ${room.name || "this room"}.`);
+    return mealRates.map(rate => ({ ...room, ...rate }));
+  });
+}
 
 export default function PropertyDashboard() {
   const [properties, setProperties] = useState<ManagedProperty[]>([]);
@@ -65,7 +95,7 @@ export default function PropertyDashboard() {
   const updateInventoryRule = (index: number, key: keyof InventoryRule, value: string | number | boolean) => setForm(current => current ? { ...current, inventoryRules: current.inventoryRules.map((rule, i) => i === index ? { ...rule, [key]: value } : rule) } : current);
 
   function openNew() { setForm(emptyForm()); setNotice(""); setError(""); window.scrollTo({ top: 0, behavior: "smooth" }); }
-  function edit(property: ManagedProperty) { setForm(JSON.parse(JSON.stringify(property))); setNotice(""); setError(""); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  function edit(property: ManagedProperty) { setForm(propertyToForm(property)); setNotice(""); setError(""); window.scrollTo({ top: 0, behavior: "smooth" }); }
   function closeForm() { setForm(null); setNotice(""); setError(""); }
   function toggle(section: string) { setOpenSections(value => ({ ...value, [section]: !value[section] })); }
 
@@ -128,12 +158,12 @@ export default function PropertyDashboard() {
     if (!form) return;
     setSaving(true); setError(""); setNotice("");
     try {
-      const response = await fetch("/api/admin/properties", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+      const response = await fetch("/api/admin/properties", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, rooms: roomsForSave(form.rooms) }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Unable to save property.");
       const saved = result.property as ManagedProperty;
       setProperties(current => [saved, ...current.filter(property => property.id !== saved.id)]);
-      setForm(JSON.parse(JSON.stringify(saved)));
+      setForm(propertyToForm(saved));
       setNotice(saved.status === "published" ? "Property published. It is now available on the public Stays page." : "Draft saved. You can publish it when all details are ready.");
     } catch (e) { setError(e instanceof Error ? e.message : "Unable to save property."); }
     finally { setSaving(false); }
@@ -166,6 +196,12 @@ function BuildingIcon() { return <div className="mx-auto flex h-14 w-14 items-ce
 
 function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInventoryRule, setForm, openSections, toggle, onUpload, uploading, saving, onSave, onCancel, notice, error }: { form: FormState; update: <K extends keyof FormState>(key: K, value: FormState[K]) => void; updateRoom: (index: number, key: keyof FormRoom, value: string | number) => void; updateSeasonalRate: (index: number, key: keyof SeasonalRate, value: string | number) => void; updateInventoryRule: (index: number, key: keyof InventoryRule, value: string | number | boolean) => void; setForm: React.Dispatch<React.SetStateAction<FormState | null>>; openSections: Record<string, boolean>; toggle: (section: string) => void; onUpload: (files: FileList | null, target: PhotoTarget) => void; uploading: boolean; saving: boolean; onSave: () => void; onCancel: () => void; notice: string; error: string }) {
   const roomCount = form.rooms.length;
+  function updateMealRate(roomIndex:number, rateIndex:number, key:keyof MealRate, value:string|number) {
+    setForm(current => current ? { ...current, rooms: current.rooms.map((room,i)=>i===roomIndex ? { ...room, mealRates: room.mealRates.map((rate,j)=>j===rateIndex ? { ...rate, [key]:value } : rate) } : room) } : current);
+  }
+  function addMealRate(roomIndex:number, mealPlan:string) {
+    setForm(current => current ? { ...current, rooms: current.rooms.map((room,i)=>i===roomIndex ? { ...room, mealRates:[...room.mealRates,{mealPlan,sellingRate:0,contractedRate:0}] } : room) } : current);
+  }
   function removeRoomPhoto(roomIndex: number, key: "photos" | "bathroomPhotos", photo: string) {
     setForm(current => current ? {
       ...current,
@@ -185,7 +221,16 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
           <div className="grid gap-4 md:grid-cols-2"><Field label="Property name" value={form.name} onChange={v => update("name", v)} placeholder="e.g. Coral Garden Guesthouse"/><Field label="Island / location" value={form.island} onChange={v => update("island", v)} placeholder="e.g. V. Felidhoo, Maldives"/><Field label="Public URL" value={form.slug} onChange={v => update("slug", v.toLowerCase().replace(/\s+/g, "-"))} placeholder="coral-garden-guesthouse" hint="Lowercase letters, numbers and hyphens."/></div><TextArea label="Description" value={form.description} onChange={v => update("description", v)} placeholder="Describe the stay, location and guest experience."/><TextArea label="Amenities" value={form.amenities} onChange={v => update("amenities", v)} placeholder="Wi-Fi, breakfast, beach access, air conditioning..." hint="Separate amenities with commas."/>
         </Panel>
         <Panel title={`Rooms & rates · ${roomCount}`} subtitle="Add room types, capacity, meal plans and your margin." open={openSections.rooms} onToggle={() => toggle("rooms")}>
-          <div className="space-y-4">{form.rooms.map((room, index) => <div key={index} className="rounded-2xl border border-white/10 bg-black/20 p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-gold">Room rate {String(index + 1).padStart(2, "0")}</p>{form.rooms.length > 1 && <button type="button" onClick={() => setForm(current => current ? { ...current, rooms: current.rooms.filter((_, i) => i !== index) } : current)} className="rounded-full p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300" aria-label="Remove room"><Trash2 className="h-4 w-4" /></button>}</div><div className="mt-4 grid gap-4 md:grid-cols-2"><Field label="Room type" value={room.name} onChange={v => updateRoom(index, "name", v)} placeholder="Deluxe Double Room"/><NumberField label="Guest capacity" value={room.capacity} onChange={v => updateRoom(index, "capacity", v)} min={1} max={100}/><NumberField label="Rooms available" value={room.totalRooms} onChange={v => updateRoom(index, "totalRooms", v)} min={0} max={100} hint="Use 0 for a draft; set the sellable inventory before publishing."/><Field label="Meal plan" value={room.mealPlan} onChange={v => updateRoom(index, "mealPlan", v)} placeholder="Bed & Breakfast"/><NumberField label="Partner rate (USD)" value={room.contractedRate} onChange={v => updateRoom(index, "contractedRate", v)} min={0} max={1000000}/><NumberField label="Tripelor selling rate (USD)" value={room.sellingRate} onChange={v => updateRoom(index, "sellingRate", v)} min={0} max={1000000}/></div><TextArea label="Room amenities / notes" value={room.amenities} onChange={v => updateRoom(index, "amenities", v)} placeholder="King bed, balcony, private bathroom..."/><div className="mt-5 grid gap-4 lg:grid-cols-2"><PhotoUploadBox label={"Add Room " + (index + 1) + " photos"} helper="Photos of this room rate section." photos={room.photos || []} uploading={uploading} onUpload={(files) => onUpload(files, { kind: "room", roomIndex: index })} onRemove={(photo) => removeRoomPhoto(index, "photos", photo)}/><PhotoUploadBox label={"Add Room " + (index + 1) + " toilet / bathroom photos"} helper="Show the private toilet or bathroom for this room." photos={room.bathroomPhotos || []} uploading={uploading} onUpload={(files) => onUpload(files, { kind: "bathroom", roomIndex: index })} onRemove={(photo) => removeRoomPhoto(index, "bathroomPhotos", photo)}/></div><p className="mt-3 text-xs text-gray-500">Your partner rate and selling rate are private admin information.</p></div>)}</div><button type="button" onClick={() => setForm(current => current ? { ...current, rooms: [...current.rooms, emptyRoom()] } : current)} className="btn-outline mt-4 gap-2"><Plus className="h-4 w-4" /> Add room rate</button>
+          <div className="space-y-4">{form.rooms.map((room, index) => <div key={index} className="rounded-2xl border border-white/10 bg-black/20 p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-gold">Room {String(index + 1).padStart(2, "0")}</p>{form.rooms.length > 1 && <button type="button" onClick={() => setForm(current => current ? { ...current, rooms: current.rooms.filter((_, i) => i !== index) } : current)} className="rounded-full p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300" disabled={uploading || saving} aria-label="Remove room"><Trash2 className="h-4 w-4" /></button>}</div><div className="mt-4 grid gap-4 md:grid-cols-2"><Field label="Room type" value={room.name} onChange={v => updateRoom(index, "name", v)} placeholder="Deluxe Double Room"/><NumberField label="Guest capacity" value={room.capacity} onChange={v => updateRoom(index, "capacity", v)} min={1} max={100}/><NumberField label="Rooms available" value={room.totalRooms} onChange={v => updateRoom(index, "totalRooms", v)} min={0} max={100} hint="Use 0 for a draft; set the sellable inventory before publishing."/></div><TextArea label="Room amenities / notes" value={room.amenities} onChange={v => updateRoom(index, "amenities", v)} placeholder="King bed, balcony, private bathroom..."/><div className="mt-5 grid gap-4 lg:grid-cols-2"><PhotoUploadBox label={"Add Room " + (index + 1) + " photos"} helper="Upload once for all meal plans of this room." photos={room.photos || []} uploading={uploading} onUpload={(files) => onUpload(files, { kind: "room", roomIndex: index })} onRemove={(photo) => removeRoomPhoto(index, "photos", photo)}/><PhotoUploadBox label={"Add Room " + (index + 1) + " toilet / bathroom photos"} helper="Show the private toilet or bathroom for this room." photos={room.bathroomPhotos || []} uploading={uploading} onUpload={(files) => onUpload(files, { kind: "bathroom", roomIndex: index })} onRemove={(photo) => removeRoomPhoto(index, "bathroomPhotos", photo)}/></div><div className="mt-6 border-t border-white/10 pt-5">
+  <h4 className="text-sm font-semibold text-gold">Meal plans & rates</h4>
+  <p className="mt-2 text-xs leading-5 text-gray-400">Enter a selling price and private contracted rate for each meal plan you offer. Photos and room details above apply to all plans.</p>
+  <div className="mt-4 space-y-3">{room.mealRates.map((rate, rateIndex) => <div key={rateIndex} className="rounded-xl border border-gold/20 p-4">
+    <div className="flex items-start justify-between gap-2"><Field label="Meal plan" value={rate.mealPlan} onChange={v => updateMealRate(index, rateIndex, "mealPlan", v)} placeholder="Bed & Breakfast"/>{room.mealRates.length > 1 && <button type="button" onClick={() => setForm(current => current ? { ...current, rooms: current.rooms.map((item,i) => i===index ? { ...item, mealRates: item.mealRates.filter((_,j)=>j!==rateIndex) } : item) } : current)} aria-label={`Remove ${rate.mealPlan} from ${room.name || "room"}`} className="p-2 text-gray-400 hover:text-red-300"><Trash2 className="h-4 w-4"/></button>}</div>
+    <div className="mt-4 grid gap-4 sm:grid-cols-2"><NumberField label="Selling price (USD)" value={rate.sellingRate} onChange={v=>updateMealRate(index,rateIndex,"sellingRate",v)} min={0} max={1000000}/><NumberField label="Contracted rate (USD) · Private" value={rate.contractedRate} onChange={v=>updateMealRate(index,rateIndex,"contractedRate",v)} min={0} max={1000000}/></div>
+  </div>)}</div>
+  <div className="mt-4 flex flex-wrap gap-2">{[["BB","Bed & Breakfast"],["HB","Half Board"],["FB","Full Board"],["RO","Room Only"],["AI","All Inclusive"]].filter(([,name])=>!room.mealRates.some(rate=>rate.mealPlan.toLowerCase()===name.toLowerCase())).map(([label,name])=><button key={label} type="button" onClick={()=>addMealRate(index,name)} className="rounded-lg border border-gold/30 px-3 py-2 text-xs text-gold">+ {label}</button>)}<button type="button" onClick={()=>addMealRate(index,"")} className="rounded-lg border border-white/20 px-3 py-2 text-xs">+ Other plan</button></div>
+  <p className="mt-3 text-xs text-gray-500">Selling prices are shown to guests. Contracted rates stay private.</p>
+</div></div>)}</div><button type="button" onClick={() => setForm(current => current ? { ...current, rooms: [...current.rooms, emptyRoom()] } : current)} className="btn-outline mt-4 gap-2"><Plus className="h-4 w-4" /> Add room</button>
         </Panel>
         <Panel title={`Seasonal rates · ${form.seasonalRates.length}`} subtitle="Set date-based prices for high season, offers and blackout periods." open={openSections.seasonal} onToggle={() => toggle("seasonal")}>
           <div className="space-y-4">{form.seasonalRates.map((rate, index) => <div key={rate.id || index} className="rounded-2xl border border-gold/20 bg-gold/[.035] p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-gold">Season {String(index + 1).padStart(2, "0")}</p><button type="button" onClick={() => setForm(current => current ? { ...current, seasonalRates: current.seasonalRates.filter((_, i) => i !== index) } : current)} className="rounded-full p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300" aria-label="Remove seasonal rate"><Trash2 className="h-4 w-4" /></button></div><div className="mt-4 grid gap-4 md:grid-cols-2"><Field label="Season name" value={rate.name} onChange={v => updateSeasonalRate(index, "name", v)} placeholder="High season 2026"/><label className="grid gap-2 text-sm"><span className="font-medium text-white/85">Room type</span><select value={rate.roomName} onChange={e => updateSeasonalRate(index, "roomName", e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 outline-none transition focus:border-gold"><option value="">Choose a room</option>{form.rooms.filter(room => room.name).map(room => <option key={room.name} value={room.name}>{room.name}</option>)}</select></label><Field label="Start date" type="date" value={rate.startDate} onChange={v => updateSeasonalRate(index, "startDate", v)}/><Field label="End date" type="date" value={rate.endDate} onChange={v => updateSeasonalRate(index, "endDate", v)}/><Field label="Meal plan" value={rate.mealPlan} onChange={v => updateSeasonalRate(index, "mealPlan", v)} placeholder="Bed & Breakfast"/><NumberField label="Partner rate (USD)" value={rate.contractedRate} onChange={v => updateSeasonalRate(index, "contractedRate", v)} min={0} max={1000000}/><NumberField label="Tripelor selling rate (USD)" value={rate.sellingRate} onChange={v => updateSeasonalRate(index, "sellingRate", v)} min={0} max={1000000}/></div><p className="mt-3 text-xs text-gray-500">The end date is included. If seasons overlap, the more specific date range is used.</p></div>)}</div><button type="button" onClick={() => setForm(current => current ? { ...current, seasonalRates: [...current.seasonalRates, { ...emptySeasonalRate(), roomName: current.rooms.find(room => room.name)?.name || "" }] } : current)} className="btn-outline mt-4 gap-2"><Plus className="h-4 w-4" /> Add seasonal rate</button>
