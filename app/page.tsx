@@ -107,6 +107,7 @@ export default async function Home() {
                 <Ship className="h-4 w-4" /> Find Transfers
               </Link>
             </div>
+            <Link href="/help-me-choose" className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-sm text-[#ead7aa] underline">Not sure where to start? Help Me Choose <ArrowRight className="h-4 w-4" /></Link>
             <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-white/65">
               <span className="flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-[#d9bd7b]" /> Transparent pricing
