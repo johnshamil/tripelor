@@ -3,6 +3,8 @@ import {
   ArrowRight,
   ArrowUpRight,
   Compass,
+  Clock,
+  MapPin,
   Headphones,
   Hotel,
   ShieldCheck,
@@ -10,6 +12,8 @@ import {
   Sparkles,
   Star,
 } from "lucide-react";
+import SaveTripButton from "@/components/save-trip-button";
+import { propertyPhotoUrl } from "@/lib/property-model";
 import RewardsChecker from "@/components/rewards-checker";
 import SmartOffers from "@/components/smart-offers";
 import PropertyCards from "@/components/room-first-booking-cards";
@@ -66,6 +70,11 @@ async function getReviews(): Promise<Review[]> {
 
 export default async function Home() {
   const [reviews, managedProperties] = await Promise.all([getReviews(), publishedProperties()]);
+  const experiences = managedProperties
+    .filter(property => property.status === "published")
+    .flatMap(property => (property.experiences || [])
+      .filter(item => item.enabled && item.photos.length > 0)
+      .map(item => ({ item, propertyName: property.name, island: property.island, slug: property.slug })));
 
 
   return (
@@ -138,6 +147,45 @@ export default async function Home() {
       </section>
 
       <PropertyCards managedProperties={managedProperties} featured />
+
+      {experiences.length > 0 && (
+        <section id="discover-experiences" aria-labelledby="discover-experiences-title" className="scroll-mt-24 border-b border-white/10 bg-[#06151c] text-white">
+          <div className="container py-16 md:py-20">
+            <p className="eyebrow">Make more of your island days</p>
+            <h2 id="discover-experiences-title" className="section-title mt-4">Discover Maldives Experiences</h2>
+            <p className="mt-5 max-w-2xl leading-7 text-white/65">Find something to look forward to. Explore activities offered through our properties and save your favourites to My Trip.</p>
+            <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {experiences.map(({ item, propertyName, island, slug }) => {
+                const href = `/stays/${slug}#experience-${item.id}`;
+                const imageUrl = propertyPhotoUrl(item.photos[0]);
+                const priceLabel = item.price > 0 ? `From USD ${item.price} ${item.priceUnit}` : "Price on request";
+                return (
+                  <article key={`${slug}-${item.id}`} className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[.025]">
+                    <Link href={href} aria-label={`Explore ${item.name} at ${propertyName}`} className="group block overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold">
+                      <img src={imageUrl} alt={item.name} loading="lazy" className="aspect-[4/3] w-full object-cover transition duration-700 motion-safe:group-hover:scale-105 motion-reduce:transition-none" />
+                    </Link>
+                    <div className="flex flex-1 flex-col p-6">
+                      <p className="flex items-start gap-2 text-sm text-[#ead7aa]"><MapPin aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />{island}</p>
+                      <h3 className="font-display mt-3 break-words text-3xl">{item.name}</h3>
+                      <p className="mt-2 text-xs text-white/55">Through {propertyName}</p>
+                      <p className="mt-4 flex items-center gap-2 text-sm text-white/75"><Clock aria-hidden="true" className="h-4 w-4 shrink-0" />{item.duration}</p>
+                      <p className="mb-6 mt-3 line-clamp-3 text-sm leading-6 text-white/65">{item.description}</p>
+                      <div className="mt-auto border-t border-white/10 pt-5">
+                        <p className="text-lg text-[#ead7aa]">{priceLabel}</p>
+                        <Link href={href} className="mt-3 inline-flex min-h-[48px] items-center gap-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold">Explore Experience <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+                        <div className="mt-3">
+                          <SaveTripButton itemType="package" itemKey={`experience-${slug}-${item.id}`} title={item.name} subtitle={`${propertyName} · ${item.duration} · ${priceLabel}`} imageUrl={imageUrl} href={href} label="Add to My Trip" />
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+            <p className="mt-6 text-sm leading-6 text-white/55">Saving an experience keeps it in your favourites. Our team confirms the price and availability before booking.</p>
+          </div>
+        </section>
+      )}
 
       <section className="section-shell overflow-hidden">
         <div className="container grid gap-12 py-24 lg:grid-cols-[.8fr_1.2fr] lg:items-end">
