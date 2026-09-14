@@ -67,6 +67,23 @@ function roomsForSave(rooms: FormRoom[]): Room[] {
   });
 }
 
+
+function duplicateRoomEntry(rooms: FormRoom[], index: number): FormRoom[] {
+  const source = rooms[index];
+  if (!source) return rooms;
+  if (rooms.reduce((count, room) => count + room.mealRates.length, 0) + source.mealRates.length > 40) return rooms;
+  const names = new Set(rooms.map(room => room.name.trim().toLowerCase()));
+  const base = source.name.trim().slice(0, 130) || "Room";
+  let name = base + " (copy)";
+  let suffix = 2;
+  while (names.has(name.toLowerCase())) name = base + " (copy " + suffix++ + ")";
+  const duplicate: FormRoom = {
+    ...source, name, totalRooms: 0, photos: [], bathroomPhotos: [],
+    mealRates: source.mealRates.map(rate => ({ ...rate })),
+  };
+  return [...rooms, duplicate];
+}
+
 export default function PropertyDashboard() {
   const [properties, setProperties] = useState<ManagedProperty[]>([]);
   const [form, setForm] = useState<FormState | null>(null);
@@ -196,6 +213,7 @@ function PropertyList({ properties, onEdit, onNew }: { properties: ManagedProper
 function BuildingIcon() { return <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gold/10 text-gold"><Upload className="h-6 w-6" /></div>; }
 
 function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInventoryRule, setForm, openSections, toggle, onUpload, uploading, saving, onSave, onCancel, notice, error }: { form: FormState; update: <K extends keyof FormState>(key: K, value: FormState[K]) => void; updateRoom: (index: number, key: keyof FormRoom, value: string | number) => void; updateSeasonalRate: (index: number, key: keyof SeasonalRate, value: string | number) => void; updateInventoryRule: (index: number, key: keyof InventoryRule, value: string | number | boolean) => void; setForm: React.Dispatch<React.SetStateAction<FormState | null>>; openSections: Record<string, boolean>; toggle: (section: string) => void; onUpload: (files: FileList | null, target: PhotoTarget) => void; uploading: boolean; saving: boolean; onSave: () => void; onCancel: () => void; notice: string; error: string }) {
+  const [duplicateNotice, setDuplicateNotice] = useState("");
   const [preview, setPreview] = useState(false);
   const [previewScroll, setPreviewScroll] = useState(0);
   if (preview) {
@@ -219,6 +237,12 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
     </section>;
   }
   const roomCount = form.rooms.length;
+  const rateCount = form.rooms.reduce((count, room) => count + room.mealRates.length, 0);
+  function duplicateRoom(index: number) {
+    if (uploading || saving) return;
+    setForm(current => current ? { ...current, rooms: duplicateRoomEntry(current.rooms, index) } : current);
+    setDuplicateNotice("Room copied to the bottom of Rooms & rates. Rename it, add its photos and set Rooms available before publishing. Save the property to keep the copy.");
+  }
   function updateMealRate(roomIndex:number, rateIndex:number, key:keyof MealRate, value:string|number) {
     setForm(current => current ? { ...current, rooms: current.rooms.map((room,i)=>i===roomIndex ? { ...room, mealRates: room.mealRates.map((rate,j)=>j===rateIndex ? { ...rate, [key]:value } : rate) } : room) } : current);
   }
@@ -240,14 +264,14 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
   }
   return <section className="mt-8 max-w-6xl">
     <div className="flex flex-col gap-4 rounded-2xl border border-gold/20 bg-gold/[.05] p-5 md:flex-row md:items-center md:justify-between md:p-6"><div><p className="text-[10px] font-semibold uppercase tracking-[.22em] text-gold">{form.id ? "Edit property" : "New property"}</p><h2 className="mt-2 text-2xl font-semibold">{form.name || "Untitled property"}</h2><p className="mt-1 text-sm text-gray-400">Save as a draft while collecting details, then publish when the page is ready.</p></div><div className="flex flex-wrap gap-2"><button type="button" disabled={saving || uploading} className="btn-outline disabled:opacity-50" onClick={() => { setPreviewScroll(window.scrollY); setPreview(true); window.scrollTo({ top: 0 }); }}>Preview Property</button><button type="button" onClick={onCancel} className="btn-outline gap-2"><X className="h-4 w-4" /> Cancel</button><button type="button" onClick={onSave} disabled={saving || uploading} className="btn-gold gap-2 disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{form.status === "published" ? "Save & Publish" : "Save Draft"}</button></div></div>
-    {notice && <Notice tone="success">{notice}</Notice>}{error && <Notice tone="error">{error}</Notice>}
+    {duplicateNotice && <div role="status"><Notice tone="success">{duplicateNotice}</Notice></div>}{notice && <Notice tone="success">{notice}</Notice>}{error && <Notice tone="error">{error}</Notice>}
     <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
       <div className="space-y-5">
         <Panel title="Property details" subtitle="The information guests will see." open={true} onToggle={() => {}} collapsible={false}>
           <div className="grid gap-4 md:grid-cols-2"><Field label="Property name" value={form.name} onChange={v => update("name", v)} placeholder="e.g. Coral Garden Guesthouse"/><Field label="Island / location" value={form.island} onChange={v => update("island", v)} placeholder="e.g. V. Felidhoo, Maldives"/><Field label="Public URL" value={form.slug} onChange={v => update("slug", v.toLowerCase().replace(/\s+/g, "-"))} placeholder="coral-garden-guesthouse" hint="Lowercase letters, numbers and hyphens."/></div><TextArea label="Description" value={form.description} onChange={v => update("description", v)} placeholder="Describe the stay, location and guest experience."/><TextArea label="Amenities" value={form.amenities} onChange={v => update("amenities", v)} placeholder="Wi-Fi, breakfast, beach access, air conditioning..." hint="Separate amenities with commas."/>
         </Panel>
         <Panel title={`Rooms & rates · ${roomCount}`} subtitle="Add room types, capacity, meal plans and your margin." open={openSections.rooms} onToggle={() => toggle("rooms")}>
-          <div className="space-y-4">{form.rooms.map((room, index) => <div key={index} className="rounded-2xl border border-white/10 bg-black/20 p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-gold">Room {String(index + 1).padStart(2, "0")}</p>{form.rooms.length > 1 && <button type="button" onClick={() => setForm(current => current ? { ...current, rooms: current.rooms.filter((_, i) => i !== index) } : current)} className="rounded-full p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300" disabled={uploading || saving} aria-label="Remove room"><Trash2 className="h-4 w-4" /></button>}</div><div className="mt-4 grid gap-4 md:grid-cols-2"><Field label="Room type" value={room.name} onChange={v => updateRoom(index, "name", v)} placeholder="Deluxe Double Room"/><NumberField label="Guest capacity" value={room.capacity} onChange={v => updateRoom(index, "capacity", v)} min={1} max={100}/><NumberField label="Rooms available" value={room.totalRooms} onChange={v => updateRoom(index, "totalRooms", v)} min={0} max={100} hint="Use 0 for a draft; set the sellable inventory before publishing."/></div><TextArea label="Room amenities / notes" value={room.amenities} onChange={v => updateRoom(index, "amenities", v)} placeholder="King bed, balcony, private bathroom..."/><div className="mt-5 grid gap-4 lg:grid-cols-2"><PhotoUploadBox label={"Add Room " + (index + 1) + " photos"} helper="Upload once for all meal plans of this room." photos={room.photos || []} uploading={uploading} onUpload={(files) => onUpload(files, { kind: "room", roomIndex: index })} onRemove={(photo) => removeRoomPhoto(index, "photos", photo)} onReorder={(photos) => reorderRoomPhotos(index, "photos", photos)} cover/><PhotoUploadBox label={"Add Room " + (index + 1) + " toilet / bathroom photos"} helper="Show the private toilet or bathroom for this room." photos={room.bathroomPhotos || []} uploading={uploading} onUpload={(files) => onUpload(files, { kind: "bathroom", roomIndex: index })} onRemove={(photo) => removeRoomPhoto(index, "bathroomPhotos", photo)} onReorder={(photos) => reorderRoomPhotos(index, "bathroomPhotos", photos)}/></div><div className="mt-6 border-t border-white/10 pt-5">
+          <div className="space-y-4">{form.rooms.map((room, index) => <div key={index} className="rounded-2xl border border-white/10 bg-black/20 p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-gold">Room {String(index + 1).padStart(2, "0")}</p><button type="button" onClick={() => duplicateRoom(index)} disabled={uploading || saving || rateCount + room.mealRates.length > 40} title={rateCount + room.mealRates.length > 40 ? "A property supports up to 40 meal-plan rates." : "Copy details and rates into a new room"} className="min-h-11 rounded-lg border border-gold/30 px-3 py-2 text-xs font-semibold text-gold disabled:opacity-40" aria-label={`Duplicate ${room.name || "room " + (index + 1)}`}>Duplicate Room</button>{form.rooms.length > 1 && <button type="button" onClick={() => setForm(current => current ? { ...current, rooms: current.rooms.filter((_, i) => i !== index) } : current)} className="rounded-full p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300" disabled={uploading || saving} aria-label="Remove room"><Trash2 className="h-4 w-4" /></button>}</div><div className="mt-4 grid gap-4 md:grid-cols-2"><Field label="Room type" value={room.name} onChange={v => updateRoom(index, "name", v)} placeholder="Deluxe Double Room"/><NumberField label="Guest capacity" value={room.capacity} onChange={v => updateRoom(index, "capacity", v)} min={1} max={100}/><NumberField label="Rooms available" value={room.totalRooms} onChange={v => updateRoom(index, "totalRooms", v)} min={0} max={100} hint="Use 0 for a draft; set the sellable inventory before publishing."/></div><TextArea label="Room amenities / notes" value={room.amenities} onChange={v => updateRoom(index, "amenities", v)} placeholder="King bed, balcony, private bathroom..."/><div className="mt-5 grid gap-4 lg:grid-cols-2"><PhotoUploadBox label={"Add Room " + (index + 1) + " photos"} helper="Upload once for all meal plans of this room." photos={room.photos || []} uploading={uploading} onUpload={(files) => onUpload(files, { kind: "room", roomIndex: index })} onRemove={(photo) => removeRoomPhoto(index, "photos", photo)} onReorder={(photos) => reorderRoomPhotos(index, "photos", photos)} cover/><PhotoUploadBox label={"Add Room " + (index + 1) + " toilet / bathroom photos"} helper="Show the private toilet or bathroom for this room." photos={room.bathroomPhotos || []} uploading={uploading} onUpload={(files) => onUpload(files, { kind: "bathroom", roomIndex: index })} onRemove={(photo) => removeRoomPhoto(index, "bathroomPhotos", photo)} onReorder={(photos) => reorderRoomPhotos(index, "bathroomPhotos", photos)}/></div><div className="mt-6 border-t border-white/10 pt-5">
   <h4 className="text-sm font-semibold text-gold">Meal plans & rates</h4>
   <p className="mt-2 text-xs leading-5 text-gray-400">Enter a selling price and private contracted rate for each meal plan you offer. Photos and room details above apply to all plans.</p>
   <div className="mt-4 space-y-3">{room.mealRates.map((rate, rateIndex) => <div key={rateIndex} className="rounded-xl border border-gold/20 p-4">
