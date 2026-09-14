@@ -153,6 +153,13 @@ export default async function Home() {
         </div>
       </section>
 
+      <section className="border-b border-gold/20 bg-[#071922]">
+        <div className="container grid items-center gap-6 py-12 md:grid-cols-[1fr_auto]">
+          <div><p className="eyebrow">Find your perfect middle</p><h2 className="font-display mt-4 text-3xl md:text-4xl">Two Hearts, One Island</h2><p className="mt-3 max-w-2xl leading-7 text-white/65">Answer separately. Discover what you both love. Build a Maldives holiday with one special moment for each of you.</p></div>
+          <Link href="/couple-match" className="btn-gold">Find Our Island Match <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+      </section>
+
       <PropertyCards managedProperties={managedProperties} featured />
 
       {experiences.length > 0 && (
