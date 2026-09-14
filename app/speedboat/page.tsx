@@ -1,5 +1,6 @@
 "use client";
 
+import { helpDate } from "@/lib/help-me-choose";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2, Mail, Plane, Search, Ship, Users } from "lucide-react";
 
@@ -17,7 +18,14 @@ export default function SpeedboatPage() {
   const [lookup, setLookup] = useState(false); const [flightInfo, setFlightInfo] = useState<FlightInfo | null>(null); const [lookupStatus, setLookupStatus] = useState("");
 
   useEffect(() => {
-    fetch("/api/speedboat/schedule").then((response) => response.json()).then((result) => setSchedule(result.schedule || [])).catch(() => {});
+    fetch("/api/speedboat/schedule").then((response) => response.json()).then((result) => {
+      const loaded: Schedule[] = result.schedule || [];
+      setSchedule(loaded);
+      const params = new URLSearchParams(window.location.search);
+      const selectedRoute = params.get("route") || "", selectedDate = params.get("date") || "";
+      if (loaded.some(item => item.route === selectedRoute)) setRoute(current => current || selectedRoute);
+      if (helpDate(selectedDate)) setDate(current => current || selectedDate);
+    }).catch(() => {});
     fetch("/api/auth/me", { cache: "no-store" }).then((response) => response.json()).then((result) => { if (!result?.user) return; setName((value) => value || result.user.fullName || ""); setEmail((value) => value || result.user.email || ""); }).catch(() => {});
   }, []);
 
