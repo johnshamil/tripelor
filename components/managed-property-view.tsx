@@ -1,3 +1,4 @@
+import PropertyExperiences from "@/components/property-experiences";
 import LuxuryPropertyPage from "@/components/luxury-property-page";
 import { propertyPhotoUrl } from "@/lib/property-model";
 import type { PublicProperty } from "@/lib/property-model";
@@ -7,7 +8,7 @@ function displayDate(value: string) {
   const date = new Date(`${value}T00:00:00`);
   return Number.isNaN(date.getTime()) ? "Date not set" : new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(date);
 }
-export default function ManagedPropertyView({ property }: { property: PublicProperty }) {
+export default function ManagedPropertyView({ property, preview = false }: { property: PublicProperty; preview?: boolean }) {
   const photos = property.photos.map(imageUrl);
   const roomGroups = new Map<string, typeof property.rooms>();
   for (const room of property.rooms) {
@@ -46,7 +47,7 @@ export default function ManagedPropertyView({ property }: { property: PublicProp
   const amounts = [...property.rooms.map(room => room.sellingRate), ...property.seasonalRates.map(rate => rate.sellingRate)].filter(rate => Number.isFinite(rate) && rate > 0);
   const startingFrom = amounts.length ? Math.min(...amounts) : 0;
 
-  return <LuxuryPropertyPage
+  return <><LuxuryPropertyPage
     eyebrow="A Tripelor partner stay"
     name={property.name}
     location={property.island}
@@ -67,5 +68,5 @@ export default function ManagedPropertyView({ property }: { property: PublicProp
       { title: "Cancellation", text: property.cancellation },
       { title: "Payment", text: property.payment },
     ]}
-  />;
+  /><PropertyExperiences experiences={property.experiences || []} propertyName={property.name} slug={property.slug} preview={preview}/></>;
 }
