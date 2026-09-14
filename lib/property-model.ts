@@ -28,7 +28,9 @@ export type InventoryRule = {
   stopSale: boolean;
   note: string;
 };
+export type PropertyExperience = { id: string; name: string; description: string; duration: string; price: number; priceUnit: string; inclusions: string; photos: string[]; enabled: boolean };
 export type ManagedProperty = {
+  experiences?: PropertyExperience[];
   id: string;
   slug: string;
   status: "draft" | "published";
@@ -67,6 +69,7 @@ export function propertyRateForDate(property: RateSource, roomName: string, meal
 }
 export function publicProperty(p: ManagedProperty): PublicProperty {
   return {
+    experiences:(p.experiences || []).filter(e=>e.enabled).map(e=>({id:e.id,name:e.name,description:e.description,duration:e.duration,price:e.price,priceUnit:e.priceUnit,inclusions:e.inclusions,photos:e.photos,enabled:true})),
     id:p.id,
     slug:p.slug,
     status:p.status,
@@ -110,7 +113,15 @@ export function validateProperty(input: any) {
   if(!Array.isArray(input.seasonalRates)||input.seasonalRates.length>100||!Array.isArray(input.inventoryRules)||input.inventoryRules.length>100) throw new Error("Use up to 100 seasonal rates and 100 inventory rules.");
   const seasonalRates:SeasonalRate[]=input.seasonalRates.map((r:any,index:number)=>{ const startDate=date(r.startDate), endDate=date(r.endDate); if(endDate<startDate) throw new Error("A seasonal rate end date must be after its start date."); return {id:rowId(r.id,index),name:text(r.name,120),startDate,endDate,roomName:text(r.roomName,150),mealPlan:text(r.mealPlan,100),sellingRate:money(r.sellingRate),contractedRate:money(r.contractedRate)}; });
   const inventoryRules:InventoryRule[]=input.inventoryRules.map((r:any,index:number)=>{ const startDate=date(r.startDate), endDate=date(r.endDate), roomsAvailable=Number(r.roomsAvailable); if(endDate<startDate) throw new Error("An inventory rule end date must be after its start date."); if(!Number.isInteger(roomsAvailable)||roomsAvailable<0||roomsAvailable>100) throw new Error("Inventory must be a whole number between 0 and 100."); return {id:rowId(r.id,index),roomName:text(r.roomName,150),startDate,endDate,roomsAvailable,stopSale:Boolean(r.stopSale),note:text(r.note,500)}; });
-  const data={ name, island:text(input.island,200), description:text(input.description), photos, rooms, seasonalRates, inventoryRules, amenities:text(input.amenities), taxes:text(input.taxes), transfers:text(input.transfers), cancellation:text(input.cancellation), payment:text(input.payment), partnerName:text(input.partnerName,200), partnerEmail:text(input.partnerEmail,250), partnerPhone:text(input.partnerPhone,80) };
+  const rawExperiences = input.experiences ?? [];
+  if (!Array.isArray(rawExperiences) || rawExperiences.length > 30) throw new Error("Use up to 30 experiences per property.");
+  const experiences: PropertyExperience[] = rawExperiences.map((e:any,index:number) => {
+    const experience = { id:rowId(e.id,index), name:text(e.name,150), description:text(e.description,2000), duration:text(e.duration,100), price:money(e.price), priceUnit:text(e.priceUnit,60), inclusions:text(e.inclusions,2000), photos:photosForSection(e.photos,20), enabled:e.enabled === true };
+    if(experience.enabled && (!experience.name || !experience.description || !experience.duration || !experience.priceUnit || !experience.inclusions || !experience.photos.length)) throw new Error(`Complete the name, description, duration, price unit, inclusions and photo for experience ${index+1}, or hide it while editing.`);
+    return experience;
+  });
+  if (new Set(experiences.map(e=>e.id)).size !== experiences.length) throw new Error("Experience IDs must be unique.");
+  const data={ experiences, name, island:text(input.island,200), description:text(input.description), photos, rooms, seasonalRates, inventoryRules, amenities:text(input.amenities), taxes:text(input.taxes), transfers:text(input.transfers), cancellation:text(input.cancellation), payment:text(input.payment), partnerName:text(input.partnerName,200), partnerEmail:text(input.partnerEmail,250), partnerPhone:text(input.partnerPhone,80) };
   if(data.partnerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.partnerEmail)) throw new Error("Enter a valid partner email.");
   if(input.status==="published" && (!data.island||!data.description||!photos.length||!rooms.length||rooms.some(r=>!r.name||!r.mealPlan||r.sellingRate<=0||r.totalRooms<1)||!data.taxes||!data.transfers||!data.cancellation||!data.payment)) throw new Error("Before publishing, add an island, description, photo, room name, meal plan, selling rate, room inventory and booking conditions.");
   return {slug,status:input.status as ManagedProperty["status"],data};
