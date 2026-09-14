@@ -1,0 +1,23 @@
+const fs=require("node:fs"),path=require("node:path"),assert=require("node:assert/strict");
+const {stripTypeScriptTypes}=require("node:module");
+function source(file){return stripTypeScriptTypes(fs.readFileSync(file,"utf8").replace(/^import .*;\n/gm,""),{mode:"transform"}).replace(/^export /gm,"");}
+const rates=new Function(source(path.join(__dirname,"../lib/property-model.ts"))+";return propertyRateForDate;")();
+const engine=new Function("propertyRateForDate",source(path.join(__dirname,"../lib/help-me-choose.ts"))+";return {chooseStays,chooseTransfers,helpDate};")(rates);
+const room={name:"Double",mealPlan:"BB",totalRooms:2,sellingRate:100,capacity:2};
+const p={name:"Stay",slug:"stay",status:"published",rooms:[room],seasonalRates:[{name:"Peak",startDate:"2026-10-02",endDate:"2026-10-02",roomName:"Double",mealPlan:"BB",sellingRate:200}],inventoryRules:[]};
+let result=engine.chooseStays([p],"stay","2026-10-01","2026-10-03",250);
+assert.equal(result[0].total,300);assert.equal(result[0].nightly,150);
+assert.equal(engine.chooseStays([p],"stay","2026-10-01","2026-10-03",150).length,0);
+assert.equal(engine.chooseStays([p],"holiday","2026-10-01","2026-10-03",250).length,0);
+assert.equal(engine.chooseStays([p],"holiday","2026-10-01","2026-10-03",300).length,1);
+assert.equal(engine.chooseStays([{...p,status:"draft"}],"stay","","",null).length,0);
+assert.equal(engine.chooseStays([{...p,inventoryRules:[{roomName:"Double",startDate:"2026-10-01",endDate:"2026-10-03",stopSale:true,roomsAvailable:2}]}],"stay","2026-10-01","2026-10-03",null).length,0);
+assert.equal(engine.chooseStays([p],"stay","2026-99-01","2026-10-03",null).length,0);
+assert.equal(engine.helpDate("2026-02-30"),false);
+assert.equal(engine.chooseStays(Array.from({length:6},(_,i)=>({...p,slug:String(i)})),"stay","","",null).length,3);
+const schedule=[{id:1,route:"A to B",day_of_week:4,departure_time:"10:00",price_per_person:50,capacity:10},{id:2,route:"A to B",day_of_week:5,departure_time:"10:00",price_per_person:30,capacity:10},{id:3,route:"C to D",day_of_week:4,departure_time:"10:00",price_per_person:20,capacity:10}];
+assert.deepEqual(engine.chooseTransfers(schedule,"A to B","2026-10-01",60).map(x=>x.id),[1]);
+assert.equal(engine.chooseTransfers(schedule,"A to B","2026-10-01",40).length,0);
+assert.equal(engine.chooseTransfers(schedule,"","",null).length,0);
+assert.equal(engine.chooseTransfers([{...schedule[0],capacity:0}],"A to B","",null).length,0);
+console.log("PASS: seasonal estimates, nightly and holiday budgets, draft/stop-sale exclusions, dates, three-result limit, transfer route/day/fare/capacity filters.");
