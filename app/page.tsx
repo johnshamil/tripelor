@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
-  CalendarDays,
   Compass,
   Headphones,
   Hotel,
@@ -76,26 +75,27 @@ export default async function Home() {
           src="/properties/rivethi-beach-hotel/1719713475.jpeg"
           alt="A serene Maldives beachfront escape"
           className="luxury-hero-image"
+          fetchPriority="high"
+          loading="eager"
         />
-        <div className="luxury-hero-shade" />
-        <div className="container relative z-10 grid min-h-[88vh] items-center gap-12 py-24 lg:grid-cols-[1fr_320px]">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#021016]/90 via-[#021016]/60 to-[#021016]/25" />
+        <div className="container relative z-10 grid min-h-[76svh] items-center gap-12 py-16 md:py-24 lg:grid-cols-[1fr_320px]">
           <div className="max-w-4xl">
             <p className="eyebrow text-[#ead7aa]">Maldives, planned with care</p>
-            <h1 className="font-display mt-6 max-w-4xl text-5xl leading-[.98] text-white sm:text-6xl md:text-7xl lg:text-[6.3rem]">
-              Your Maldives,
-              <span className="block italic text-[#d9bd7b]">considered beautifully.</span>
+            <h1 className="font-display mt-6 max-w-4xl text-[2.8rem] leading-[1.05] text-white sm:text-6xl md:text-7xl lg:text-[5.5rem]">
+              Your Maldives island escape
+              <span className="block italic text-[#ead7aa]">starts here.</span>
             </h1>
             <p className="mt-7 max-w-2xl text-base leading-8 text-white/75 md:text-lg">
-              Curated island stays, private-feeling experiences and seamless
-              speedboat transfers—all thoughtfully brought together by a local
-              team.
+              Find your island home, discover ocean experiences and arrange your
+              transfers with a Maldives team who helps you bring it all together.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <Link href="/build-your-trip" className="btn-gold">
-                Design My Journey <ArrowRight className="h-4 w-4" />
+              <Link href="#properties" className="btn-gold w-full sm:w-auto">
+                Explore Stays <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/stays" className="btn-outline border-white/40 text-white">
-                Explore Stays
+              <Link href="/speedboat" className="btn-outline w-full border-white/40 bg-black/20 text-white sm:w-auto">
+                <Ship className="h-4 w-4" /> Find Transfers
               </Link>
             </div>
             <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-white/65">
@@ -103,7 +103,7 @@ export default async function Home() {
                 <ShieldCheck className="h-4 w-4 text-[#d9bd7b]" /> Transparent pricing
               </span>
               <span className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-[#d9bd7b]" /> Live availability
+                <Hotel className="h-4 w-4 text-[#d9bd7b]" /> Rooms & meal plans
               </span>
               <span className="flex items-center gap-2">
                 <Headphones className="h-4 w-4 text-[#d9bd7b]" /> Local support
@@ -137,7 +137,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <PropertyCards managedProperties={managedProperties} />
+      <PropertyCards managedProperties={managedProperties} featured />
 
       <section className="section-shell overflow-hidden">
         <div className="container grid gap-12 py-24 lg:grid-cols-[.8fr_1.2fr] lg:items-end">
@@ -213,7 +213,7 @@ export default async function Home() {
             </div>
             <div className="grid gap-px overflow-hidden border border-[#cfc4af] bg-[#cfc4af] md:grid-cols-3">
               {[
-                [Hotel, "Selected stays", "Compare rooms, meal plans and live availability."],
+                [Hotel, "Selected stays", "Compare rooms, meal plans and rates."],
                 [Compass, "Island experiences", "Choose ocean adventures and slower island moments."],
                 [Ship, "Speedboat transfers", "Arrange your arrival and departure in one journey."],
               ].map(([Icon, title, text]) => {
