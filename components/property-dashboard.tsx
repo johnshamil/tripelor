@@ -14,7 +14,8 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { propertyPhotoUrl } from "@/lib/property-model";
+import ManagedPropertyView from "@/components/managed-property-view";
+import { publicProperty, propertyPhotoUrl } from "@/lib/property-model";
 import type { InventoryRule, ManagedProperty, Room, SeasonalRate } from "@/lib/property-model";
 import PropertySubmissionInbox from "@/components/property-submission-inbox";
 
@@ -195,6 +196,28 @@ function PropertyList({ properties, onEdit, onNew }: { properties: ManagedProper
 function BuildingIcon() { return <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gold/10 text-gold"><Upload className="h-6 w-6" /></div>; }
 
 function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInventoryRule, setForm, openSections, toggle, onUpload, uploading, saving, onSave, onCancel, notice, error }: { form: FormState; update: <K extends keyof FormState>(key: K, value: FormState[K]) => void; updateRoom: (index: number, key: keyof FormRoom, value: string | number) => void; updateSeasonalRate: (index: number, key: keyof SeasonalRate, value: string | number) => void; updateInventoryRule: (index: number, key: keyof InventoryRule, value: string | number | boolean) => void; setForm: React.Dispatch<React.SetStateAction<FormState | null>>; openSections: Record<string, boolean>; toggle: (section: string) => void; onUpload: (files: FileList | null, target: PhotoTarget) => void; uploading: boolean; saving: boolean; onSave: () => void; onCancel: () => void; notice: string; error: string }) {
+  const [preview, setPreview] = useState(false);
+  const [previewScroll, setPreviewScroll] = useState(0);
+  if (preview) {
+    const previewProperty = publicProperty({
+      ...form,
+      id: form.id || "preview",
+      updated_at: form.updated_at || "",
+      rooms: form.rooms.flatMap(({ mealRates, ...room }) => mealRates.map(rate => ({ ...room, ...rate }))),
+    });
+    return <section className="mt-6">
+      <div className="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gold/30 bg-[#071922] p-4">
+        <div><h2 className="font-semibold text-gold">Private property preview</h2><p className="mt-1 text-xs text-gray-400">Includes your unsaved edits. Nothing has been published. Booking is disabled here.</p></div>
+        <button type="button" className="btn-gold" onClick={() => { setPreview(false); requestAnimationFrame(() => window.scrollTo({ top: previewScroll })); }}>Back to editing</button>
+      </div>
+      <div onClickCapture={event => {
+        const link = (event.target as Element).closest("a");
+        if (link && !link.getAttribute("href")?.startsWith("#")) { event.preventDefault(); event.stopPropagation(); }
+      }}>
+        <ManagedPropertyView property={previewProperty}/>
+      </div>
+    </section>;
+  }
   const roomCount = form.rooms.length;
   function updateMealRate(roomIndex:number, rateIndex:number, key:keyof MealRate, value:string|number) {
     setForm(current => current ? { ...current, rooms: current.rooms.map((room,i)=>i===roomIndex ? { ...room, mealRates: room.mealRates.map((rate,j)=>j===rateIndex ? { ...rate, [key]:value } : rate) } : room) } : current);
@@ -213,7 +236,7 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
     } : current);
   }
   return <section className="mt-8 max-w-6xl">
-    <div className="flex flex-col gap-4 rounded-2xl border border-gold/20 bg-gold/[.05] p-5 md:flex-row md:items-center md:justify-between md:p-6"><div><p className="text-[10px] font-semibold uppercase tracking-[.22em] text-gold">{form.id ? "Edit property" : "New property"}</p><h2 className="mt-2 text-2xl font-semibold">{form.name || "Untitled property"}</h2><p className="mt-1 text-sm text-gray-400">Save as a draft while collecting details, then publish when the page is ready.</p></div><div className="flex gap-2"><button type="button" onClick={onCancel} className="btn-outline gap-2"><X className="h-4 w-4" /> Cancel</button><button type="button" onClick={onSave} disabled={saving || uploading} className="btn-gold gap-2 disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{form.status === "published" ? "Save & Publish" : "Save Draft"}</button></div></div>
+    <div className="flex flex-col gap-4 rounded-2xl border border-gold/20 bg-gold/[.05] p-5 md:flex-row md:items-center md:justify-between md:p-6"><div><p className="text-[10px] font-semibold uppercase tracking-[.22em] text-gold">{form.id ? "Edit property" : "New property"}</p><h2 className="mt-2 text-2xl font-semibold">{form.name || "Untitled property"}</h2><p className="mt-1 text-sm text-gray-400">Save as a draft while collecting details, then publish when the page is ready.</p></div><div className="flex flex-wrap gap-2"><button type="button" disabled={saving || uploading} className="btn-outline disabled:opacity-50" onClick={() => { setPreviewScroll(window.scrollY); setPreview(true); window.scrollTo({ top: 0 }); }}>Preview Property</button><button type="button" onClick={onCancel} className="btn-outline gap-2"><X className="h-4 w-4" /> Cancel</button><button type="button" onClick={onSave} disabled={saving || uploading} className="btn-gold gap-2 disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{form.status === "published" ? "Save & Publish" : "Save Draft"}</button></div></div>
     {notice && <Notice tone="success">{notice}</Notice>}{error && <Notice tone="error">{error}</Notice>}
     <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
       <div className="space-y-5">
