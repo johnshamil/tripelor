@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import {
   Check,
   ChevronDown,
@@ -225,6 +225,9 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
   function addMealRate(roomIndex:number, mealPlan:string) {
     setForm(current => current ? { ...current, rooms: current.rooms.map((room,i)=>i===roomIndex ? { ...room, mealRates:[...room.mealRates,{mealPlan,sellingRate:0,contractedRate:0}] } : room) } : current);
   }
+  function reorderRoomPhotos(roomIndex: number, key: "photos" | "bathroomPhotos", photos: string[]) {
+    setForm(current => current ? { ...current, rooms: current.rooms.map((room, index) => index === roomIndex ? { ...room, [key]: photos } : room) } : current);
+  }
   function removeRoomPhoto(roomIndex: number, key: "photos" | "bathroomPhotos", photo: string) {
     setForm(current => current ? {
       ...current,
@@ -244,7 +247,7 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
           <div className="grid gap-4 md:grid-cols-2"><Field label="Property name" value={form.name} onChange={v => update("name", v)} placeholder="e.g. Coral Garden Guesthouse"/><Field label="Island / location" value={form.island} onChange={v => update("island", v)} placeholder="e.g. V. Felidhoo, Maldives"/><Field label="Public URL" value={form.slug} onChange={v => update("slug", v.toLowerCase().replace(/\s+/g, "-"))} placeholder="coral-garden-guesthouse" hint="Lowercase letters, numbers and hyphens."/></div><TextArea label="Description" value={form.description} onChange={v => update("description", v)} placeholder="Describe the stay, location and guest experience."/><TextArea label="Amenities" value={form.amenities} onChange={v => update("amenities", v)} placeholder="Wi-Fi, breakfast, beach access, air conditioning..." hint="Separate amenities with commas."/>
         </Panel>
         <Panel title={`Rooms & rates · ${roomCount}`} subtitle="Add room types, capacity, meal plans and your margin." open={openSections.rooms} onToggle={() => toggle("rooms")}>
-          <div className="space-y-4">{form.rooms.map((room, index) => <div key={index} className="rounded-2xl border border-white/10 bg-black/20 p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-gold">Room {String(index + 1).padStart(2, "0")}</p>{form.rooms.length > 1 && <button type="button" onClick={() => setForm(current => current ? { ...current, rooms: current.rooms.filter((_, i) => i !== index) } : current)} className="rounded-full p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300" disabled={uploading || saving} aria-label="Remove room"><Trash2 className="h-4 w-4" /></button>}</div><div className="mt-4 grid gap-4 md:grid-cols-2"><Field label="Room type" value={room.name} onChange={v => updateRoom(index, "name", v)} placeholder="Deluxe Double Room"/><NumberField label="Guest capacity" value={room.capacity} onChange={v => updateRoom(index, "capacity", v)} min={1} max={100}/><NumberField label="Rooms available" value={room.totalRooms} onChange={v => updateRoom(index, "totalRooms", v)} min={0} max={100} hint="Use 0 for a draft; set the sellable inventory before publishing."/></div><TextArea label="Room amenities / notes" value={room.amenities} onChange={v => updateRoom(index, "amenities", v)} placeholder="King bed, balcony, private bathroom..."/><div className="mt-5 grid gap-4 lg:grid-cols-2"><PhotoUploadBox label={"Add Room " + (index + 1) + " photos"} helper="Upload once for all meal plans of this room." photos={room.photos || []} uploading={uploading} onUpload={(files) => onUpload(files, { kind: "room", roomIndex: index })} onRemove={(photo) => removeRoomPhoto(index, "photos", photo)}/><PhotoUploadBox label={"Add Room " + (index + 1) + " toilet / bathroom photos"} helper="Show the private toilet or bathroom for this room." photos={room.bathroomPhotos || []} uploading={uploading} onUpload={(files) => onUpload(files, { kind: "bathroom", roomIndex: index })} onRemove={(photo) => removeRoomPhoto(index, "bathroomPhotos", photo)}/></div><div className="mt-6 border-t border-white/10 pt-5">
+          <div className="space-y-4">{form.rooms.map((room, index) => <div key={index} className="rounded-2xl border border-white/10 bg-black/20 p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-gold">Room {String(index + 1).padStart(2, "0")}</p>{form.rooms.length > 1 && <button type="button" onClick={() => setForm(current => current ? { ...current, rooms: current.rooms.filter((_, i) => i !== index) } : current)} className="rounded-full p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300" disabled={uploading || saving} aria-label="Remove room"><Trash2 className="h-4 w-4" /></button>}</div><div className="mt-4 grid gap-4 md:grid-cols-2"><Field label="Room type" value={room.name} onChange={v => updateRoom(index, "name", v)} placeholder="Deluxe Double Room"/><NumberField label="Guest capacity" value={room.capacity} onChange={v => updateRoom(index, "capacity", v)} min={1} max={100}/><NumberField label="Rooms available" value={room.totalRooms} onChange={v => updateRoom(index, "totalRooms", v)} min={0} max={100} hint="Use 0 for a draft; set the sellable inventory before publishing."/></div><TextArea label="Room amenities / notes" value={room.amenities} onChange={v => updateRoom(index, "amenities", v)} placeholder="King bed, balcony, private bathroom..."/><div className="mt-5 grid gap-4 lg:grid-cols-2"><PhotoUploadBox label={"Add Room " + (index + 1) + " photos"} helper="Upload once for all meal plans of this room." photos={room.photos || []} uploading={uploading} onUpload={(files) => onUpload(files, { kind: "room", roomIndex: index })} onRemove={(photo) => removeRoomPhoto(index, "photos", photo)} onReorder={(photos) => reorderRoomPhotos(index, "photos", photos)} cover/><PhotoUploadBox label={"Add Room " + (index + 1) + " toilet / bathroom photos"} helper="Show the private toilet or bathroom for this room." photos={room.bathroomPhotos || []} uploading={uploading} onUpload={(files) => onUpload(files, { kind: "bathroom", roomIndex: index })} onRemove={(photo) => removeRoomPhoto(index, "bathroomPhotos", photo)} onReorder={(photos) => reorderRoomPhotos(index, "bathroomPhotos", photos)}/></div><div className="mt-6 border-t border-white/10 pt-5">
   <h4 className="text-sm font-semibold text-gold">Meal plans & rates</h4>
   <p className="mt-2 text-xs leading-5 text-gray-400">Enter a selling price and private contracted rate for each meal plan you offer. Photos and room details above apply to all plans.</p>
   <div className="mt-4 space-y-3">{room.mealRates.map((rate, rateIndex) => <div key={rateIndex} className="rounded-xl border border-gold/20 p-4">
@@ -268,6 +271,7 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
             uploading={uploading}
             onUpload={(files) => onUpload(files, { kind: "property" })}
             onRemove={(photo) => update("photos", form.photos.filter((item) => item !== photo))}
+            onReorder={(photos) => update("photos", photos)}
             cover
           />
         </Panel>
@@ -279,8 +283,46 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
   </section>;
 }
 
-function PhotoUploadBox({ label, helper, photos, uploading, onUpload, onRemove, cover = false }: { label: string; helper: string; photos: string[]; uploading: boolean; onUpload: (files: FileList | null) => void; onRemove: (photo: string) => void; cover?: boolean }) {
-  return <div className="rounded-2xl border border-white/10 bg-black/20 p-4"><label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-gold/35 bg-gold/[.04] p-5 text-center transition hover:bg-gold/[.08]"><ImagePlus className="h-6 w-6 text-gold"/><span className="mt-3 text-sm font-semibold">{uploading ? "Uploading..." : label}</span><span className="mt-1 text-xs leading-5 text-gray-500">{helper}</span><input type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" disabled={uploading} onChange={(event) => { onUpload(event.target.files); event.currentTarget.value = ""; }}/></label>{photos.length > 0 && <div className="mt-4 grid grid-cols-2 gap-2">{photos.map((photo, index) => <div key={photo} className="group relative aspect-square overflow-hidden rounded-lg border border-white/10"><img src={propertyPhotoUrl(photo)} alt={`${label} ${index + 1}`} className="h-full w-full object-cover"/><button type="button" onClick={() => onRemove(photo)} className="absolute right-1.5 top-1.5 rounded-full bg-black/70 p-1.5 text-white opacity-0 transition group-hover:opacity-100" aria-label={`Remove ${label} photo ${index + 1}`}><X className="h-3 w-3"/></button>{cover && index === 0 && <span className="absolute bottom-1.5 left-1.5 rounded-full bg-black/70 px-2 py-1 text-[9px] uppercase tracking-[.1em] text-gold">Cover</span>}</div>)}</div>}</div>;
+function PhotoUploadBox({ label, helper, photos, uploading, onUpload, onRemove, onReorder, cover = false }: { label: string; helper: string; photos: string[]; uploading: boolean; onUpload: (files: FileList | null) => void; onRemove: (photo: string) => void; onReorder: (photos: string[]) => void; cover?: boolean }) {
+  const dragged = useRef<number | null>(null);
+  const [announcement, setAnnouncement] = useState("");
+  function move(from: number, to: number) {
+    if (uploading || from === to || from < 0 || to < 0 || from >= photos.length || to >= photos.length) return;
+    const next = [...photos];
+    const [photo] = next.splice(from, 1);
+    next.splice(to, 0, photo);
+    onReorder(next);
+    setAnnouncement(`Photo moved to position ${to + 1}.${cover && to === 0 ? " Cover selected." : ""} Save the property to keep this order.`);
+  }
+  const control = "min-h-11 rounded-lg border border-white/20 px-2 py-2 text-xs text-white/80 hover:border-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold disabled:opacity-30";
+  return <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+    <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-gold/35 bg-gold/[.04] p-5 text-center transition hover:bg-gold/[.08]">
+      <ImagePlus className="h-6 w-6 text-gold"/><span className="mt-3 text-sm font-semibold">{uploading ? "Uploading..." : label}</span><span className="mt-1 text-xs leading-5 text-gray-500">{helper}</span>
+      <input type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" disabled={uploading} onChange={(event) => { onUpload(event.target.files); event.currentTarget.value = ""; }}/>
+    </label>
+    {photos.length > 0 && <>
+      <p className="mt-4 text-xs leading-5 text-gray-400">Drag photos to reorder, or use Earlier and Later. {cover && "The first photo is the cover."} Save the property to keep your changes.</p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">{photos.map((photo, index) => <div key={photo} draggable={!uploading}
+        onDragStart={event => { dragged.current = index; event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", String(index)); }}
+        onDragEnd={() => { dragged.current = null; }}
+        onDragOver={event => { if (dragged.current !== null && !uploading) { event.preventDefault(); event.dataTransfer.dropEffect = "move"; } }}
+        onDrop={event => { event.preventDefault(); const from = dragged.current; dragged.current = null; if (from !== null) move(from, index); }}
+        className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
+        <div className="relative aspect-square"><img draggable={false} src={propertyPhotoUrl(photo)} alt={`${label} ${index + 1}`} className="h-full w-full object-cover"/>
+          <span className="absolute bottom-2 left-2 rounded-full bg-black/80 px-3 py-1 text-xs text-gold">{cover && index === 0 ? "Cover" : `Photo ${index + 1}`}</span>
+        </div>
+        <div className="grid gap-2 p-2">
+          {cover && <button type="button" disabled={uploading || index === 0} onClick={() => move(index, 0)} className={control} aria-label={`Set ${label} photo ${index + 1} as cover`}>{index === 0 ? "Current cover" : "Set as Cover"}</button>}
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" disabled={uploading || index === 0} onClick={() => move(index, index - 1)} className={control} aria-label={`Move ${label} photo ${index + 1} earlier`}>← Earlier</button>
+            <button type="button" disabled={uploading || index === photos.length - 1} onClick={() => move(index, index + 1)} className={control} aria-label={`Move ${label} photo ${index + 1} later`}>Later →</button>
+          </div>
+          <button type="button" disabled={uploading} onClick={() => onRemove(photo)} className={control} aria-label={`Remove ${label} photo ${index + 1}`}>Remove photo</button>
+        </div>
+      </div>)}</div>
+    </>}
+    <p role="status" aria-live="polite" className="mt-2 text-xs text-gold">{announcement}</p>
+  </div>;
 }
 
 function Panel({ title, subtitle, open, onToggle, children, collapsible = true }: { title: string; subtitle: string; open: boolean; onToggle: () => void; children: React.ReactNode; collapsible?: boolean }) { return <section className="rounded-2xl border border-white/10 bg-white/[.025] p-5 md:p-6"><button type="button" onClick={onToggle} disabled={!collapsible} className="flex w-full items-start justify-between gap-4 text-left disabled:cursor-default"><span><h3 className="text-lg font-semibold">{title}</h3><p className="mt-1 text-xs text-gray-500">{subtitle}</p></span>{collapsible && (open ? <ChevronUp className="mt-1 h-5 w-5 text-gold" /> : <ChevronDown className="mt-1 h-5 w-5 text-gray-500" />)}</button>{open && <div className="mt-5">{children}</div>}</section>; }
