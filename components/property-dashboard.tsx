@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import ManagedPropertyView from "@/components/managed-property-view";
 import { publicProperty, propertyPhotoUrl } from "@/lib/property-model";
-import type { InventoryRule, ManagedProperty, Room, SeasonalRate } from "@/lib/property-model";
+import type { InventoryRule, ManagedProperty, PropertyExperience, Room, SeasonalRate } from "@/lib/property-model";
 import PropertySubmissionInbox from "@/components/property-submission-inbox";
 
 type MealRate = Pick<Room, "mealPlan" | "sellingRate" | "contractedRate">;
@@ -24,6 +24,7 @@ type FormRoom = Room & { mealRates: MealRate[] };
 type FormState = Omit<ManagedProperty, "id" | "updated_at" | "rooms"> & { id?: string; updated_at?: string; rooms: FormRoom[] };
 type PhotoTarget =
   | { kind: "property" }
+  | { kind: "experience"; experienceId: string }
   | { kind: "room"; roomIndex: number }
   | { kind: "bathroom"; roomIndex: number };
 
@@ -34,7 +35,7 @@ const emptySeasonalRate = (): SeasonalRate => ({ id: crypto.randomUUID(), name: 
 const emptyInventoryRule = (): InventoryRule => ({ id: crypto.randomUUID(), roomName: "", startDate: "", endDate: "", roomsAvailable: 0, stopSale: false, note: "" });
 const emptyForm = (): FormState => ({
   slug: "", status: "draft", name: "", island: "", description: "", photos: [], amenities: "", rooms: [emptyRoom()],
-  seasonalRates: [], inventoryRules: [],
+  experiences: [], seasonalRates: [], inventoryRules: [],
   taxes: "", transfers: "", cancellation: "", payment: "", partnerName: "", partnerEmail: "", partnerPhone: "",
 });
 
@@ -153,6 +154,7 @@ export default function PropertyDashboard() {
       setForm(current => {
         if (!current) return current;
         if (target.kind === "property") return { ...current, photos: [...(current.photos || []), ...added] };
+        if (target.kind === "experience") return { ...current, experiences: (current.experiences || []).map(item => item.id === target.experienceId ? { ...item, photos: [...item.photos, ...added] } : item) };
         return {
           ...current,
           rooms: current.rooms.map((room, index) => {
@@ -162,7 +164,7 @@ export default function PropertyDashboard() {
           }),
         };
       });
-      const section = target.kind === "property"
+      const section = target.kind === "experience" ? "the experience" : target.kind === "property"
         ? "the property"
         : target.kind === "room"
           ? `Room ${target.roomIndex + 1}`
@@ -232,9 +234,12 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
         const link = (event.target as Element).closest("a");
         if (link && !link.getAttribute("href")?.startsWith("#")) { event.preventDefault(); event.stopPropagation(); }
       }}>
-        <ManagedPropertyView property={previewProperty}/>
+        <ManagedPropertyView property={previewProperty} preview/>
       </div>
     </section>;
+  }
+  function updateExperience(id:string, patch:Partial<PropertyExperience>) {
+    setForm(current=>current?{...current,experiences:(current.experiences||[]).map(item=>item.id===id?{...item,...patch}:item)}:current);
   }
   const roomCount = form.rooms.length;
   const rateCount = form.rooms.reduce((count, room) => count + room.mealRates.length, 0);
@@ -281,6 +286,15 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
   <div className="mt-4 flex flex-wrap gap-2">{[["BB","Bed & Breakfast"],["HB","Half Board"],["FB","Full Board"],["RO","Room Only"],["AI","All Inclusive"]].filter(([,name])=>!room.mealRates.some(rate=>rate.mealPlan.toLowerCase()===name.toLowerCase())).map(([label,name])=><button key={label} type="button" onClick={()=>addMealRate(index,name)} className="rounded-lg border border-gold/30 px-3 py-2 text-xs text-gold">+ {label}</button>)}<button type="button" onClick={()=>addMealRate(index,"")} className="rounded-lg border border-white/20 px-3 py-2 text-xs">+ Other plan</button></div>
   <p className="mt-3 text-xs text-gray-500">Selling prices are shown to guests. Contracted rates stay private.</p>
 </div></div>)}</div><button type="button" onClick={() => setForm(current => current ? { ...current, rooms: [...current.rooms, emptyRoom()] } : current)} className="btn-outline mt-4 gap-2"><Plus className="h-4 w-4" /> Add room</button>
+        </Panel>
+        <Panel title={`Things to do near this stay · ${(form.experiences || []).length}`} subtitle="Add local experiences for this property. Prices are starting estimates; customers save their interest to My Tripelor." open={true} onToggle={()=>{}} collapsible={false}>
+          <div className="space-y-5">{(form.experiences || []).map(experience=><div key={experience.id} className="rounded-xl border border-gold/20 p-4">
+            <div className="flex items-center justify-between gap-3"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={experience.enabled} onChange={e=>updateExperience(experience.id,{enabled:e.target.checked})}/>Show to customers when property is published</label><button type="button" disabled={uploading||saving} aria-label={`Remove ${experience.name || "experience"}`} onClick={()=>setForm(current=>current?{...current,experiences:(current.experiences||[]).filter(item=>item.id!==experience.id)}:current)} className="min-h-11 p-2 text-red-300"><Trash2 className="h-4 w-4"/></button></div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2"><Field label="Experience name" value={experience.name} onChange={name=>updateExperience(experience.id,{name})} placeholder="e.g. Sandbank excursion"/><Field label="Duration" value={experience.duration} onChange={duration=>updateExperience(experience.id,{duration})} placeholder="e.g. 3 hours"/><NumberField label="Starting price (USD)" value={experience.price} onChange={price=>updateExperience(experience.id,{price})} min={0} max={1000000} hint="Use 0 to display Price on request."/><Field label="Price unit" value={experience.priceUnit} onChange={priceUnit=>updateExperience(experience.id,{priceUnit})} placeholder="per person / per group"/></div>
+            <TextArea label="Description" value={experience.description} onChange={description=>updateExperience(experience.id,{description})}/><TextArea label="What's included" value={experience.inclusions} onChange={inclusions=>updateExperience(experience.id,{inclusions})} placeholder="List confirmed inclusions and any important conditions."/>
+            <div className="mt-4"><PhotoUploadBox label={`Add ${experience.name || "experience"} photos`} helper="JPG, PNG or WebP up to 10 MB each. First photo is the cover." photos={experience.photos} uploading={uploading} onUpload={files=>onUpload(files,{kind:"experience",experienceId:experience.id})} onRemove={photo=>updateExperience(experience.id,{photos:experience.photos.filter(item=>item!==photo)})} onReorder={photos=>updateExperience(experience.id,{photos})} cover/></div>
+          </div>)}</div>
+          <button type="button" disabled={uploading||saving||(form.experiences||[]).length>=30} onClick={()=>setForm(current=>current?{...current,experiences:[...(current.experiences||[]),{id:crypto.randomUUID(),name:"",description:"",duration:"",price:0,priceUnit:"per person",inclusions:"",photos:[],enabled:false}]}:current)} className="btn-outline mt-4">+ Add experience</button>
         </Panel>
         <Panel title={`Seasonal rates · ${form.seasonalRates.length}`} subtitle="Set date-based prices for high season, offers and blackout periods." open={openSections.seasonal} onToggle={() => toggle("seasonal")}>
           <div className="space-y-4">{form.seasonalRates.map((rate, index) => <div key={rate.id || index} className="rounded-2xl border border-gold/20 bg-gold/[.035] p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-gold">Season {String(index + 1).padStart(2, "0")}</p><button type="button" onClick={() => setForm(current => current ? { ...current, seasonalRates: current.seasonalRates.filter((_, i) => i !== index) } : current)} className="rounded-full p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300" aria-label="Remove seasonal rate"><Trash2 className="h-4 w-4" /></button></div><div className="mt-4 grid gap-4 md:grid-cols-2"><Field label="Season name" value={rate.name} onChange={v => updateSeasonalRate(index, "name", v)} placeholder="High season 2026"/><label className="grid gap-2 text-sm"><span className="font-medium text-white/85">Room type</span><select value={rate.roomName} onChange={e => updateSeasonalRate(index, "roomName", e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 outline-none transition focus:border-gold"><option value="">Choose a room</option>{form.rooms.filter(room => room.name).map(room => <option key={room.name} value={room.name}>{room.name}</option>)}</select></label><Field label="Start date" type="date" value={rate.startDate} onChange={v => updateSeasonalRate(index, "startDate", v)}/><Field label="End date" type="date" value={rate.endDate} onChange={v => updateSeasonalRate(index, "endDate", v)}/><Field label="Meal plan" value={rate.mealPlan} onChange={v => updateSeasonalRate(index, "mealPlan", v)} placeholder="Bed & Breakfast"/><NumberField label="Partner rate (USD)" value={rate.contractedRate} onChange={v => updateSeasonalRate(index, "contractedRate", v)} min={0} max={1000000}/><NumberField label="Tripelor selling rate (USD)" value={rate.sellingRate} onChange={v => updateSeasonalRate(index, "sellingRate", v)} min={0} max={1000000}/></div><p className="mt-3 text-xs text-gray-500">The end date is included. If seasons overlap, the more specific date range is used.</p></div>)}</div><button type="button" onClick={() => setForm(current => current ? { ...current, seasonalRates: [...current.seasonalRates, { ...emptySeasonalRate(), roomName: current.rooms.find(room => room.name)?.name || "" }] } : current)} className="btn-outline mt-4 gap-2"><Plus className="h-4 w-4" /> Add seasonal rate</button>
