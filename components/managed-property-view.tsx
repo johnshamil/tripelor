@@ -1,3 +1,4 @@
+import PropertyHostMessage from "@/components/property-host-message";
 import Link from "next/link";
 import PropertyKnowGuide from "@/components/property-know-guide";
 import PropertyArrivalGuide from "@/components/property-arrival-guide";
@@ -71,5 +72,5 @@ export default function ManagedPropertyView({ property, preview = false }: { pro
       { title: "Cancellation", text: property.cancellation },
       { title: "Payment", text: property.payment },
     ]}
-  />{!preview && <div className="container py-6"><Link href={"/holiday-shortlist?add="+encodeURIComponent(property.slug)} className="btn-outline min-h-11">Add to a shared holiday shortlist</Link></div>}<PropertyKnowGuide property={property} preview={preview}/><PropertyArrivalGuide property={property} preview={preview}/><PropertyExperiences experiences={property.experiences || []} propertyName={property.name} slug={property.slug} preview={preview}/></>;
+  />{!preview && <div className="container py-6"><Link href={"/holiday-shortlist?add="+encodeURIComponent(property.slug)} className="btn-outline min-h-11">Add to a shared holiday shortlist</Link></div>}<PropertyHostMessage host={property.host} propertyId={property.id} propertyName={property.name} slug={property.slug} preview={preview}/><PropertyKnowGuide property={property} preview={preview}/><PropertyArrivalGuide property={property} preview={preview}/><PropertyExperiences experiences={property.experiences || []} propertyName={property.name} slug={property.slug} preview={preview}/></>;
 }

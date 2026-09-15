@@ -213,6 +213,7 @@ export default function AdminPage() {
         </div>
       )}
 
+      <Link href="/admin/host-questions" className="mt-6 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 p-5"><span><strong>Host Questions</strong><span className="mt-1 block text-sm text-gray-400">Read guest enquiries and publish personal text or voice replies.</span></span><span className="text-gold">Open inbox →</span></Link>
       <AdminCommandCenter />
 
       <section id="bookings" className="mt-9 scroll-mt-24">
