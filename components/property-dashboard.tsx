@@ -14,6 +14,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import PropertyArrivalEditor from "@/components/property-arrival-editor";
 import WishlistTagsEditor from "@/components/wishlist-tags-editor";
 import ManagedPropertyView from "@/components/managed-property-view";
 import { publicProperty, propertyPhotoUrl } from "@/lib/property-model";
@@ -316,6 +317,7 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
             cover
           />
         </Panel>
+        <PropertyArrivalEditor value={form.arrival} onChange={value => update("arrival", value)}/>
         <Panel title="Booking conditions" subtitle="Shown on the public property page." open={openSections.commercial} onToggle={() => toggle("commercial")}><TextArea label="Taxes & service charges" value={form.taxes} onChange={v => update("taxes", v)} placeholder="e.g. 10% service charge and 17% GST included / excluded."/><TextArea label="Transfer options" value={form.transfers} onChange={v => update("transfers", v)} placeholder="e.g. Speedboat, public ferry, airport transfer details."/><TextArea label="Cancellation conditions" value={form.cancellation} onChange={v => update("cancellation", v)} placeholder="Explain notice periods and non-refundable amounts."/><TextArea label="Payment conditions" value={form.payment} onChange={v => update("payment", v)} placeholder="e.g. Payment is due after Tripelor confirms availability."/></Panel>
         <Panel title="Partner contact & commercial terms" subtitle="Only visible to your admin account." open={openSections.partner} onToggle={() => toggle("partner")}><Field label="Partner / property manager" value={form.partnerName} onChange={v => update("partnerName", v)} placeholder="Manager name"/><Field label="Partner email" value={form.partnerEmail} onChange={v => update("partnerEmail", v)} placeholder="manager@example.com" type="email"/><Field label="Partner phone / WhatsApp" value={form.partnerPhone} onChange={v => update("partnerPhone", v)} placeholder="+960 ..."/><p className="mt-3 text-xs leading-5 text-gray-500">Contracted rates, partner contacts and unpublished drafts are never sent to public visitors.</p></Panel>
         <div className="rounded-2xl border border-white/10 bg-white/[.025] p-5"><p className="text-xs font-semibold uppercase tracking-[.18em] text-gold">Publishing</p><div className="mt-4 grid grid-cols-2 gap-2"><button type="button" onClick={() => update("status", "draft")} className={`rounded-xl border px-3 py-3 text-sm font-semibold ${form.status === "draft" ? "border-gold bg-gold/15 text-gold" : "border-white/10 text-gray-500"}`}>Save as draft</button><button type="button" onClick={() => update("status", "published")} className={`rounded-xl border px-3 py-3 text-sm font-semibold ${form.status === "published" ? "border-emerald-400/50 bg-emerald-400/10 text-emerald-200" : "border-white/10 text-gray-500"}`}>Publish live</button></div><p className="mt-3 text-xs leading-5 text-gray-500">Publishing makes the property visible on the Stays page and its public property link.</p></div>
