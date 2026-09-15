@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { LogOut, Menu, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import TripelorMark from "@/components/tripelor-mark";
@@ -25,6 +26,8 @@ const mobileLinks = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const adminSurface = pathname === "/admin" || pathname.startsWith("/admin/");
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
@@ -49,7 +52,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#041117]/95 backdrop-blur-xl">
+    <header data-menu-open={open || undefined} className="sticky top-0 z-50 border-b border-white/10 bg-[#041117]/95 backdrop-blur-xl">
       <div className="container flex h-[64px] items-center justify-between md:h-[76px]">
         <Link
           href="/"
@@ -92,7 +95,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      <Link href="/help-me-choose" onClick={() => setOpen(false)} className="flex min-h-[44px] items-center justify-center gap-2 border-t border-white/10 px-4 text-xs text-[#ead7aa] lg:hidden">Not sure where to start? <span className="font-semibold underline">Help Me Choose</span></Link>
+      {!adminSurface && <Link href="/help-me-choose" onClick={() => setOpen(false)} className="flex min-h-[44px] items-center justify-center gap-2 border-t border-white/10 px-4 text-xs text-[#ead7aa] lg:hidden">Not sure where to start? <span className="font-semibold underline">Help Me Choose</span></Link>}
 
       {open && (
         <div className="fixed inset-x-0 top-[64px] z-[100] h-[calc(100dvh-64px)] overflow-hidden border-t border-white/10 bg-[#041117] md:top-[76px] md:h-[calc(100dvh-76px)] lg:hidden">
@@ -103,6 +106,7 @@ export default function Navbar() {
             </div>
 
             <nav className="grid" aria-label="Mobile navigation">
+              {user?.isAdmin && <div className="mb-3 grid grid-cols-2 gap-2 border-b border-gold/20 pb-4">{[["/admin", "Admin home"], ["/admin/properties", "Properties"], ["/admin/host-questions", "Host Questions"]].map(([href, label]) => <Link key={href} href={href} onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-center rounded-xl border border-gold/30 px-3 py-2 text-center text-sm text-gold">{label}</Link>)}</div>}
               {mobileLinks.map(([href, label], index) => (
                 <Link
                   key={href}
