@@ -2,13 +2,47 @@
 
 @media (max-width: 767px) {
   html {
-    scroll-padding-top: 72px;
+    scroll-padding-top: 120px;
     scroll-padding-bottom: 104px;
   }
 
   body {
-    padding-bottom: 5.8rem;
+    padding-bottom: calc(5.8rem + env(safe-area-inset-bottom));
   }
+
+  /* Let a phone keyboard and the form use the screen without floating controls. */
+  body:has(textarea:focus, input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus) .mobile-booking-bar,
+  body:has(textarea:focus, input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus) [data-mobile-float],
+  body:has(header[data-menu-open]) .mobile-booking-bar,
+  body:has(header[data-menu-open]) [data-mobile-float] {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .host-surface input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .host-surface select,
+  .host-surface textarea,
+  .property-editor input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .property-editor select,
+  .property-editor textarea {
+    width: 100%;
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  .host-surface audio { width: 100%; min-width: 0; }
+  .host-surface input[type="checkbox"] { min-height: 1.25rem; }
+  .host-surface input[type="radio"] { min-height: 0; }
+  .host-surface .btn-gold, .host-surface .btn-outline,
+  .property-editor-actions .btn-gold, .property-editor-actions .btn-outline {
+    text-transform: none;
+    letter-spacing: 0;
+    padding-inline: .75rem;
+  }
+  .property-editor-actions .btn-gold, .property-editor-actions .btn-outline { padding-inline: .5rem; }
+  .property-editor-actions svg { display: none; }
+
+  .property-editor section { scroll-margin-top: 4.5rem; }
 
   /* Reduce oversized desktop spacing on phones. */
   .route-transition .py-24 {
