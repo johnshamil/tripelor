@@ -29,6 +29,7 @@ export default function PropertyCards({ managedProperties = [], featured = false
         </div>
         {featured && <Link href="/stays" className="inline-flex min-h-[48px] shrink-0 items-center gap-3 rounded-full border border-[#8d7037]/40 px-6 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#8d7037]">View all stays <ArrowRight className="h-4 w-4" /></Link>}
       </div>
+      <div className="mb-6"><Link href="/holiday-shortlist" className="inline-flex min-h-11 items-center rounded-full border border-[#8d7037]/40 px-5 text-sm font-semibold">Planning together? Share a holiday shortlist →</Link></div>
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {visibleProperties.map(property => <Link key={property.slug} href={`/stays/${property.slug}`} className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[#d0c5b0] bg-[#f8f4ec] shadow-sm transition hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#8d7037]">
           <div className="relative aspect-[5/4] overflow-hidden"><img src={property.image} alt={property.name} loading="lazy" className="h-full w-full object-cover transition duration-700 motion-safe:group-hover:scale-105 motion-reduce:transition-none" /></div>

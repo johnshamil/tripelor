@@ -18,6 +18,7 @@ const primaryLinks = [
 const mobileLinks = [
   ["/", "Home"],
   ["/help-me-choose", "Help Me Choose"],
+  ["/holiday-shortlist", "Holiday Shortlist"],
   ...primaryLinks,
   ["/account#referral-rewards", "Referral & Earn"],
   ["/contact", "Contact"],
