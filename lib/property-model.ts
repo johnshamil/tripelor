@@ -62,7 +62,19 @@ export function normalizePropertyKnowDetails(value: unknown): PropertyKnowDetail
   }
   return result;
 }
+export type PropertyHost = { enabled: boolean; name: string; introduction: string; photo: string; audio: string; transcript: string };
+export function normalizePropertyHost(value: unknown): PropertyHost {
+  const input = value == null ? {} : value;
+  if(typeof input !== "object" || Array.isArray(input)) throw new Error("Enter valid host information.");
+  const raw=input as Record<string, unknown>;
+  const read=(key:string,max:number)=>{const v=raw[key] ?? "";if(typeof v!=="string" || v.length>max)throw new Error("Please shorten the host " + key + ".");return v.trim();};
+  const host={enabled:raw.enabled===true,name:read("name",120),introduction:read("introduction",2000),photo:read("photo",150),audio:read("audio",150),transcript:read("transcript",5000)};
+  if(host.photo && !/^profiles\/[0-9a-f-]{36}\.(jpg|png|webp)$/.test(host.photo)) throw new Error("Use an uploaded host photograph.");
+  if(host.audio && !/^profiles\/[0-9a-f-]{36}\.(mp3|m4a|ogg|webm|wav)$/.test(host.audio)) throw new Error("Use an uploaded host voice message.");
+  return host;
+}
 export type ManagedProperty = {
+  host?: PropertyHost;
   knowBeforeBooking?: PropertyKnowDetails;
   arrival?: PropertyArrival;
   wishlistTags?: string[];
@@ -104,7 +116,9 @@ export function propertyRateForDate(property: RateSource, roomName: string, meal
   return seasonalRateForDate(property, roomName, mealPlan, date)?.sellingRate ?? room?.sellingRate ?? 0;
 }
 export function publicProperty(p: ManagedProperty): PublicProperty {
+  const host=normalizePropertyHost(p.host);
   return {
+    host:host.enabled ? host : undefined,
     knowBeforeBooking:normalizePropertyKnowDetails(p.knowBeforeBooking),
     arrival:normalizePropertyArrival(p.arrival),
     wishlistTags:p.wishlistTags || [],
@@ -167,7 +181,8 @@ export function validateProperty(input: any) {
     return experience;
   });
   if (new Set(experiences.map(e=>e.id)).size !== experiences.length) throw new Error("Experience IDs must be unique.");
-  const data={ knowBeforeBooking:normalizePropertyKnowDetails(input.knowBeforeBooking), arrival:normalizePropertyArrival(input.arrival), wishlistTags, experiences, name, island:text(input.island,200), description:text(input.description), photos, rooms, seasonalRates, inventoryRules, amenities:text(input.amenities), taxes:text(input.taxes), transfers:text(input.transfers), cancellation:text(input.cancellation), payment:text(input.payment), partnerName:text(input.partnerName,200), partnerEmail:text(input.partnerEmail,250), partnerPhone:text(input.partnerPhone,80) };
+  const data={ host:normalizePropertyHost(input.host), knowBeforeBooking:normalizePropertyKnowDetails(input.knowBeforeBooking), arrival:normalizePropertyArrival(input.arrival), wishlistTags, experiences, name, island:text(input.island,200), description:text(input.description), photos, rooms, seasonalRates, inventoryRules, amenities:text(input.amenities), taxes:text(input.taxes), transfers:text(input.transfers), cancellation:text(input.cancellation), payment:text(input.payment), partnerName:text(input.partnerName,200), partnerEmail:text(input.partnerEmail,250), partnerPhone:text(input.partnerPhone,80) };
+  if(input.status==="published" && data.host.enabled && (!data.host.name || !data.host.introduction || !data.host.photo || (data.host.audio && !data.host.transcript))) throw new Error("Complete the host name, introduction, photograph and voice transcript, or hide the host section while editing.");
   if(data.partnerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.partnerEmail)) throw new Error("Enter a valid partner email.");
   if(input.status==="published" && (!data.island||!data.description||!photos.length||!rooms.length||rooms.some(r=>!r.name||!r.mealPlan||r.sellingRate<=0||r.totalRooms<1)||!data.taxes||!data.transfers||!data.cancellation||!data.payment)) throw new Error("Before publishing, add an island, description, photo, room name, meal plan, selling rate, room inventory and booking conditions.");
   return {slug,status:input.status as ManagedProperty["status"],data};
