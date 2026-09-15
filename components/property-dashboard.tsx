@@ -230,7 +230,7 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
       rooms: form.rooms.flatMap(({ mealRates, ...room }) => mealRates.map(rate => ({ ...room, ...rate }))),
     });
     return <section className="mt-6">
-      <div className="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gold/30 bg-[#071922] p-4">
+      <div className="sticky top-[108px] z-40 flex flex-wrap md:top-[120px] lg:top-[76px] items-center justify-between gap-3 rounded-xl border border-gold/30 bg-[#071922] p-4">
         <div><h2 className="font-semibold text-gold">Private property preview</h2><p className="mt-1 text-xs text-gray-400">Includes your unsaved edits. Nothing has been published. Booking is disabled here.</p></div>
         <button type="button" className="btn-gold" onClick={() => { setPreview(false); requestAnimationFrame(() => window.scrollTo({ top: previewScroll })); }}>Back to editing</button>
       </div>
