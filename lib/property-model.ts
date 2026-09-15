@@ -29,7 +29,20 @@ export type InventoryRule = {
   note: string;
 };
 export type PropertyExperience = { wishlistTags?: string[]; id: string; name: string; description: string; duration: string; price: number; priceUnit: string; inclusions: string; photos: string[]; enabled: boolean };
+export type PropertyArrival = { meetingPoint: string; contactName: string; contactDetails: string; journeyTime: string; lateArrival: string; islandWelcome: string };
+export function normalizePropertyArrival(value: unknown): PropertyArrival {
+  const input = value == null ? {} : value;
+  if(typeof input !== "object" || Array.isArray(input)) throw new Error("Enter valid arrival details.");
+  const result = {} as PropertyArrival;
+  for(const key of ["meetingPoint", "contactName", "contactDetails", "journeyTime", "lateArrival", "islandWelcome"] as const) {
+    const field = (input as Record<string, unknown>)[key] ?? "";
+    if(typeof field !== "string" || field.length > 2000) throw new Error("Arrival details must be text with up to 2,000 characters per field.");
+    result[key] = field.trim();
+  }
+  return result;
+}
 export type ManagedProperty = {
+  arrival?: PropertyArrival;
   wishlistTags?: string[];
   experiences?: PropertyExperience[];
   id: string;
@@ -70,6 +83,7 @@ export function propertyRateForDate(property: RateSource, roomName: string, meal
 }
 export function publicProperty(p: ManagedProperty): PublicProperty {
   return {
+    arrival:normalizePropertyArrival(p.arrival),
     wishlistTags:p.wishlistTags || [],
     experiences:(p.experiences || []).filter(e=>e.enabled).map(e=>({wishlistTags:e.wishlistTags || [],id:e.id,name:e.name,description:e.description,duration:e.duration,price:e.price,priceUnit:e.priceUnit,inclusions:e.inclusions,photos:e.photos,enabled:true})),
     id:p.id,
@@ -130,7 +144,7 @@ export function validateProperty(input: any) {
     return experience;
   });
   if (new Set(experiences.map(e=>e.id)).size !== experiences.length) throw new Error("Experience IDs must be unique.");
-  const data={ wishlistTags, experiences, name, island:text(input.island,200), description:text(input.description), photos, rooms, seasonalRates, inventoryRules, amenities:text(input.amenities), taxes:text(input.taxes), transfers:text(input.transfers), cancellation:text(input.cancellation), payment:text(input.payment), partnerName:text(input.partnerName,200), partnerEmail:text(input.partnerEmail,250), partnerPhone:text(input.partnerPhone,80) };
+  const data={ arrival:normalizePropertyArrival(input.arrival), wishlistTags, experiences, name, island:text(input.island,200), description:text(input.description), photos, rooms, seasonalRates, inventoryRules, amenities:text(input.amenities), taxes:text(input.taxes), transfers:text(input.transfers), cancellation:text(input.cancellation), payment:text(input.payment), partnerName:text(input.partnerName,200), partnerEmail:text(input.partnerEmail,250), partnerPhone:text(input.partnerPhone,80) };
   if(data.partnerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.partnerEmail)) throw new Error("Enter a valid partner email.");
   if(input.status==="published" && (!data.island||!data.description||!photos.length||!rooms.length||rooms.some(r=>!r.name||!r.mealPlan||r.sellingRate<=0||r.totalRooms<1)||!data.taxes||!data.transfers||!data.cancellation||!data.payment)) throw new Error("Before publishing, add an island, description, photo, room name, meal plan, selling rate, room inventory and booking conditions.");
   return {slug,status:input.status as ManagedProperty["status"],data};
