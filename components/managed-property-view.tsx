@@ -1,3 +1,4 @@
+import PropertyKnowGuide from "@/components/property-know-guide";
 import PropertyArrivalGuide from "@/components/property-arrival-guide";
 import PropertyExperiences from "@/components/property-experiences";
 import LuxuryPropertyPage from "@/components/luxury-property-page";
@@ -69,5 +70,5 @@ export default function ManagedPropertyView({ property, preview = false }: { pro
       { title: "Cancellation", text: property.cancellation },
       { title: "Payment", text: property.payment },
     ]}
-  /><PropertyArrivalGuide property={property} preview={preview}/><PropertyExperiences experiences={property.experiences || []} propertyName={property.name} slug={property.slug} preview={preview}/></>;
+  /><PropertyKnowGuide property={property} preview={preview}/><PropertyArrivalGuide property={property} preview={preview}/><PropertyExperiences experiences={property.experiences || []} propertyName={property.name} slug={property.slug} preview={preview}/></>;
 }
