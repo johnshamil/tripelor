@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useId, useState } from "react";
 import HostAudio from "@/components/host-audio";
 import { hostMediaUrl } from "@/lib/host-questions";
 export default function HostMediaUpload({kind,section,questionId,value,onChange,onBusyChange,disabled=false}:{kind:"profile"|"reply";section:"photo"|"audio";questionId?:string;value:string;onChange:(value:string)=>void;onBusyChange:(busy:boolean)=>void;disabled?:boolean}){
   const [busy,setBusy]=useState(false),[error,setError]=useState("");
+  const inputId=useId();
   async function upload(file?:File){
     if(!file||busy||disabled)return;
     setBusy(true);onBusyChange(true);setError("");
@@ -17,9 +18,12 @@ export default function HostMediaUpload({kind,section,questionId,value,onChange,
       onChange(data.file);
     }catch(e){setError(e instanceof Error?e.message:"Upload failed.");}finally{setBusy(false);onBusyChange(false);}
   }
-  return <div className="rounded-xl border border-white/15 p-4">
-    <label className="grid gap-3 text-sm"><span className="font-medium">{section==="photo"?"Host photograph":"Voice message"}</span><span className="text-xs leading-5 text-gray-400">{section==="photo"?"JPG, PNG or WebP, up to 10 MB.":"Upload an MP3, M4A, OGG, WebM or WAV recording, up to 10 MB. A short 20–45 second message works well."}</span><input type="file" disabled={disabled||busy} accept={section==="photo"?"image/jpeg,image/png,image/webp":".mp3,.m4a,.ogg,.webm,.wav,audio/mpeg,audio/mp4,audio/x-m4a,audio/ogg,audio/webm,audio/wav,audio/x-wav"} className="w-full min-w-0 text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-[#c9a86a] file:px-3 file:py-3 file:text-black" onChange={e=>{const file=e.target.files?.[0];e.target.value="";void upload(file);}}/></label>
+  return <div className="min-w-0 rounded-xl border border-white/15 p-3 sm:p-4">
+    <p className="text-sm font-medium">{section==="photo"?"Host photograph":"Voice message"}</p>
+    <p id={inputId+"-help"} className="mt-2 text-sm leading-6 text-gray-400">{section==="photo"?"JPG, PNG or WebP, up to 10 MB.":"MP3, M4A, OGG, WebM or WAV, up to 10 MB. Aim for a short 20–45 second welcome."}</p>
+    <input id={inputId} aria-label={section==="photo"?"Choose host photograph":"Choose voice recording"} aria-describedby={inputId+"-help"} type="file" disabled={disabled||busy} accept={section==="photo"?"image/jpeg,image/png,image/webp":".mp3,.m4a,.ogg,.webm,.wav,audio/mpeg,audio/mp4,audio/x-m4a,audio/ogg,audio/webm,audio/wav,audio/x-wav"} className="peer sr-only" onChange={e=>{const file=e.target.files?.[0];e.target.value="";void upload(file);}}/>
+    <label htmlFor={inputId} className="btn-outline mt-4 w-full cursor-pointer normal-case tracking-normal peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-gold peer-disabled:cursor-wait peer-disabled:opacity-50">{busy?"Uploading…":value?(section==="photo"?"Replace photograph":"Replace recording"):(section==="photo"?"Choose photograph":"Choose recording")}</label>
     {busy&&<p role="status" className="mt-3 text-sm text-gold">Uploading…</p>}{error&&<p role="alert" className="mt-3 text-sm text-red-200">{error}</p>}
-    {value&&<div className="mt-4">{section==="photo"?<img src={hostMediaUrl(value)} alt="Host photograph preview" className="h-32 w-32 rounded-2xl object-cover"/>:<HostAudio file={value} label="Preview uploaded voice message"/>}<button type="button" disabled={busy||disabled} onClick={()=>onChange("")} className="mt-2 min-h-11 text-xs text-gray-400 underline">Remove {section==="photo"?"photograph":"recording"}</button></div>}
+    {value&&<div className="mt-4 min-w-0">{section==="photo"?<img src={hostMediaUrl(value)} alt="Host photograph preview" className="h-24 w-24 rounded-2xl object-cover"/>:<HostAudio file={value} label="Preview uploaded voice message"/>}<button type="button" disabled={busy||disabled} onClick={()=>onChange("")} className="mt-2 min-h-12 px-2 text-sm text-gray-300 underline">Remove {section==="photo"?"photograph":"recording"}</button></div>}
   </div>;
 }
