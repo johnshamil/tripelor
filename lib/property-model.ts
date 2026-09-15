@@ -41,7 +41,29 @@ export function normalizePropertyArrival(value: unknown): PropertyArrival {
   }
   return result;
 }
+export const propertyKnowFields = [
+  { key: "beach", label: "Beach access", hint: "Distance or walking time to the beach, and whether a designated bikini beach is available." },
+  { key: "wifi", label: "Wi-Fi", hint: "Where Wi-Fi is available, any charges and confirmed limitations." },
+  { key: "accessibility", label: "Stairs & accessibility", hint: "Steps, lifts, ground-floor rooms and bathroom access. Describe confirmed facilities." },
+  { key: "family", label: "Families & extra beds", hint: "Cots, extra beds, age limits, charges and which rooms can accommodate them." },
+  { key: "meals", label: "Meals & dietary requests", hint: "Where meals are served and which dietary requests can be arranged." },
+  { key: "checkIn", label: "Check-in", hint: "Local check-in time and early check-in conditions." },
+  { key: "checkOut", label: "Check-out", hint: "Local check-out time and late check-out conditions." },
+] as const;
+export type PropertyKnowDetails = Record<(typeof propertyKnowFields)[number]["key"], string>;
+export function normalizePropertyKnowDetails(value: unknown): PropertyKnowDetails {
+  const input = value == null ? {} : value;
+  if(typeof input !== "object" || Array.isArray(input)) throw new Error("Enter valid Know Before You Book details.");
+  const result = {} as PropertyKnowDetails;
+  for(const { key, label } of propertyKnowFields) {
+    const field = (input as Record<string, unknown>)[key] ?? "";
+    if(typeof field !== "string" || field.length > 2000) throw new Error(label + " must be text with up to 2,000 characters.");
+    result[key] = field.trim();
+  }
+  return result;
+}
 export type ManagedProperty = {
+  knowBeforeBooking?: PropertyKnowDetails;
   arrival?: PropertyArrival;
   wishlistTags?: string[];
   experiences?: PropertyExperience[];
@@ -83,6 +105,7 @@ export function propertyRateForDate(property: RateSource, roomName: string, meal
 }
 export function publicProperty(p: ManagedProperty): PublicProperty {
   return {
+    knowBeforeBooking:normalizePropertyKnowDetails(p.knowBeforeBooking),
     arrival:normalizePropertyArrival(p.arrival),
     wishlistTags:p.wishlistTags || [],
     experiences:(p.experiences || []).filter(e=>e.enabled).map(e=>({wishlistTags:e.wishlistTags || [],id:e.id,name:e.name,description:e.description,duration:e.duration,price:e.price,priceUnit:e.priceUnit,inclusions:e.inclusions,photos:e.photos,enabled:true})),
@@ -144,7 +167,7 @@ export function validateProperty(input: any) {
     return experience;
   });
   if (new Set(experiences.map(e=>e.id)).size !== experiences.length) throw new Error("Experience IDs must be unique.");
-  const data={ arrival:normalizePropertyArrival(input.arrival), wishlistTags, experiences, name, island:text(input.island,200), description:text(input.description), photos, rooms, seasonalRates, inventoryRules, amenities:text(input.amenities), taxes:text(input.taxes), transfers:text(input.transfers), cancellation:text(input.cancellation), payment:text(input.payment), partnerName:text(input.partnerName,200), partnerEmail:text(input.partnerEmail,250), partnerPhone:text(input.partnerPhone,80) };
+  const data={ knowBeforeBooking:normalizePropertyKnowDetails(input.knowBeforeBooking), arrival:normalizePropertyArrival(input.arrival), wishlistTags, experiences, name, island:text(input.island,200), description:text(input.description), photos, rooms, seasonalRates, inventoryRules, amenities:text(input.amenities), taxes:text(input.taxes), transfers:text(input.transfers), cancellation:text(input.cancellation), payment:text(input.payment), partnerName:text(input.partnerName,200), partnerEmail:text(input.partnerEmail,250), partnerPhone:text(input.partnerPhone,80) };
   if(data.partnerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.partnerEmail)) throw new Error("Enter a valid partner email.");
   if(input.status==="published" && (!data.island||!data.description||!photos.length||!rooms.length||rooms.some(r=>!r.name||!r.mealPlan||r.sellingRate<=0||r.totalRooms<1)||!data.taxes||!data.transfers||!data.cancellation||!data.payment)) throw new Error("Before publishing, add an island, description, photo, room name, meal plan, selling rate, room inventory and booking conditions.");
   return {slug,status:input.status as ManagedProperty["status"],data};
