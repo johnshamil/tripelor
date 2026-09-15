@@ -1,4 +1,5 @@
 "use client";
+import PropertyKnowEditor from "@/components/property-know-editor";
 
 import { useEffect, useMemo, useState, useRef } from "react";
 import {
@@ -317,6 +318,7 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
             cover
           />
         </Panel>
+        <PropertyKnowEditor value={form.knowBeforeBooking} onChange={value => update("knowBeforeBooking", value)}/>
         <PropertyArrivalEditor value={form.arrival} onChange={value => update("arrival", value)}/>
         <Panel title="Booking conditions" subtitle="Shown on the public property page." open={openSections.commercial} onToggle={() => toggle("commercial")}><TextArea label="Taxes & service charges" value={form.taxes} onChange={v => update("taxes", v)} placeholder="e.g. 10% service charge and 17% GST included / excluded."/><TextArea label="Transfer options" value={form.transfers} onChange={v => update("transfers", v)} placeholder="e.g. Speedboat, public ferry, airport transfer details."/><TextArea label="Cancellation conditions" value={form.cancellation} onChange={v => update("cancellation", v)} placeholder="Explain notice periods and non-refundable amounts."/><TextArea label="Payment conditions" value={form.payment} onChange={v => update("payment", v)} placeholder="e.g. Payment is due after Tripelor confirms availability."/></Panel>
         <Panel title="Partner contact & commercial terms" subtitle="Only visible to your admin account." open={openSections.partner} onToggle={() => toggle("partner")}><Field label="Partner / property manager" value={form.partnerName} onChange={v => update("partnerName", v)} placeholder="Manager name"/><Field label="Partner email" value={form.partnerEmail} onChange={v => update("partnerEmail", v)} placeholder="manager@example.com" type="email"/><Field label="Partner phone / WhatsApp" value={form.partnerPhone} onChange={v => update("partnerPhone", v)} placeholder="+960 ..."/><p className="mt-3 text-xs leading-5 text-gray-500">Contracted rates, partner contacts and unpublished drafts are never sent to public visitors.</p></Panel>
