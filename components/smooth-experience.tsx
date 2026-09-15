@@ -14,6 +14,7 @@ const mobileActions = [
 
 export default function SmoothExperience({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const adminSurface = pathname === "/admin" || pathname.startsWith("/admin/");
   const [showPlanButton, setShowPlanButton] = useState(false);
   const authSurface = ["/login", "/signup", "/forgot-password", "/reset-password"].some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
@@ -29,7 +30,7 @@ export default function SmoothExperience({ children }: { children: React.ReactNo
   useEffect(() => {
     const elements = Array.from(
       document.querySelectorAll<HTMLElement>(
-        ".route-transition > section, .route-transition [data-smooth-reveal]",
+        ".route-transition > section:not(.host-surface), .route-transition [data-smooth-reveal]",
       ),
     );
 
@@ -62,7 +63,7 @@ export default function SmoothExperience({ children }: { children: React.ReactNo
         {children}
       </div>
 
-      {!authSurface && (
+      {!authSurface && !adminSurface && (
         <>
           <Link
             href="/build-your-trip"
