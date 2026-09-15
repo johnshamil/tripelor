@@ -1,4 +1,5 @@
 "use client";
+import PropertyHostEditor from "@/components/property-host-editor";
 import PropertyKnowEditor from "@/components/property-know-editor";
 
 import { useEffect, useMemo, useState, useRef } from "react";
@@ -201,7 +202,7 @@ export default function PropertyDashboard() {
     {notice && !form && <Notice tone="success">{notice}</Notice>}
     {error && !form && <Notice tone="error">{error}</Notice>}
     {!form && <PropertySubmissionInbox onApproved={(property) => setProperties((current) => [property, ...current.filter((item) => item.id !== property.id)])} />}
-    {form ? <PropertyForm form={form} update={update} updateRoom={updateRoom} updateSeasonalRate={updateSeasonalRate} updateInventoryRule={updateInventoryRule} setForm={setForm} openSections={openSections} toggle={toggle} onUpload={uploadPhotos} uploading={uploading} saving={saving} onSave={save} onCancel={closeForm} notice={notice} error={error} /> : <PropertyList properties={sortedProperties} onEdit={edit} onNew={openNew} />}
+    {form ? <PropertyForm form={form} update={update} updateRoom={updateRoom} updateSeasonalRate={updateSeasonalRate} updateInventoryRule={updateInventoryRule} setForm={setForm} openSections={openSections} toggle={toggle} onUpload={uploadPhotos} onHostBusy={setUploading} uploading={uploading} saving={saving} onSave={save} onCancel={closeForm} notice={notice} error={error} /> : <PropertyList properties={sortedProperties} onEdit={edit} onNew={openNew} />}
   </main>;
 }
 
@@ -217,7 +218,7 @@ function PropertyList({ properties, onEdit, onNew }: { properties: ManagedProper
 
 function BuildingIcon() { return <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gold/10 text-gold"><Upload className="h-6 w-6" /></div>; }
 
-function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInventoryRule, setForm, openSections, toggle, onUpload, uploading, saving, onSave, onCancel, notice, error }: { form: FormState; update: <K extends keyof FormState>(key: K, value: FormState[K]) => void; updateRoom: (index: number, key: keyof FormRoom, value: string | number) => void; updateSeasonalRate: (index: number, key: keyof SeasonalRate, value: string | number) => void; updateInventoryRule: (index: number, key: keyof InventoryRule, value: string | number | boolean) => void; setForm: React.Dispatch<React.SetStateAction<FormState | null>>; openSections: Record<string, boolean>; toggle: (section: string) => void; onUpload: (files: FileList | null, target: PhotoTarget) => void; uploading: boolean; saving: boolean; onSave: () => void; onCancel: () => void; notice: string; error: string }) {
+function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInventoryRule, setForm, openSections, toggle, onUpload, onHostBusy, uploading, saving, onSave, onCancel, notice, error }: { form: FormState; update: <K extends keyof FormState>(key: K, value: FormState[K]) => void; updateRoom: (index: number, key: keyof FormRoom, value: string | number) => void; updateSeasonalRate: (index: number, key: keyof SeasonalRate, value: string | number) => void; updateInventoryRule: (index: number, key: keyof InventoryRule, value: string | number | boolean) => void; setForm: React.Dispatch<React.SetStateAction<FormState | null>>; openSections: Record<string, boolean>; toggle: (section: string) => void; onUpload: (files: FileList | null, target: PhotoTarget) => void; onHostBusy: (busy: boolean) => void; uploading: boolean; saving: boolean; onSave: () => void; onCancel: () => void; notice: string; error: string }) {
   const [duplicateNotice, setDuplicateNotice] = useState("");
   const [preview, setPreview] = useState(false);
   const [previewScroll, setPreviewScroll] = useState(0);
@@ -271,7 +272,7 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
     } : current);
   }
   return <section className="mt-8 max-w-6xl">
-    <div className="flex flex-col gap-4 rounded-2xl border border-gold/20 bg-gold/[.05] p-5 md:flex-row md:items-center md:justify-between md:p-6"><div><p className="text-[10px] font-semibold uppercase tracking-[.22em] text-gold">{form.id ? "Edit property" : "New property"}</p><h2 className="mt-2 text-2xl font-semibold">{form.name || "Untitled property"}</h2><p className="mt-1 text-sm text-gray-400">Save as a draft while collecting details, then publish when the page is ready.</p></div><div className="flex flex-wrap gap-2"><button type="button" disabled={saving || uploading} className="btn-outline disabled:opacity-50" onClick={() => { setPreviewScroll(window.scrollY); setPreview(true); window.scrollTo({ top: 0 }); }}>Preview Property</button><button type="button" onClick={onCancel} className="btn-outline gap-2"><X className="h-4 w-4" /> Cancel</button><button type="button" onClick={onSave} disabled={saving || uploading} className="btn-gold gap-2 disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{form.status === "published" ? "Save & Publish" : "Save Draft"}</button></div></div>
+    <div className="flex flex-col gap-4 rounded-2xl border border-gold/20 bg-gold/[.05] p-5 md:flex-row md:items-center md:justify-between md:p-6"><div><p className="text-[10px] font-semibold uppercase tracking-[.22em] text-gold">{form.id ? "Edit property" : "New property"}</p><h2 className="mt-2 text-2xl font-semibold">{form.name || "Untitled property"}</h2><p className="mt-1 text-sm text-gray-400">Save as a draft while collecting details, then publish when the page is ready.</p></div><div className="flex flex-wrap gap-2"><button type="button" disabled={saving || uploading} className="btn-outline disabled:opacity-50" onClick={() => { setPreviewScroll(window.scrollY); setPreview(true); window.scrollTo({ top: 0 }); }}>Preview Property</button><button type="button" onClick={onCancel} disabled={saving || uploading} className="btn-outline gap-2 disabled:opacity-50"><X className="h-4 w-4" /> Cancel</button><button type="button" onClick={onSave} disabled={saving || uploading} className="btn-gold gap-2 disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{form.status === "published" ? "Save & Publish" : "Save Draft"}</button></div></div>
     {duplicateNotice && <div role="status"><Notice tone="success">{duplicateNotice}</Notice></div>}{notice && <Notice tone="success">{notice}</Notice>}{error && <Notice tone="error">{error}</Notice>}
     <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
       <div className="space-y-5">
@@ -318,6 +319,7 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
             cover
           />
         </Panel>
+        <PropertyHostEditor value={form.host} onChange={value => update("host", value)} busy={uploading || saving} onBusyChange={onHostBusy}/>
         <PropertyKnowEditor value={form.knowBeforeBooking} onChange={value => update("knowBeforeBooking", value)}/>
         <PropertyArrivalEditor value={form.arrival} onChange={value => update("arrival", value)}/>
         <Panel title="Booking conditions" subtitle="Shown on the public property page." open={openSections.commercial} onToggle={() => toggle("commercial")}><TextArea label="Taxes & service charges" value={form.taxes} onChange={v => update("taxes", v)} placeholder="e.g. 10% service charge and 17% GST included / excluded."/><TextArea label="Transfer options" value={form.transfers} onChange={v => update("transfers", v)} placeholder="e.g. Speedboat, public ferry, airport transfer details."/><TextArea label="Cancellation conditions" value={form.cancellation} onChange={v => update("cancellation", v)} placeholder="Explain notice periods and non-refundable amounts."/><TextArea label="Payment conditions" value={form.payment} onChange={v => update("payment", v)} placeholder="e.g. Payment is due after Tripelor confirms availability."/></Panel>
