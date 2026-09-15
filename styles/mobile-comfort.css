@@ -1,5 +1,7 @@
 /* Mobile comfort layer: keeps Tripelor luxurious while making phone use faster and easier. */
 
+.property-editor section { scroll-margin-top: 10rem; }
+
 @media (max-width: 767px) {
   html {
     scroll-padding-top: 120px;
