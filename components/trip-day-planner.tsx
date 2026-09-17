@@ -39,7 +39,7 @@ export default function TripDayPlanner() {
     if (!product) return null;
     const Icon = product.kind === "stay" ? BedDouble : Waves;
     const day = tripDay(itinerary.start, line.date);
-    const lastDay = itinerary.days.at(-1)?.day || 1;
+    const lastDay = itinerary.days[itinerary.days.length - 1]?.day || 1;
     const options = Array.from({ length: Math.min(31, Math.max(14, lastDay)) }, (_, index) => index + 1);
     if (day > options.length) options.push(day);
     return <article key={product.id} data-trip-product={product.id} tabIndex={-1} aria-label={product.name} className="min-w-0 rounded-2xl border border-white/10 bg-white/[.025] p-5 outline-none focus-visible:ring-1 focus-visible:ring-gold sm:p-6">
