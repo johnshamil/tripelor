@@ -12,6 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/stays/uhoos-lavish-oasis/room-102`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${base}/stays/masfalhi-view-inn`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/island-adventures`, lastModified: now, changeFrequency: "weekly", priority: 0.95 },
+    { url: `${base}/shared-excursions`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/island-adventures/vaavu-blue-escape`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
     { url: `${base}/island-adventures/reef-relax-escape`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/island-adventures/5-night-island-adventure`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },

@@ -12,6 +12,7 @@ type User = { email: string; fullName: string; isAdmin?: boolean };
 const primaryLinks = [
   ["/stays", "Stays"],
   ["/island-adventures", "Packages"],
+  ["/shared-excursions", "Shared Excursions"],
   ["/experience-bundles", "Experiences"],
   ["/speedboat", "Transfers"],
   ["/reviews", "Reviews"],
