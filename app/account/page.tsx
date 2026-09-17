@@ -122,6 +122,7 @@ export default function AccountPage() {
       <Link href="/account/trip-requests" className="mt-7 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>My Trip Requests</strong><span className="mt-1 block text-sm text-gray-400">Follow up on the stays and experiences in your trip plan.</span></span><span className="text-gold">View →</span></Link>
       <Link href="/account/host-questions" className="mt-7 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>Host Messages</strong><span className="mt-1 block text-sm text-gray-400">Your questions and personal replies from the island.</span></span><span className="text-gold">Open →</span></Link>
       <Rewards2Card user={user} loyalty={loyalty} />
+      <Link href="/account/availability-alerts" className="mt-7 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>Availability Alerts</strong><span className="mt-1 block text-sm text-gray-400">Get an email when your preferred room opens up for your dates.</span></span><span className="text-gold">Manage →</span></Link>
       <ReferralRewardsCard email={user.email} />
 
       <section className="relative mt-8 overflow-hidden rounded-[2rem] border border-gold/20 bg-gradient-to-br from-white/[.05] via-black to-gold/[.06]">

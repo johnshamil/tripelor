@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import AvailabilityAlertButton from "@/components/availability-alert-button";
 import { CalendarDays, SearchCheck } from "lucide-react";
 
 type Props = { roomType: string; propertyName?: string; displayName?: string };
@@ -15,6 +16,8 @@ export default function AvailabilityChecker({
   const [status, setStatus] = useState("");
   const [ok, setOk] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checkedSelection, setCheckedSelection] = useState('');
+  const selectionKey = [propertyName, roomType, checkIn, checkOut].join('|');
   const roomLabel = displayName || roomType;
 
   async function check() {
@@ -39,6 +42,7 @@ export default function AvailabilityChecker({
       if (!r.ok) throw new Error(x?.error || "Unable to check availability.");
       const available = Boolean(x.available ?? x.isAvailable ?? x.ok);
       setOk(available);
+      setCheckedSelection(selectionKey);
       setStatus(
         available
           ? `${roomLabel} is available for these dates.`
@@ -75,12 +79,13 @@ export default function AvailabilityChecker({
       <button onClick={check} disabled={loading} className="btn-outline mt-5 w-full disabled:opacity-60">
         {loading ? "Checking..." : "Check Availability"}
       </button>
-      {status && (
+      {status && (!checkedSelection || checkedSelection === selectionKey) && (
         <div className={`mt-4 rounded-xl border p-4 text-sm ${ok === true ? "border-green-500/30 bg-green-500/5 text-green-200" : ok === false ? "border-red-500/30 bg-red-500/5 text-red-200" : "border-white/10 text-gray-300"}`}>
           {status}
         </div>
       )}
-      {ok === true && <a href={bookingHref} className="btn-gold mt-4 w-full">Book {roomLabel}</a>}
+      {ok === true && checkedSelection === selectionKey && <a href={bookingHref} className="btn-gold mt-4 w-full">Book {roomLabel}</a>}
+      {ok === false && checkedSelection === selectionKey && <AvailabilityAlertButton key={selectionKey} selection={{ propertyName, roomType, checkIn, checkOut, rooms: 1 }} />}
     </div>
   );
 }

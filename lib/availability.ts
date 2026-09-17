@@ -22,6 +22,7 @@ async function rpc<T>(name: string, payload: Record<string, unknown>): Promise<T
     },
     body: JSON.stringify(payload),
     cache: "no-store",
+    signal: AbortSignal.timeout(5000),
   });
   const text = await response.text();
   let data: any = null;
@@ -57,6 +58,15 @@ function masfalhiInternalRooms(roomType: string) {
   return null;
 }
 
+async function hasActiveCategory(propertyName: string, roomType: string) {
+  const { url, key } = config();
+  const response = await fetch(`${url}/rest/v1/property_inventory?property_name=eq.${encodeURIComponent(propertyName)}&room_type=eq.${encodeURIComponent(roomType)}&active=eq.true&select=room_type&limit=1`, {
+    headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: 'no-store', signal: AbortSignal.timeout(5000),
+  });
+  if (!response.ok) throw new Error('Unable to check room inventory.');
+  return (await response.json()).length > 0;
+}
+
 export async function checkAvailability(input: {
   propertyName: string;
   roomType: string;
@@ -65,6 +75,9 @@ export async function checkAvailability(input: {
   rooms: number;
 }): Promise<AvailabilityResult> {
   if (input.propertyName.toLowerCase() === "masfalhi view inn") {
+    // Published room categories supersede the older individually numbered rooms.
+    // An active category with a stop-sale must not fall back to legacy inventory.
+    if (await hasActiveCategory(input.propertyName, input.roomType)) return checkOneRoom(input);
     const internalRooms = masfalhiInternalRooms(input.roomType);
     if (internalRooms) {
       const results = await Promise.all(
@@ -128,6 +141,7 @@ export async function reserveRooms(input: {
   guestPhone?: string;
 }): Promise<string> {
   if (input.propertyName.toLowerCase() === "masfalhi view inn") {
+    if (await hasActiveCategory(input.propertyName, input.roomType)) return reserveOneRoom(input);
     const internalRooms = masfalhiInternalRooms(input.roomType);
     if (internalRooms) {
       if (input.rooms !== 1) throw new Error("ROOM_NOT_AVAILABLE");
