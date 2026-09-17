@@ -197,6 +197,9 @@ export default function AdminPage() {
             <Link href="/admin/transfers" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
               <Ship className="h-4 w-4" /> Transfers
             </Link>
+            <Link href="/admin/shared-excursions" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
+              <Users className="h-4 w-4" /> Shared trips
+            </Link>
             <Link href="#bookings" className="btn-outline min-h-[46px] px-4 text-xs">
               Bookings
             </Link>

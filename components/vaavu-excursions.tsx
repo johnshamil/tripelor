@@ -1,4 +1,5 @@
 import AddToCartButton from "@/components/add-to-cart-button";
+import Link from "next/link";
 import { CheckCircle2, Clock, Fish, Waves } from "lucide-react";
 import { VAAVU_EXCURSIONS } from "@/lib/vaavu-excursions";
 
@@ -9,6 +10,7 @@ export default function VaavuExcursions() {
         <p className="text-sm font-semibold uppercase tracking-[.2em] text-gold">Snorkeling & night fishing</p>
         <h2 id="vaavu-excursions-title" className="font-display mt-3 text-4xl md:text-5xl">Vaavu excursions</h2>
         <p className="mt-4 max-w-2xl leading-7 text-gray-300">Choose an ocean experience for your island stay. All prices are in USD per person.</p>
+        <Link href="/shared-excursions" className="mt-5 inline-flex min-h-11 items-center rounded-full border border-gold/40 px-4 py-2 text-sm text-gold transition hover:bg-gold/10">Join a shared excursion date →</Link>
         <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {VAAVU_EXCURSIONS.map(excursion => {
             const Icon = excursion.category === "fishing" ? Fish : Waves;
