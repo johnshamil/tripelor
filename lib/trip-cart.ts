@@ -47,11 +47,11 @@ export function cleanStoredCart(value: unknown): CartLine[] {
   });
 }
 export function quoteCart(value: unknown, today = maldivesToday()): { items: QuotedLine[]; total: number } {
-  if (!Array.isArray(value) || value.length === 0 || value.length > CART_PRODUCTS.length) throw new Error("Please add an excursion or package to your cart.");
+  if (!Array.isArray(value) || value.length === 0 || value.length > CART_PRODUCTS.length) throw new Error("Choose an excursion or package for your trip plan.");
   const seen = new Set<string>();
   const items: QuotedLine[] = value.map(raw => {
     const product = raw && typeof raw.productId === "string" ? findCartProduct(raw.productId) : undefined;
-    if (!product || seen.has(product.id)) throw new Error("One of your cart items is unavailable. Please refresh your cart.");
+    if (!product || seen.has(product.id)) throw new Error("One of your selections is unavailable. Please refresh your trip plan.");
     seen.add(product.id);
     if (!Number.isInteger(raw.quantity) || raw.quantity < 1 || raw.quantity > 100) throw new Error(`Choose a valid quantity for ${product.name}.`);
     if (!isDate(raw.date) || raw.date < today || raw.date > "9998-12-31") throw new Error(`Choose a date from today onwards for ${product.name}.`);

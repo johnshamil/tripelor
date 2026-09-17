@@ -18,7 +18,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setLines(restored);
     }
     try { restore(localStorage.getItem(CART_STORAGE_KEY)); }
-    catch { setStorageNotice("Your browser could not restore the cart. You can still select items in this tab."); }
+    catch { setStorageNotice("Your browser could not restore your trip plan. You can still choose experiences in this tab."); }
     setReady(true);
     function sync(event: StorageEvent) {
       if (event.key !== CART_STORAGE_KEY && event.key !== null) return;
@@ -32,7 +32,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     currentLines.current = next;
     setLines(next);
     try { localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(next)); }
-    catch { setStorageNotice("Your cart is available in this tab, but this browser could not save it for later."); }
+    catch { setStorageNotice("Your trip plan is available in this tab, but this browser could not save it for later."); }
   }, []);
   const add = useCallback((id: string) => { if (findCartProduct(id)) change(current => current.some(line => line.productId === id) ? current : [...current, { productId: id, quantity: 1, date: "" }]); }, [change]);
   const update = useCallback((id: string, patch: Partial<Pick<CartLine, "quantity" | "date">>) => change(current => current.map(line => line.productId === id ? { ...line, ...patch } : line)), [change]);

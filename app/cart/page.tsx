@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-import CartCheckout from "@/components/cart-checkout";
-
-export const metadata: Metadata = { title: "Your Cart", robots: { index: false, follow: true } };
-export default function CartPage() { return <CartCheckout />; }
+import { redirect } from "next/navigation";
+export const dynamic = "force-dynamic";
+export default function CartPage() { redirect("/my-trip"); }

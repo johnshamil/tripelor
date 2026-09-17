@@ -21,7 +21,7 @@ const mobileLinks = [
   ["/", "Home"],
   ["/help-me-choose", "Help Me Choose"],
   ["/holiday-shortlist", "Holiday Shortlist"],
-  ["/cart", "My Cart"],
+  ["/my-trip", "My Trip Plan"],
   ...primaryLinks,
   ["/account#referral-rewards", "Referral & Earn"],
   ["/contact", "Contact"],
@@ -73,7 +73,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-4 xl:gap-6 lg:flex" aria-label="Main navigation">
+        <nav className="hidden items-center gap-4 xl:gap-6 xl:flex" aria-label="Main navigation">
           {primaryLinks.map(([href, label]) => (
             <Link key={href} href={href} className="nav-tab">
               {label}
@@ -81,18 +81,18 @@ export default function Navbar() {
           ))}
           <CartLink />
           <Link href="/account" className="nav-tab gap-2" aria-label="My Tripelor account">
-            <UserRound className="h-4 w-4" /> {user ? "My Trip" : "Sign In"}
+            <UserRound className="h-4 w-4" /> {user ? "My Account" : "Sign In"}
           </Link>
           <Link href="/help-me-choose" className="btn-gold min-h-[44px] px-5 py-2">
             Help Me Choose
           </Link>
         </nav>
 
-        <div className="flex items-center gap-2 lg:hidden">
-        <CartLink onClick={() => setOpen(false)} />
+        <div className="flex items-center gap-2 xl:hidden">
+        <CartLink compact onClick={() => setOpen(false)} />
         <button
           onClick={() => setOpen(!open)}
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/[.04] text-white transition active:scale-95 lg:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/[.04] text-white transition active:scale-95 xl:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
         >
@@ -101,10 +101,10 @@ export default function Navbar() {
         </div>
       </div>
 
-      {!adminSurface && <Link href="/help-me-choose" onClick={() => setOpen(false)} className="flex min-h-[44px] items-center justify-center gap-2 border-t border-white/10 px-4 text-xs text-[#ead7aa] lg:hidden">Not sure where to start? <span className="font-semibold underline">Help Me Choose</span></Link>}
+      {!adminSurface && <Link href="/help-me-choose" onClick={() => setOpen(false)} className="flex min-h-[44px] items-center justify-center gap-2 border-t border-white/10 px-4 text-xs text-[#ead7aa] xl:hidden">Not sure where to start? <span className="font-semibold underline">Help Me Choose</span></Link>}
 
       {open && (
-        <div className="fixed inset-x-0 top-[64px] z-[100] h-[calc(100dvh-64px)] overflow-hidden border-t border-white/10 bg-[#041117] md:top-[76px] md:h-[calc(100dvh-76px)] lg:hidden">
+        <div className="fixed inset-x-0 top-[64px] z-[100] h-[calc(100dvh-64px)] overflow-hidden border-t border-white/10 bg-[#041117] md:top-[76px] md:h-[calc(100dvh-76px)] xl:hidden">
           <div className="flex h-full flex-col overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 md:px-6 md:pt-5">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] uppercase tracking-[.25em] text-[#c9a86a]">Explore Tripelor</p>

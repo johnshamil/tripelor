@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { CheckCircle2, ShoppingCart, Trash2 } from "lucide-react";
+import { ArrowRight, BedDouble, CheckCircle2, Compass, MapPin, Waves, X } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { addNights, findCartProduct, isDate, maldivesToday, quoteCart } from "@/lib/trip-cart";
 
@@ -37,8 +37,8 @@ export default function CartCheckout() {
     event.preventDefault();
     if (sending.current) return;
     setError("");
-    if (!user) { setError("Please sign in to send your booking request. Your cart will be kept."); return; }
-    try { quoteCart(lines); } catch (e) { setError(e instanceof Error ? e.message : "Please check your cart."); return; }
+    if (!user) { setError("Please sign in to send your booking request. Your trip plan will be kept."); return; }
+    try { quoteCart(lines); } catch (e) { setError(e instanceof Error ? e.message : "Please check your trip plan."); return; }
     sending.current = true;
     setPending(true);
     const submitted = lines.map(line => ({ ...line }));
@@ -51,7 +51,7 @@ export default function CartCheckout() {
       try { sessionStorage.setItem("tripelor-cart-attempt", JSON.stringify(attempt.current)); } catch { /* The current tab retains the retry key. */ }
       const response = await fetch("/api/cart-booking", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...payload, submissionId: attempt.current.key }), signal: AbortSignal.timeout(45000) });
       const data = await response.json();
-      if (response.status === 401) { setUser(null); throw new Error("Please sign in again. Your cart is still here."); }
+      if (response.status === 401) { setUser(null); throw new Error("Please sign in again. Your trip plan is still here."); }
       if (!response.ok) throw new Error(data.error || "We could not save your booking request. Please try again.");
       setReceipt({ bookingReference: data.bookingReference, total: data.total });
       complete(submitted);
@@ -63,60 +63,79 @@ export default function CartCheckout() {
   }
 
   return <section className="container py-10 pb-28 md:py-16">
-    <p className="text-sm uppercase tracking-[.25em] text-gold">Your Maldives plans</p>
-    <h1 className="font-display mt-3 text-4xl md:text-5xl">Your cart</h1>
-    <p className="mt-4 max-w-2xl leading-7 text-gray-300">Pick your excursions and packages, choose dates, and send one booking request.</p>
+    <div className="flex flex-wrap items-start justify-between gap-6 border-b border-gold/20 pb-8 md:pb-10">
+      <div className="max-w-2xl">
+        <p className="flex items-center gap-2 text-xs uppercase tracking-[.25em] text-gold"><Compass aria-hidden="true" className="h-4 w-4" />A Maldives escape, made yours</p>
+        <h1 className="font-display mt-4 text-4xl md:text-6xl">My Trip Plan</h1>
+        <p className="mt-5 max-w-xl leading-7 text-gray-300">Bring together the stays and experiences you love. Share your preferred dates, and let our island team help arrange the details.</p>
+      </div>
+      <Link href="/island-adventures" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-gold">Explore more experiences <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+    </div>
+    <ol aria-label="How to plan your trip" className="mt-6 grid gap-4 text-sm text-gray-300 sm:grid-cols-3">
+      {["Choose your experiences", "Set your dates & guests", "Let us arrange your trip"].map((step, index) => <li key={step} className="flex items-center gap-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gold/30 text-xs text-gold">0{index + 1}</span>{step}</li>)}
+    </ol>
     {storageNotice && <p role="status" className="mt-5 rounded-xl border border-gold/30 p-4 text-sm text-gold">{storageNotice}</p>}
     {receipt && <div role="status" className="card mt-8 border-gold/40 p-6 md:p-8">
       <CheckCircle2 aria-hidden="true" className="h-9 w-9 text-gold" />
-      <h2 ref={receiptHeading} tabIndex={-1} className="mt-4 text-2xl font-semibold outline-none">Booking request received</h2>
-      <p className="mt-3">Reference: <strong className="break-all text-gold">{receipt.bookingReference}</strong></p>
-      <p className="mt-2 text-gray-300">Estimated total: {usd(receipt.total)}. Tripelor will confirm availability, final details and payment with you. No payment has been taken.</p>
-      <Link href="/account/cart-bookings" className="btn-gold mt-6">View my booking requests</Link>
+      <h2 ref={receiptHeading} tabIndex={-1} className="font-display mt-4 text-3xl outline-none">Your trip is in good hands</h2>
+      <p className="mt-3">Request received · <strong className="break-all text-gold">{receipt.bookingReference}</strong></p>
+      <p className="mt-3 leading-7 text-gray-300">Your trip estimate is {usd(receipt.total)}. Our team will confirm availability, final details and payment with you.</p>
+      <Link href="/account/trip-requests" className="btn-gold mt-6">View My Trip Requests</Link>
     </div>}
-    {!ready ? <p role="status" className="py-16 text-gray-300">Loading your cart…</p> : lines.length === 0 ? <div className="card mt-8 p-8 text-center md:p-12">
-      <ShoppingCart aria-hidden="true" className="mx-auto h-10 w-10 text-gold" />
-      <h2 className="mt-5 text-2xl">{receipt ? "Plan another island adventure" : "Your cart is ready for an adventure"}</h2>
-      <p className="mt-3 text-gray-300">Add an excursion or a stay package to get started.</p>
-      <Link href="/island-adventures" className="btn-gold mt-6">Explore packages & excursions</Link>
-    </div> : <form onSubmit={submit} className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,1fr)]">
-      <fieldset disabled={pending} className="min-w-0 space-y-5">
-        <legend className="sr-only">Selected excursions and packages</legend>
-        {lines.map(line => {
+    {!ready ? <p role="status" className="py-16 text-gray-300">Opening your trip plan…</p> : lines.length === 0 ? <div className="mt-10 rounded-3xl border border-gold/20 bg-gradient-to-br from-[#123039] to-[#06151c] p-6 md:p-12">
+      <Compass aria-hidden="true" className="h-10 w-10 text-gold" />
+      <h2 className="font-display mt-6 max-w-xl text-3xl leading-tight md:text-4xl">{receipt ? "There’s always another island to discover." : "Where will your Maldives story begin?"}</h2>
+      <p className="mt-4 max-w-xl leading-7 text-gray-300">A quiet island stay, an afternoon on the reef, or a little of both. Choose what you love and start shaping your escape.</p>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <Link href="/island-adventures?duration=3" className="flex min-h-24 items-center gap-4 rounded-2xl border border-white/15 bg-white/[.03] p-5 transition hover:border-gold/50"><BedDouble aria-hidden="true" className="h-6 w-6 shrink-0 text-gold" /><span><strong className="block">Find your island stay</strong><span className="mt-1 block text-sm text-gray-300">Explore our couple packages</span></span><ArrowRight aria-hidden="true" className="ml-auto h-4 w-4 shrink-0 text-gold" /></Link>
+        <Link href="/island-adventures#excursions" className="flex min-h-24 items-center gap-4 rounded-2xl border border-white/15 bg-white/[.03] p-5 transition hover:border-gold/50"><Waves aria-hidden="true" className="h-6 w-6 shrink-0 text-gold" /><span><strong className="block">Discover the ocean</strong><span className="mt-1 block text-sm text-gray-300">Snorkeling, island trips & fishing</span></span><ArrowRight aria-hidden="true" className="ml-auto h-4 w-4 shrink-0 text-gold" /></Link>
+      </div>
+    </div> : <form onSubmit={submit} className="mt-10 grid items-start gap-8 xl:gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,1fr)]">
+      <fieldset disabled={pending} className="min-w-0">
+        <legend className="sr-only">Your selected stays and experiences</legend>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3"><h2 className="font-display text-3xl">Your island itinerary</h2><span className="text-xs text-gray-400">{lines.length} {lines.length === 1 ? "selection" : "selections"} · saved on this device</span></div>
+        <ol className="space-y-6 border-l border-gold/25 pl-5 sm:pl-7">
+        {lines.map((line, index) => {
           const product = findCartProduct(line.productId);
           if (!product) return null;
-          return <article key={line.productId} className="card min-w-0 p-5 sm:p-7">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0"><p className="text-xs uppercase tracking-[.15em] text-gold">{product.kind === "stay" ? "Stay package" : product.kind === "package" ? "Ocean package" : "Excursion"}</p><h2 className="mt-2 text-xl font-semibold sm:text-2xl"><Link href={product.href} className="hover:text-gold">{product.name}</Link></h2></div>
-              <button type="button" onClick={() => remove(line.productId)} aria-label={`Remove ${product.name}`} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 text-gray-300 hover:border-red-300 hover:text-red-300"><Trash2 aria-hidden="true" className="h-4 w-4" /></button>
-            </div>
-            <p className="mt-4 text-gold">{usd(product.price)} per {product.unit}{product.nights ? ` · entire ${product.nights}-night stay` : ""}{product.duration ? ` · ${product.duration}` : ""}</p>
-            <details className="mt-3 text-sm leading-6 text-gray-300"><summary className="min-h-10 cursor-pointer py-2">What’s included</summary><ul className="list-disc space-y-1 pl-5">{product.inclusions.map(item => <li key={item}>{item}</li>)}</ul></details>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <label className="text-sm text-gray-300">{product.unit === "couple" ? "Couples (2 adults, 1 room each)" : "Guests"}<input type="number" required min={1} max={100} step={1} value={line.quantity || ""} aria-label={`${product.name}: ${product.unit === "couple" ? "couples" : "guests"}`} onChange={e => update(line.productId, { quantity: e.target.value === "" ? 0 : Number(e.target.value) })} className={field} /></label>
-              <label className="text-sm text-gray-300">{product.nights ? "Preferred check-in date" : "Preferred excursion date"}<input type="date" required min={maldivesToday()} max="9998-12-31" value={line.date} aria-label={`${product.name}: date`} onChange={e => update(line.productId, { date: e.target.value })} className={field} /></label>
-            </div>
-            {product.nights && isDate(line.date) && <p className="mt-3 text-sm text-gray-400">Check-out: {addNights(line.date, product.nights)} · {line.quantity * 2} adults · {line.quantity} {line.quantity === 1 ? "room" : "rooms"}</p>}
-            <p className="mt-5 border-t border-white/10 pt-4 text-right text-lg font-semibold">{usd(product.price * line.quantity)}</p>
-          </article>;
+          const Icon = product.kind === "stay" ? BedDouble : Waves;
+          return <li key={line.productId} className="relative">
+            <span aria-hidden="true" className="absolute -left-[27px] top-8 h-3 w-3 rounded-full border border-gold bg-[#041117] sm:-left-[35px]" />
+            <article className="min-w-0 rounded-2xl border border-white/10 bg-white/[.025] p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0"><p className="flex items-center gap-2 text-xs uppercase tracking-[.15em] text-gold"><Icon aria-hidden="true" className="h-4 w-4 shrink-0" />{String(index + 1).padStart(2, "0")} · {product.kind === "stay" ? "Island stay" : product.kind === "package" ? "Ocean escape" : "Island experience"}</p><h3 className="font-display mt-3 text-2xl leading-tight sm:text-3xl"><Link href={product.href} className="hover:text-gold">{product.name}</Link></h3></div>
+                <button type="button" onClick={() => remove(line.productId)} aria-label={`Remove ${product.name} from my trip`} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-white/5 hover:text-white"><X aria-hidden="true" className="h-4 w-4" /></button>
+              </div>
+              <p className="mt-4 text-sm text-gold">{usd(product.price)} per {product.unit}{product.nights ? ` · ${product.nights}-night stay` : ""}{product.duration ? ` · ${product.duration}` : ""}</p>
+              <details className="mt-2 text-sm leading-6 text-gray-300"><summary className="min-h-10 cursor-pointer py-2">Your experience includes</summary><ul className="list-disc space-y-1 pl-5">{product.inclusions.map(item => <li key={item}>{item}</li>)}</ul></details>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <label className="text-sm text-gray-300">{product.unit === "couple" ? "Couples (2 adults, 1 room each)" : "Guests joining"}<input type="number" required min={1} max={100} step={1} value={line.quantity || ""} aria-label={`${product.name}: ${product.unit === "couple" ? "couples" : "guests"}`} onChange={e => update(line.productId, { quantity: e.target.value === "" ? 0 : Number(e.target.value) })} className={field} /></label>
+                <label className="text-sm text-gray-300">{product.nights ? "Preferred check-in" : "Preferred experience date"}<input type="date" required min={maldivesToday()} max="9998-12-31" value={line.date} aria-label={`${product.name}: date`} onChange={e => update(line.productId, { date: e.target.value })} className={field} /></label>
+              </div>
+              {product.nights && isDate(line.date) && <p className="mt-3 text-sm text-gray-400">Check-out: {addNights(line.date, product.nights)} · {line.quantity * 2} adults · {line.quantity} {line.quantity === 1 ? "room" : "rooms"}</p>}
+              <div className="mt-5 flex flex-wrap items-baseline justify-between gap-2 border-t border-white/10 pt-4"><span className="text-xs text-gray-400">Estimate for your {product.kind === "stay" ? "stay" : "experience"}</span><span className="font-semibold">{usd(product.price * line.quantity)}</span></div>
+            </article>
+          </li>;
         })}
-        <Link href="/island-adventures" className="inline-flex min-h-12 items-center text-sm font-semibold text-gold">+ Add more packages & excursions</Link>
+        </ol>
+        <Link href="/island-adventures" className="mt-5 inline-flex min-h-12 items-center gap-2 text-sm font-semibold text-gold">Discover more for your trip <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
       </fieldset>
-      <div className="card min-w-0 p-5 sm:p-7 lg:sticky lg:top-28">
-        <h2 className="text-2xl font-semibold">Book your selection</h2>
-        <div className="mt-5 flex flex-wrap items-baseline justify-between gap-3 border-y border-white/10 py-5"><span className="text-gray-300">Estimated total</span><strong className="text-3xl text-gold">{usd(total)}</strong></div>
-        <p className="mt-4 text-sm leading-6 text-gray-400">Excursions are priced per person. Stay packages are priced per couple for the full stay. Availability, final inclusions and any separate transfers are confirmed before payment.</p>
+      <div className="min-w-0 rounded-3xl border border-gold/25 bg-gradient-to-br from-[#123039] to-[#07181f] p-6 sm:p-7 lg:sticky lg:top-28">
+        <p className="flex items-center gap-2 text-xs uppercase tracking-[.18em] text-gold"><MapPin aria-hidden="true" className="h-4 w-4" />Your island team</p>
+        <h2 className="font-display mt-4 text-3xl">Let’s plan your escape</h2>
+        <p className="mt-4 text-sm leading-6 text-gray-300">Tell us when you’d like to travel. We’ll help bring your chosen experiences together.</p>
+        <div className="mt-6 border-y border-gold/20 py-5"><span className="text-xs uppercase tracking-[.18em] text-gray-300">Your trip estimate</span><strong className="font-display mt-2 block text-4xl text-gold">{usd(total)}</strong><p className="mt-2 text-xs leading-5 text-gray-400">Based on your selected guests and stays. Any separate transfers and final inclusions will be confirmed with you.</p></div>
         {user ? <fieldset disabled={pending} className="mt-6 space-y-4">
-          <legend className="sr-only">Booking contact details</legend>
-          <label className="block text-sm text-gray-300">Full name<input className={field} autoComplete="name" required maxLength={120} value={name} onChange={e => setName(e.target.value)} /></label>
-          <label className="block text-sm text-gray-300">Account email<input className={`${field} text-gray-400`} type="email" value={user.email} readOnly /></label>
+          <legend className="sr-only">Your contact details</legend>
+          <label className="block text-sm text-gray-300">Your name<input className={field} autoComplete="name" required maxLength={120} value={name} onChange={e => setName(e.target.value)} /></label>
+          <label className="block text-sm text-gray-300">Email address<input className={`${field} text-gray-400`} type="email" value={user.email} readOnly /></label>
           <label className="block text-sm text-gray-300">Phone / WhatsApp (with country code)<input className={field} type="tel" autoComplete="tel" required minLength={6} maxLength={40} placeholder="+960…" value={phone} onChange={e => setPhone(e.target.value)} /></label>
-          <label className="block text-sm text-gray-300">Notes (optional)<textarea className={field} rows={3} maxLength={2000} placeholder="Your island, hotel, or any special requests" value={notes} onChange={e => setNotes(e.target.value)} /></label>
-          <p className="text-sm leading-6 text-gray-300">This sends a booking request. Your dates are confirmed by Tripelor, and no payment is taken at checkout.</p>
-          <button type="submit" disabled={pending} className="btn-gold min-h-12 w-full disabled:opacity-60">{pending ? "Sending your request…" : "Book items in cart"}</button>
-        </fieldset> : user === undefined ? <p role="status" className="mt-6 text-sm text-gray-300">Checking your account…</p> : <div className="mt-6"><p className="text-sm leading-6 text-gray-300">Sign in to book your selection and track your request. Your cart will be kept.</p><Link href="/login?next=%2Fcart" className="btn-gold mt-4 min-h-12 w-full">Sign in to book</Link></div>}
+          <label className="block text-sm text-gray-300">Make it yours (optional)<textarea className={field} rows={3} maxLength={2000} placeholder="Your island, hotel, a special occasion, or anything you’d love us to know" value={notes} onChange={e => setNotes(e.target.value)} /></label>
+          <button type="submit" disabled={pending} className="btn-gold min-h-12 w-full gap-2 disabled:opacity-60">{pending ? "Sending your trip plan…" : "Request My Trip"}<ArrowRight aria-hidden="true" className="h-4 w-4" /></button>
+          <p className="text-xs leading-6 text-gray-300">No payment is needed to send your plan. We’ll confirm availability and payment details with you before your trip is booked.</p>
+        </fieldset> : user === undefined ? <p role="status" className="mt-6 text-sm text-gray-300">Checking your account…</p> : <div className="mt-6"><p className="text-sm leading-6 text-gray-300">Sign in to share your trip plan with our team and follow your request. Your selections will be kept.</p><Link href="/login?next=%2Fmy-trip" className="btn-gold mt-4 min-h-12 w-full">Sign in to Request My Trip</Link></div>}
         {error && <p role="alert" className="mt-4 rounded-xl border border-red-400/30 p-3 text-sm text-red-200">{error}</p>}
-        <Link href="/account/cart-bookings" className="mt-5 inline-flex min-h-11 items-center text-sm text-gold">My booking requests →</Link>
+        <Link href="/account/trip-requests" className="mt-5 inline-flex min-h-11 items-center text-sm text-gold">My Trip Requests →</Link>
       </div>
     </form>}
   </section>;

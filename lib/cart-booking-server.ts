@@ -23,16 +23,16 @@ export async function cartBookingBody(request: Request) {
 }
 
 function normalizeRequest(body: any, email: string) {
-  if (!body || typeof body !== "object" || !uuid.test(body.submissionId || "")) throw new CartBookingProblem("Please refresh your cart and try again.");
+  if (!body || typeof body !== "object" || !uuid.test(body.submissionId || "")) throw new CartBookingProblem("Please refresh your trip plan and try again.");
   if (typeof body.guestName !== "string" || !body.guestName.trim() || body.guestName.length > 120) throw new CartBookingProblem("Please enter your full name (up to 120 characters).");
   if (typeof body.phone !== "string" || body.phone.trim().length < 6 || body.phone.length > 40 || !/^[+\d\s().-]+$/.test(body.phone)) throw new CartBookingProblem("Please enter a valid phone number with country code.");
   if (body.notes !== undefined && (typeof body.notes !== "string" || body.notes.length > 2000)) throw new CartBookingProblem("Keep your notes under 2,000 characters.");
-  if (!Array.isArray(body.items) || !body.items.length || body.items.length > CART_PRODUCTS.length) throw new CartBookingProblem("Please add an excursion or package to your cart.");
+  if (!Array.isArray(body.items) || !body.items.length || body.items.length > CART_PRODUCTS.length) throw new CartBookingProblem("Choose an excursion or package for your trip plan.");
   const items: CartLine[] = body.items.map((line: any) => {
-    if (!line || typeof line.productId !== "string" || line.productId.length > 120 || !Number.isInteger(line.quantity) || line.quantity < 1 || line.quantity > 100 || !isDate(line.date) || line.date > "9998-12-31") throw new CartBookingProblem("Check the dates and guest numbers for each cart item.");
+    if (!line || typeof line.productId !== "string" || line.productId.length > 120 || !Number.isInteger(line.quantity) || line.quantity < 1 || line.quantity > 100 || !isDate(line.date) || line.date > "9998-12-31") throw new CartBookingProblem("Check the dates and guest numbers for each selection.");
     return { productId: line.productId, quantity: line.quantity, date: line.date };
   }).sort((a: CartLine, b: CartLine) => a.productId.localeCompare(b.productId));
-  if (!Number.isFinite(body.expectedTotal) || body.expectedTotal <= 0) throw new CartBookingProblem("Please refresh your cart to check the total.");
+  if (!Number.isFinite(body.expectedTotal) || body.expectedTotal <= 0) throw new CartBookingProblem("Please refresh your trip plan to check the estimate.");
   return { items, guestName: body.guestName.trim(), guestEmail: email, phone: body.phone.trim(), notes: (body.notes || "").trim(), expectedTotal: body.expectedTotal };
 }
 
@@ -56,9 +56,9 @@ export function publicCartBooking(row: CartBookingRow) {
 }
 export function cartBookingResponse(data: unknown, status = 200) { return Response.json(data, { status, headers: { "Cache-Control": "no-store" } }); }
 export function cartBookingError(error: unknown) {
-  if (error instanceof Error && error.message === "UNAUTHORIZED") return cartBookingResponse({ error: "Please sign in to book your cart." }, 401);
+  if (error instanceof Error && error.message === "UNAUTHORIZED") return cartBookingResponse({ error: "Please sign in to request your trip." }, 401);
   if (error instanceof CartBookingProblem) return cartBookingResponse({ error: error.message }, error.status);
-  return cartBookingResponse({ error: "We could not confirm your request. Your cart is kept; please retry or contact Tripelor." }, 500);
+  return cartBookingResponse({ error: "We could not confirm your request. Your trip plan is kept; please retry or contact Tripelor." }, 500);
 }
 
 async function notifyCartBooking(row: CartBookingRow) {
@@ -67,7 +67,7 @@ async function notifyCartBooking(row: CartBookingRow) {
   try {
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `cart-booking/${row.id}` },
-      body: JSON.stringify({ from: "Tripelor Bookings <bookings@tripelor.com>", to: ["bookings@tripelor.com"], bcc: ["johnshamil87@gmail.com"], reply_to: row.guest_email, subject: `Cart booking request ${row.booking_reference}`, text: `New cart booking request: ${row.booking_reference}\nStatus: pending confirmation\n\nGuest: ${row.guest_name}\nEmail: ${row.guest_email}\nPhone / WhatsApp: ${row.guest_phone}\n\n${details}\n\nEstimated total: USD ${row.estimated_total}\nNotes: ${row.notes || "None"}\n\nReview: https://www.tripelor.com/admin/cart-bookings\nNo payment or inventory hold has been made.` }),
+      body: JSON.stringify({ from: "Tripelor Bookings <bookings@tripelor.com>", to: ["bookings@tripelor.com"], bcc: ["johnshamil87@gmail.com"], reply_to: row.guest_email, subject: `Trip planning request ${row.booking_reference}`, text: `New trip planning request: ${row.booking_reference}\nStatus: pending confirmation\n\nGuest: ${row.guest_name}\nEmail: ${row.guest_email}\nPhone / WhatsApp: ${row.guest_phone}\n\n${details}\n\nEstimated total: USD ${row.estimated_total}\nNotes: ${row.notes || "None"}\n\nReview: https://www.tripelor.com/admin/trip-requests\nNo payment or inventory hold has been made.` }),
       signal: AbortSignal.timeout(6000),
     });
     if (response.ok) await cartBookingDB(`?id=eq.${row.id}`, { method: "PATCH", body: JSON.stringify({ notification_sent_at: new Date().toISOString() }) });
@@ -82,8 +82,8 @@ export async function submitCartBooking(user: { id: string; email: string }, bod
   let row = (await cartBookingDB(query))[0];
   if (!row) {
     let quote: ReturnType<typeof quoteCart>;
-    try { quote = quoteCart(normalized.items); } catch (e) { throw new CartBookingProblem(e instanceof Error ? e.message : "Please check your cart."); }
-    if (quote.total !== normalized.expectedTotal) throw new CartBookingProblem("A price has changed. Refresh your cart and review the new total before booking.", 409);
+    try { quote = quoteCart(normalized.items); } catch (e) { throw new CartBookingProblem(e instanceof Error ? e.message : "Please check your trip plan."); }
+    if (quote.total !== normalized.expectedTotal) throw new CartBookingProblem("A price has changed. Refresh your trip plan and review the new estimate before sending your request.", 409);
     const payload = { user_id: user.id, submission_id: input.submissionId, request_hash: hash, booking_reference: `TRIP-${randomUUID().replace(/-/g, "").slice(0, 16).toUpperCase()}`, status: "pending", items: quote.items, estimated_total: quote.total, guest_name: normalized.guestName, guest_email: user.email, guest_phone: normalized.phone, notes: normalized.notes };
     try { row = (await cartBookingDB("", { method: "POST", body: JSON.stringify(payload) }))[0]; }
     catch (e) {
@@ -93,7 +93,7 @@ export async function submitCartBooking(user: { id: string; email: string }, bod
     }
   }
   if (!row) throw new Error("Booking request was not saved.");
-  if (row.request_hash !== hash) throw new CartBookingProblem("This request changed during submission. Refresh your cart and try again.", 409);
+  if (row.request_hash !== hash) throw new CartBookingProblem("This request changed during submission. Refresh your trip plan and try again.", 409);
   await notifyCartBooking(row);
   return { bookingReference: row.booking_reference, total: Number(row.estimated_total), status: row.status };
 }
