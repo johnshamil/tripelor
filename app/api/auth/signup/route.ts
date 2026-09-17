@@ -1,4 +1,5 @@
 import { setSession, supabaseAuth } from "@/lib/auth-server";
+import { notifyCustomerSignIn } from "@/lib/signin-notifications";
 
 export async function POST(request: Request) {
   try {
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
 
     if (result.access_token) {
       setSession(result.access_token, result.refresh_token, result.expires_in);
+      await notifyCustomerSignIn(result.user, "new_account");
     }
     return Response.json({
       success: true,
