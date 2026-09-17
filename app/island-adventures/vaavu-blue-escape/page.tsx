@@ -57,6 +57,7 @@ export default function VaavuBlueEscapePage() {
           </aside>
         </div>
         <p className="mt-6 max-w-3xl text-sm leading-6 text-gray-400">Marine activities depend on weather and sea conditions. Wildlife sightings cannot be guaranteed. Final details are confirmed before payment.</p>
+        <Link href="/island-adventures#excursions" className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-sm font-semibold text-gold">Explore more Vaavu excursions <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
       </section>
     </main>
   );

@@ -250,6 +250,7 @@ export default async function Home() {
               Discover an ocean excursion or a longer island stay, with the
               details you need to plan your Maldives escape.
             </p>
+            <Link href="/island-adventures#excursions" className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-sm font-semibold text-[#715721] underline">View snorkeling & night fishing excursions <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
           </div>
 
           <div className="mt-12 grid gap-6 lg:grid-cols-3">

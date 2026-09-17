@@ -1,14 +1,22 @@
 "use client";
 import { FormEvent, useEffect, useState } from "react";
 import { VAAVU_BLUE_ESCAPE, vaavuBlueEscapeEnquiry } from "@/lib/vaavu-blue-escape";
+import { findVaavuExcursion, vaavuExcursionEnquiry } from "@/lib/vaavu-excursions";
 import { Mail, MapPin, Clock, Send, CheckCircle2 } from "lucide-react";
 export default function ContactPage(){const [status,setStatus]=useState("idle");const [notice,setNotice]=useState("");
 const [enquiryType,setEnquiryType]=useState("Guesthouse stay");
 const [message,setMessage]=useState("");
 useEffect(() => {
-  if (new URLSearchParams(window.location.search).get("package") === VAAVU_BLUE_ESCAPE.slug) {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("package") === VAAVU_BLUE_ESCAPE.slug) {
     setEnquiryType("Activities / excursions");
     setMessage(vaavuBlueEscapeEnquiry);
+    return;
+  }
+  const excursion = findVaavuExcursion(params.get("excursion"));
+  if (excursion) {
+    setEnquiryType("Activities / excursions");
+    setMessage(vaavuExcursionEnquiry(excursion));
   }
 }, []);
 async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setStatus("sending");setNotice("");const form=e.currentTarget;const data=Object.fromEntries(new FormData(form).entries());try{const r=await fetch("/api/contact",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});const x=await r.json();if(!r.ok)throw new Error(x.error||"Unable to send enquiry.");setStatus("success");setNotice("Thank you. Your enquiry has been sent to Tripelor. We will get back to you as soon as possible.");form.reset();setEnquiryType("Guesthouse stay");setMessage("");}catch(err){setStatus("error");setNotice(err instanceof Error?err.message:"Unable to send enquiry.");}}
