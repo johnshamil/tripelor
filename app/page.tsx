@@ -18,6 +18,7 @@ import RewardsChecker from "@/components/rewards-checker";
 import SmartOffers from "@/components/smart-offers";
 import PropertyCards from "@/components/room-first-booking-cards";
 import { publishedProperties } from "@/lib/property-store";
+import { VAAVU_BLUE_ESCAPE } from "@/lib/vaavu-blue-escape";
 
 const escapes = [
   {
@@ -26,6 +27,7 @@ const escapes = [
     image:
       "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=1600&q=88",
     label: "A beautiful introduction",
+    badge: "3 nights",
     text: "A thoughtfully paced island stay with meals and selected ocean experiences.",
   },
   {
@@ -34,7 +36,16 @@ const escapes = [
     image:
       "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=1600&q=88",
     label: "Time to experience more",
+    badge: "5 nights",
     text: "More unhurried days for snorkeling, sandbanks, dolphins and island life.",
+  },
+  {
+    title: VAAVU_BLUE_ESCAPE.name,
+    href: VAAVU_BLUE_ESCAPE.href,
+    image: VAAVU_BLUE_ESCAPE.image,
+    label: "Discover Vaavu",
+    badge: `USD ${VAAVU_BLUE_ESCAPE.price} per person`,
+    text: "Shark Bay snorkeling, dolphins, lunch, shipwreck snorkeling, turtles and island hopping to Thinadhoo or Keyodhoo.",
   },
 ];
 
@@ -233,30 +244,30 @@ export default async function Home() {
           <div className="mx-auto max-w-3xl text-center">
             <p className="eyebrow text-[#8d7037]">Curated escapes</p>
             <h2 className="font-display mt-4 text-4xl leading-tight md:text-6xl">
-              Choose the rhythm of your island stay.
+              Choose your island escape.
             </h2>
             <p className="mx-auto mt-5 max-w-2xl leading-7 text-[#40505a]">
-              Two beautifully simple ways to begin, each ready to personalise
-              around the moments that matter to you.
+              Discover an ocean excursion or a longer island stay, with the
+              details you need to plan your Maldives escape.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 lg:grid-cols-2">
-            {escapes.map((escape, index) => (
-              <Link key={escape.title} href={escape.href} className="escape-card group">
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            {escapes.map((escape) => (
+              <Link key={escape.title} href={escape.href} className="escape-card group flex items-end">
                 <img src={escape.image} alt={escape.title} />
                 <div className="escape-card-shade" />
-                <div className="absolute inset-x-0 bottom-0 z-10 p-7 text-white md:p-10">
+                <div className="relative z-10 w-full p-7 text-white lg:p-8">
                   <div className="flex items-center justify-between gap-4">
-                    <span className="border border-white/35 bg-black/20 px-3 py-2 text-[10px] uppercase tracking-[.24em] backdrop-blur-md">
-                      {index === 0 ? "3 nights" : "5 nights"}
+                    <span className="border border-white/35 bg-black/20 px-3 py-2 text-sm backdrop-blur-md">
+                      {escape.badge}
                     </span>
-                    <ArrowUpRight className="h-6 w-6 transition duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+                    <ArrowUpRight className="h-6 w-6 shrink-0 transition duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
                   </div>
                   <p className="mt-20 text-xs uppercase tracking-[.24em] text-[#ead7aa]">
                     {escape.label}
                   </p>
-                  <h3 className="font-display mt-3 text-4xl md:text-5xl">{escape.title}</h3>
+                  <h3 className="font-display mt-3 text-4xl">{escape.title}</h3>
                   <p className="mt-3 max-w-lg leading-7 text-white/75">{escape.text}</p>
                 </div>
               </Link>

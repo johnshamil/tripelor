@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://tripelor.com/island-adventures" },
   openGraph: {
     title: "Maldives Island Packages | Tripelor",
-    description: "Five-night Maldives packages combining island stays, meals and unforgettable ocean experiences.",
+    description: "Discover Vaavu Blue Escape at USD 100 per person, alongside Maldives island stays, meals and ocean experiences.",
     url: "https://tripelor.com/island-adventures",
     siteName: "Tripelor",
     type: "website",
