@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowRight, BedDouble, Check, Fish, Plus, Search, Waves } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
+import TripInclusionReminder from "@/components/trip-inclusion-reminder";
 import { CART_PRODUCTS, stayCartId } from "@/lib/trip-cart";
 import { fiveNight, threeNight } from "@/lib/island-packages";
 import { VAAVU_BLUE_ESCAPE } from "@/lib/vaavu-blue-escape";
@@ -76,6 +77,7 @@ export default function TripExperienceCatalog({ onViewPlan }: { onViewPlan: () =
             {product.duration && <p className="mt-2 text-xs text-gray-400">{product.duration}</p>}
             <ul className="mt-4 space-y-2 text-sm leading-6 text-gray-300">{product.inclusions.slice(0, 3).map(item => <li key={item} className="flex gap-2"><Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-gold" />{item}</li>)}</ul>
             {product.inclusions.length > 3 && <details className="mt-2 text-sm leading-6 text-gray-300"><summary className="min-h-11 cursor-pointer py-2 text-gold">See all inclusions</summary><ul className="space-y-2">{product.inclusions.slice(3).map(item => <li key={item} className="flex gap-2"><Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-gold" />{item}</li>)}</ul></details>}
+            <TripInclusionReminder productId={product.id} onReview={onViewPlan} />
             <div className="mt-auto pt-5">
               <div className="border-t border-white/10 pt-4"><strong className="font-display text-3xl text-gold">{usd(product.price)}</strong><p className="mt-1 text-xs text-gray-300">{product.unit === "couple" ? `Total for 2 adults · ${product.nights} nights` : "Per person"}</p></div>
               <button type="button" disabled={!ready} onClick={() => { if (selected) onViewPlan(); else { add(product.id); setAnnouncement(`${product.name} added to your trip. Choose dates and guests in My selections.`); } }} aria-label={selected ? `View my selections with ${product.name}` : `Add ${product.name} to my trip`} className={`mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border px-3 py-3 text-sm font-semibold transition disabled:opacity-50 ${selected ? "border-gold/60 text-gold hover:bg-gold/10" : "border-gold bg-gold text-[#071922] hover:bg-[#e3ca91]"}`}>

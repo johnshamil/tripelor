@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { ArrowRight, BedDouble, CheckCircle2, Compass, MapPin, Waves, X } from "lucide-react";
+import { ArrowRight, CheckCircle2, Compass, MapPin } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import TripExperienceCatalog from "@/components/trip-experience-catalog";
-import { addNights, findCartProduct, isDate, maldivesToday, quoteCart } from "@/lib/trip-cart";
+import TripDayPlanner from "@/components/trip-day-planner";
+import { findCartProduct, quoteCart } from "@/lib/trip-cart";
 
 const field = "mt-2 min-h-12 w-full rounded-xl border border-white/20 bg-[#041117] px-4 py-3 text-white focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold [color-scheme:dark]";
 const usd = (value: number) => `USD ${value.toLocaleString("en-US")}`;
@@ -13,7 +14,7 @@ type User = { email: string; fullName: string };
 type Receipt = { bookingReference: string; total: number };
 
 export default function CartCheckout() {
-  const { lines, ready, storageNotice, update, remove, complete } = useCart();
+  const { lines, ready, storageNotice, complete } = useCart();
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -105,31 +106,7 @@ export default function CartCheckout() {
     </div> : <form onSubmit={submit} className="mt-10 grid items-start gap-8 xl:gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,1fr)]">
       <fieldset disabled={pending} className="min-w-0">
         <legend className="sr-only">Your selected stays and experiences</legend>
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3"><h2 className="font-display text-3xl">Your island itinerary</h2><span className="text-xs text-gray-400">{lines.length} {lines.length === 1 ? "selection" : "selections"} · saved on this device</span></div>
-        <ol className="space-y-6 border-l border-gold/25 pl-5 sm:pl-7">
-        {lines.map((line, index) => {
-          const product = findCartProduct(line.productId);
-          if (!product) return null;
-          const Icon = product.kind === "stay" ? BedDouble : Waves;
-          return <li key={line.productId} className="relative">
-            <span aria-hidden="true" className="absolute -left-[27px] top-8 h-3 w-3 rounded-full border border-gold bg-[#041117] sm:-left-[35px]" />
-            <article className="min-w-0 rounded-2xl border border-white/10 bg-white/[.025] p-5 sm:p-6">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0"><p className="flex items-center gap-2 text-xs uppercase tracking-[.15em] text-gold"><Icon aria-hidden="true" className="h-4 w-4 shrink-0" />{String(index + 1).padStart(2, "0")} · {product.kind === "stay" ? "Island stay" : product.kind === "package" ? "Ocean escape" : "Island experience"}</p><h3 className="font-display mt-3 text-2xl leading-tight sm:text-3xl"><Link href={product.href} className="hover:text-gold">{product.name}</Link></h3></div>
-                <button type="button" onClick={() => remove(line.productId)} aria-label={`Remove ${product.name} from my trip`} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-white/5 hover:text-white"><X aria-hidden="true" className="h-4 w-4" /></button>
-              </div>
-              <p className="mt-4 text-sm text-gold">{usd(product.price)} per {product.unit}{product.nights ? ` · ${product.nights}-night stay` : ""}{product.duration ? ` · ${product.duration}` : ""}</p>
-              <details className="mt-2 text-sm leading-6 text-gray-300"><summary className="min-h-10 cursor-pointer py-2">Your experience includes</summary><ul className="list-disc space-y-1 pl-5">{product.inclusions.map(item => <li key={item}>{item}</li>)}</ul></details>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <label className="text-sm text-gray-300">{product.unit === "couple" ? "Couples (2 adults, 1 room each)" : "Guests joining"}<input type="number" required min={1} max={100} step={1} value={line.quantity || ""} aria-label={`${product.name}: ${product.unit === "couple" ? "couples" : "guests"}`} onChange={e => update(line.productId, { quantity: e.target.value === "" ? 0 : Number(e.target.value) })} className={field} /></label>
-                <label className="text-sm text-gray-300">{product.nights ? "Preferred check-in" : "Preferred experience date"}<input type="date" required min={maldivesToday()} max="9998-12-31" value={line.date} aria-label={`${product.name}: date`} onChange={e => update(line.productId, { date: e.target.value })} className={field} /></label>
-              </div>
-              {product.nights && isDate(line.date) && <p className="mt-3 text-sm text-gray-400">Check-out: {addNights(line.date, product.nights)} · {line.quantity * 2} adults · {line.quantity} {line.quantity === 1 ? "room" : "rooms"}</p>}
-              <div className="mt-5 flex flex-wrap items-baseline justify-between gap-2 border-t border-white/10 pt-4"><span className="text-xs text-gray-400">Estimate for your {product.kind === "stay" ? "stay" : "experience"}</span><span className="font-semibold">{usd(product.price * line.quantity)}</span></div>
-            </article>
-          </li>;
-        })}
-        </ol>
+        <TripDayPlanner />
         <button type="button" onClick={() => changeView("explore")} className="mt-5 inline-flex min-h-12 items-center gap-2 text-sm font-semibold text-gold">Add more packages & excursions <ArrowRight aria-hidden="true" className="h-4 w-4" /></button>
       </fieldset>
       <div className="min-w-0 rounded-3xl border border-gold/25 bg-gradient-to-br from-[#123039] to-[#07181f] p-6 sm:p-7 lg:sticky lg:top-28">
