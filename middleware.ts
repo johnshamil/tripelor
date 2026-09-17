@@ -13,6 +13,7 @@ const PROTECTED_PREFIXES = [
   "/api/account",
   "/api/admin",
   "/api/booking",
+  "/api/cart-booking",
   "/api/speedboat",
   "/api/partner",
 ];

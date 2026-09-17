@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import "../styles/mobile-comfort.css";
 import type { Metadata } from "next";
+import { CartProvider } from "@/components/cart-provider";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import WhatsAppFloat from "@/components/whatsapp-float";
@@ -88,10 +89,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }} />
+        <CartProvider>
         <Navbar />
         <main><SmoothExperience>{children}</SmoothExperience></main>
         <Footer />
         <WhatsAppFloat />
+        </CartProvider>
       </body>
     </html>
   );

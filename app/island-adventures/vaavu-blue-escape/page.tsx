@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import AddToCartButton from "@/components/add-to-cart-button";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, CheckCircle2, MapPin } from "lucide-react";
@@ -33,7 +34,7 @@ export default function VaavuBlueEscapePage() {
               <strong className="text-5xl text-gold">USD {excursion.price}</strong>
               <span className="text-lg text-gray-300">per person</span>
             </div>
-            <Link href={excursion.enquiryHref} className="btn-gold mt-7 w-full gap-2 sm:w-auto">Enquire About This Package <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+            <AddToCartButton productId="package:vaavu-blue-escape" className="mt-7 sm:max-w-sm" />
           </div>
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
             <Image src={excursion.image} alt={excursion.imageAlt} fill priority sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
@@ -53,7 +54,7 @@ export default function VaavuBlueEscapePage() {
           <aside className="card p-6 sm:p-8">
             <h2 className="font-display text-3xl">Plan your escape</h2>
             <p className="mt-4 leading-7 text-gray-300">Share your preferred date and number of guests. Our team will confirm availability and the island stop: Thinadhoo or Keyodhoo.</p>
-            <Link href={excursion.enquiryHref} className="btn-gold mt-6 w-full">Send an Enquiry</Link>
+            <AddToCartButton productId="package:vaavu-blue-escape" className="mt-6" />
           </aside>
         </div>
         <p className="mt-6 max-w-3xl text-sm leading-6 text-gray-400">Marine activities depend on weather and sea conditions. Wildlife sightings cannot be guaranteed. Final details are confirmed before payment.</p>

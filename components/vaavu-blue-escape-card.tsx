@@ -1,3 +1,4 @@
+import AddToCartButton from "@/components/add-to-cart-button";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
@@ -23,7 +24,8 @@ export default function VaavuBlueEscapeCard() {
           </ul>
           <div className="mt-7 border-t border-white/10 pt-6">
             <p><strong className="text-4xl text-gold">USD {excursion.price}</strong><span className="ml-2 text-sm text-gray-300">per person</span></p>
-            <Link href={excursion.href} className="btn-gold mt-5 w-full gap-2 sm:w-auto">View Package <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+            <AddToCartButton productId="package:vaavu-blue-escape" className="mt-5" />
+            <Link href={excursion.href} className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm text-gold">View Package <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
           </div>
         </div>
       </article>

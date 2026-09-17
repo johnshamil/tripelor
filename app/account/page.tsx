@@ -119,6 +119,7 @@ export default function AccountPage() {
         </div>
       </header>
 
+      <Link href="/account/cart-bookings" className="mt-7 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>Package & Excursion Bookings</strong><span className="mt-1 block text-sm text-gray-400">Track the selections you booked together from your cart.</span></span><span className="text-gold">View →</span></Link>
       <Link href="/account/host-questions" className="mt-7 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>Host Messages</strong><span className="mt-1 block text-sm text-gray-400">Your questions and personal replies from the island.</span></span><span className="text-gold">Open →</span></Link>
       <Rewards2Card user={user} loyalty={loyalty} />
       <ReferralRewardsCard email={user.email} />

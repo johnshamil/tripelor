@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut, Menu, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import CartLink from "@/components/cart-link";
 import TripelorMark from "@/components/tripelor-mark";
 
 type User = { email: string; fullName: string; isAdmin?: boolean };
@@ -20,6 +21,7 @@ const mobileLinks = [
   ["/", "Home"],
   ["/help-me-choose", "Help Me Choose"],
   ["/holiday-shortlist", "Holiday Shortlist"],
+  ["/cart", "My Cart"],
   ...primaryLinks,
   ["/account#referral-rewards", "Referral & Earn"],
   ["/contact", "Contact"],
@@ -71,12 +73,13 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 lg:flex" aria-label="Main navigation">
+        <nav className="hidden items-center gap-4 xl:gap-6 lg:flex" aria-label="Main navigation">
           {primaryLinks.map(([href, label]) => (
             <Link key={href} href={href} className="nav-tab">
               {label}
             </Link>
           ))}
+          <CartLink />
           <Link href="/account" className="nav-tab gap-2" aria-label="My Tripelor account">
             <UserRound className="h-4 w-4" /> {user ? "My Trip" : "Sign In"}
           </Link>
@@ -85,6 +88,8 @@ export default function Navbar() {
           </Link>
         </nav>
 
+        <div className="flex items-center gap-2 lg:hidden">
+        <CartLink onClick={() => setOpen(false)} />
         <button
           onClick={() => setOpen(!open)}
           className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/[.04] text-white transition active:scale-95 lg:hidden"
@@ -93,6 +98,7 @@ export default function Navbar() {
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
+        </div>
       </div>
 
       {!adminSurface && <Link href="/help-me-choose" onClick={() => setOpen(false)} className="flex min-h-[44px] items-center justify-center gap-2 border-t border-white/10 px-4 text-xs text-[#ead7aa] lg:hidden">Not sure where to start? <span className="font-semibold underline">Help Me Choose</span></Link>}

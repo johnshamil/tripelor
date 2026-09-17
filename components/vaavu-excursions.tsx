@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { ArrowRight, CheckCircle2, Clock, Fish, Waves } from "lucide-react";
+import AddToCartButton from "@/components/add-to-cart-button";
+import { CheckCircle2, Clock, Fish, Waves } from "lucide-react";
 import { VAAVU_EXCURSIONS } from "@/lib/vaavu-excursions";
 
 export default function VaavuExcursions() {
@@ -24,7 +24,7 @@ export default function VaavuExcursions() {
                 </ul>
                 <div className="mt-auto border-t border-white/10 pt-5">
                   <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1"><strong className="text-3xl text-gold">USD {excursion.price}</strong><span className="text-sm text-gray-300">per person</span></p>
-                  <Link href={`/contact?excursion=${excursion.slug}`} aria-label={`Enquire about ${excursion.name}`} className="btn-gold mt-5 w-full gap-2">Enquire Now <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+                  <AddToCartButton productId={`excursion:${excursion.slug}`} className="mt-5" />
                 </div>
               </article>
             );
