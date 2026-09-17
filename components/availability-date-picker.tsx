@@ -18,6 +18,7 @@ export default function AvailabilityDatePicker({
   roomType,
   minDate,
   disabled = false,
+  allowUnavailable = false,
 }: {
   label: string;
   value: string;
@@ -26,6 +27,7 @@ export default function AvailabilityDatePicker({
   roomType: string;
   minDate?: string;
   disabled?: boolean;
+  allowUnavailable?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const initial = value ? new Date(`${value}T00:00:00`) : new Date();
@@ -67,7 +69,7 @@ export default function AvailabilityDatePicker({
   }, [month.getFullYear(), month.getMonth()]);
 
   function choose(key: string, available: boolean, past: boolean) {
-    if (!available || past || disabled) return;
+    if ((!available && !allowUnavailable) || past || disabled) return;
     onChange(key);
     setOpen(false);
   }
@@ -130,13 +132,13 @@ export default function AvailabilityDatePicker({
                     <button
                       key={key}
                       type="button"
-                      disabled={past || !available || loading}
+                      disabled={past || (!available && !allowUnavailable) || loading}
                       onClick={() => choose(key, available, past)}
                       className={`aspect-square text-sm font-semibold transition ${
                         past
                           ? "text-white/15"
                           : !available
-                            ? "bg-red-400/15 text-red-300/70 cursor-not-allowed"
+                            ? `bg-red-400/15 text-red-300/70 ${allowUnavailable ? 'hover:bg-red-400/25' : 'cursor-not-allowed'} ${selected ? 'ring-2 ring-red-300/70' : ''}`
                             : selected
                               ? "bg-[#c9a86a] text-[#071922] ring-2 ring-[#e3ca91] ring-offset-2 ring-offset-[#071922]"
                               : "bg-white/[.045] text-white/75 hover:bg-[#c9a86a] hover:text-[#071922]"
@@ -153,6 +155,7 @@ export default function AvailabilityDatePicker({
                 <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 bg-red-400/60" /> Booked</span>
                 <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 bg-white/15" /> Past</span>
               </div>
+              {allowUnavailable && <p className="mt-4 text-center text-xs leading-5 text-white/60">You can select booked dates to request an availability alert.</p>}
             </div>
           </div>
         </div>

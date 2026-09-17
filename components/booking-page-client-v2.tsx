@@ -19,6 +19,7 @@ import {
   Users,
 } from "lucide-react";
 import AvailabilityDatePicker from "@/components/availability-date-picker";
+import AvailabilityAlertButton from "@/components/availability-alert-button";
 import { propertyRateForDate, seasonalRateForDate } from "@/lib/property-model";
 import type { PublicProperty } from "@/lib/property-model";
 
@@ -105,6 +106,8 @@ export default function BookingPageClientV2() {
     total_rooms?: number;
   } | null>(null);
   const [checking, setChecking] = useState(false);
+  const [checkedSelection, setCheckedSelection] = useState('');
+  const selectionKey = [propertyName, roomType, checkIn, checkOut].join('|');
   const [managedProperties, setManagedProperties] = useState<PublicProperty[]>([]);
 
   const managedProperty = managedProperties.find((property) => property.name === propertyName);
@@ -287,6 +290,7 @@ export default function BookingPageClientV2() {
       const result = await response.json();
       if (!response.ok) throw new Error(result?.error || "Unable to check availability.");
       setAvailability(result);
+      setCheckedSelection(selectionKey);
       if (!result.available) setStatus("Sorry, no rooms are available for the selected dates.");
       return Boolean(result.available);
     } catch (error) {
@@ -470,7 +474,7 @@ export default function BookingPageClientV2() {
             )}
 
             <div className="mt-5 grid gap-5 md:grid-cols-2">
-              <AvailabilityDatePicker label="Check-in" value={checkIn} onChange={handleCheckIn} propertyName={propertyName} roomType={roomType} />
+              <AvailabilityDatePicker allowUnavailable label="Check-in" value={checkIn} onChange={handleCheckIn} propertyName={propertyName} roomType={roomType} />
               <AvailabilityDatePicker
                 label="Check-out"
                 value={checkOut}
@@ -479,6 +483,7 @@ export default function BookingPageClientV2() {
                 roomType={roomType}
                 minDate={checkIn ? addDays(checkIn, 1) : undefined}
                 disabled={!!packageName}
+                allowUnavailable
               />
             </div>
 
@@ -540,12 +545,12 @@ export default function BookingPageClientV2() {
               <SearchCheck className="h-4 w-4" /> {checking ? "Checking Dates…" : "Check Live Availability"}
             </button>
 
-            {availability?.available && availability.rooms_left === 1 && (
+            {checkedSelection === selectionKey && availability?.available && availability.rooms_left === 1 && (
               <div className="mt-5 flex items-center gap-3 border border-[#b9964f]/45 bg-[#efe2c5] p-4 text-[#745b2e]">
                 <Flame className="h-5 w-5" /> <strong>Only one room remains in this category for these dates.</strong>
               </div>
             )}
-            {availability && (
+            {checkedSelection === selectionKey && availability && (
               <div className={`mt-5 flex items-center gap-3 border p-4 text-sm ${availability.available ? "border-[#8ea99a]/45 bg-[#e5eee7] text-[#40564a]" : "border-[#c69292]/45 bg-[#f2dfdc] text-[#744740]"}`}>
                 <CheckCircle2 className="h-5 w-5 shrink-0" />
                 {availability.available
@@ -553,6 +558,9 @@ export default function BookingPageClientV2() {
                   : "Sold out for the selected dates."}
               </div>
             )}
+            {checkedSelection === selectionKey && availability?.available === false && <AvailabilityAlertButton
+              key={[propertyName, roomType, checkIn, checkOut].join('|')} light
+              selection={{ propertyName, roomType, checkIn, checkOut, rooms: 1 }} />}
           </div>
 
           <div className="p-6 md:p-9">
