@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Award, Gift } from "lucide-react";
+import { translations, type ProfessionalLocale } from "@/lib/professional-translations";
 
 type User={email:string;fullName:string;isAdmin?:boolean};
 type Loyalty={account?:{points_balance?:number};pointsForFreeNight?:number};
@@ -14,7 +15,8 @@ function levelFor(points:number){
   return {level:"Bronze",nextLevel:"Silver",pointsToNext:1000-points};
 }
 
-export default function RewardsChecker(){
+export default function RewardsChecker({locale="en"}:{locale?:ProfessionalLocale}){
+  const copy=translations[locale].rewards;
   const [user,setUser]=useState<User|null>(null);
   const [loyalty,setLoyalty]=useState<Loyalty|null>(null);
   const [loading,setLoading]=useState(true);
@@ -31,9 +33,9 @@ export default function RewardsChecker(){
     }finally{setLoading(false);}
   })()},[]);
 
-  if(loading)return <section className="border-y border-white/10 bg-[#050505]"><div className="container py-8"><div className="mx-auto max-w-[760px] rounded-2xl border border-gold/20 bg-gradient-to-br from-[#1a1408] via-[#080808] to-black p-7 text-gray-400">Loading your Tripelor card...</div></div></section>;
+  if(loading)return <section className="border-y border-white/10 bg-[#050505]"><div className="container py-8"><div className="mx-auto max-w-[760px] rounded-2xl border border-gold/20 bg-gradient-to-br from-[#1a1408] via-[#080808] to-black p-7 text-gray-400">{copy.loading}</div></div></section>;
 
-  if(!user)return <section className="border-y border-white/10 bg-[#050505]"><div className="container py-8"><div className="mx-auto flex max-w-[760px] flex-col gap-5 rounded-2xl border border-gold/30 bg-gradient-to-br from-[#1c1609] via-[#090909] to-black p-7 shadow-2xl md:flex-row md:items-center md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.32em] text-gold">Tripelor Card</p><h2 className="mt-2 text-2xl font-bold">Your member card appears after login.</h2><p className="mt-2 text-sm text-gray-400">Log in to see your name, points and membership level.</p></div><Link href="/login" className="btn-gold shrink-0">Log In</Link></div></div></section>;
+  if(!user)return <section className="border-y border-white/10 bg-[#050505]"><div className="container py-8"><div className="mx-auto flex max-w-[760px] flex-col gap-5 rounded-2xl border border-gold/30 bg-gradient-to-br from-[#1c1609] via-[#090909] to-black p-7 shadow-2xl md:flex-row md:items-center md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.32em] text-gold">{copy.card}</p><h2 className="mt-2 text-2xl font-bold">{copy.loginTitle}</h2><p className="mt-2 text-sm text-gray-400">{copy.loginBody}</p></div><Link href="/login" className="btn-gold shrink-0">{copy.login}</Link></div></div></section>;
 
   const points=Number(loyalty?.account?.points_balance||0);
   const target=Number(loyalty?.pointsForFreeNight||1000);
@@ -45,11 +47,11 @@ export default function RewardsChecker(){
       <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(120deg,transparent_0%,rgba(255,255,255,.08)_45%,transparent_60%)]"/>
       <div className="absolute right-8 top-8 h-20 w-20 rounded-full border border-gold/20"/><div className="absolute right-14 top-14 h-20 w-20 rounded-full border border-gold/10"/>
       <div className="relative flex h-full flex-col justify-between">
-        <div className="flex items-start justify-between gap-4"><div><div className="flex items-center gap-2"><Award className="h-5 w-5 text-gold"/><p className="text-sm font-bold uppercase tracking-[.32em] text-gold">TRIPELOR</p></div><p className="mt-1 text-[10px] uppercase tracking-[.28em] text-gray-500">The Art of Exploring</p></div><div className="rounded-md border border-gold/35 bg-gold/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.22em] text-gold">{level} Member</div></div>
-        <div><p className="text-[10px] uppercase tracking-[.24em] text-gray-500">Card Holder</p><h2 className="mt-1 text-2xl font-semibold tracking-wide text-white md:text-3xl">{user.fullName||"Tripelor Guest"}</h2><p className="mt-4 text-[10px] uppercase tracking-[.24em] text-gray-500">Available Points</p><div className="mt-1 flex items-baseline gap-2"><span className="text-5xl font-black tracking-tight text-gold md:text-6xl">{points.toLocaleString()}</span><span className="text-xs uppercase tracking-[.2em] text-gray-400">PTS</span></div></div>
+        <div className="flex items-start justify-between gap-4"><div><div className="flex items-center gap-2"><Award className="h-5 w-5 text-gold"/><p className="text-sm font-bold uppercase tracking-[.32em] text-gold">TRIPELOR</p></div><p className="mt-1 text-[10px] uppercase tracking-[.28em] text-gray-500">{copy.art}</p></div><div className="rounded-md border border-gold/35 bg-gold/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.22em] text-gold">{copy.tiers[level as keyof typeof copy.tiers]} {copy.member}</div></div>
+        <div><p className="text-[10px] uppercase tracking-[.24em] text-gray-500">{copy.holder}</p><h2 className="mt-1 text-2xl font-semibold tracking-wide text-white md:text-3xl">{user.fullName||copy.guest}</h2><p className="mt-4 text-[10px] uppercase tracking-[.24em] text-gray-500">{copy.available}</p><div className="mt-1 flex items-baseline gap-2"><span className="text-5xl font-black tracking-tight text-gold md:text-6xl">{points.toLocaleString()}</span><span className="text-xs uppercase tracking-[.2em] text-gray-400">{copy.pts}</span></div></div>
         <div className="grid grid-cols-2 items-end border-t border-white/10 pt-4">
-          <div>{freeNights>0?<><p className="flex items-center gap-1.5 text-xs font-semibold text-gold"><Gift className="h-4 w-4"/>{freeNights} free night{freeNights>1?"s":""} ready</p><Link href="/account" className="mt-1 inline-block text-[10px] uppercase tracking-[.16em] text-gray-400">Redeem reward →</Link></>:nextLevel&&pointsToNext!==null?<><p className="text-sm font-semibold text-gold">{pointsToNext.toLocaleString()} points to {nextLevel}</p><Link href="/account" className="mt-1 inline-block text-[10px] uppercase tracking-[.16em] text-gray-500">View rewards →</Link></>:<p className="text-sm font-semibold text-gold">Top tier member</p>}</div>
-          <div className="text-right"><p className="text-[9px] uppercase tracking-[.2em] text-gray-600">Member Email</p><p className="mt-1 truncate text-xs text-gray-400">{user.email}</p><p className="mt-1 text-[10px] text-gray-600">1,000 pts = 1 free night</p></div>
+          <div>{freeNights>0?<><p className="flex items-center gap-1.5 text-xs font-semibold text-gold"><Gift className="h-4 w-4"/>{freeNights} {freeNights>1?copy.freeNights:copy.freeNight} {copy.ready}</p><Link href="/account" className="mt-1 inline-block text-[10px] uppercase tracking-[.16em] text-gray-400">{copy.redeem}</Link></>:nextLevel&&pointsToNext!==null?<><p className="text-sm font-semibold text-gold">{pointsToNext.toLocaleString()} {copy.pointsTo} {copy.tiers[nextLevel as keyof typeof copy.tiers]}</p><Link href="/account" className="mt-1 inline-block text-[10px] uppercase tracking-[.16em] text-gray-500">{copy.view}</Link></>:<p className="text-sm font-semibold text-gold">{copy.top}</p>}</div>
+          <div className="text-right"><p className="text-[9px] uppercase tracking-[.2em] text-gray-600">{copy.email}</p><p className="mt-1 truncate text-xs text-gray-400">{user.email}</p><p className="mt-1 text-[10px] text-gray-600">{copy.freeNightRule}</p></div>
         </div>
       </div>
     </div>
