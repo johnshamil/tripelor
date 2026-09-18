@@ -12,6 +12,7 @@ import {
   Compass,
   Crown,
   Heart,
+  FileText,
   MapPin,
   ShieldCheck,
   Ship,
@@ -21,6 +22,9 @@ import {
   Waves,
 } from "lucide-react";
 import SaveTripButton from "@/components/save-trip-button";
+import { fiveNight, threeNight } from "@/lib/island-packages";
+import { stayCartId } from "@/lib/trip-cart";
+import { buildQuoteHref, createQuoteReference } from "@/lib/trip-quote";
 
 type Mood = "relax" | "romance" | "adventure" | "ocean";
 type Dining = "flexible" | "Half Board" | "Full Board";
@@ -165,6 +169,7 @@ export default function BuildYourTripPage() {
   const [budget, setBudget] = useState<Budget>("signature");
   const [room, setRoom] = useState("ROOM 101");
   const [includeTransfer, setIncludeTransfer] = useState(true);
+  const [quoteError, setQuoteError] = useState("");
 
   const recommendation = useMemo(() => {
     return packageOptions
@@ -202,9 +207,36 @@ export default function BuildYourTripPage() {
     else setComplete(true);
   }
 
+  function createQuote() {
+    setQuoteError("");
+    if (!arrival) {
+      setQuoteError("Choose an approximate arrival date first so we can save your 48-hour quote.");
+      return;
+    }
+    const sourcePackage = [...threeNight, ...fiveNight].find(
+      (pkg) => pkg.nights === nights && pkg.name === recommendation.name,
+    );
+    if (!sourcePackage) {
+      setQuoteError("We could not prepare this quote. Please adjust your preferences and try again.");
+      return;
+    }
+    const line = { productId: stayCartId(sourcePackage.slug, nights), quantity: 1, date: arrival };
+    const reference = createQuoteReference(new Date(), crypto.randomUUID().replace(/-/g, "").slice(0, 6));
+    const relative = buildQuoteHref(reference, [line]);
+    const url = new URL(relative, window.location.origin);
+    url.searchParams.set("room", room);
+    url.searchParams.set("meal", recommendation.meal);
+    url.searchParams.set("transferSeats", String(transferSeats));
+    url.searchParams.set("transferTotal", String(transferTotal));
+    url.searchParams.set("request", bookingHref);
+    url.searchParams.set("customize", "/build-your-trip");
+    window.location.href = `${url.pathname}${url.search}`;
+  }
+
   function editPlan() {
     setComplete(false);
     setStep(0);
+    setQuoteError("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -458,6 +490,10 @@ export default function BuildYourTripPage() {
 
                 <div className="mt-7 grid gap-3">
                   <Link href={bookingHref} className="btn-gold w-full">Continue to Private Booking <ArrowRight className="h-4 w-4" /></Link>
+                  <button type="button" onClick={createQuote} className="btn-outline w-full border-[#9c7d3d] text-[#7c622e]">
+                    <FileText className="h-4 w-4" /> Create My 48-Hour Quote
+                  </button>
+                  {quoteError && <p className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-700">{quoteError}</p>}
                   <SaveTripButton
                     itemType="package"
                     itemKey={`${recommendation.name}-${nights}-${room}-${transferSeats}`}
