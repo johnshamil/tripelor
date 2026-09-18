@@ -6,6 +6,7 @@ import { LogOut, Menu, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import CartLink from "@/components/cart-link";
 import TripelorMark from "@/components/tripelor-mark";
+import LanguageSwitcher from "@/components/language-switcher";
 
 type User = { email: string; fullName: string; isAdmin?: boolean };
 
@@ -80,6 +81,7 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
+          <LanguageSwitcher />
           <CartLink />
           <Link href="/account" className="nav-tab gap-2" aria-label="My Tripelor account">
             <UserRound className="h-4 w-4" /> {user ? "My Account" : "Sign In"}
@@ -90,6 +92,7 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2 xl:hidden">
+        <LanguageSwitcher compact />
         <CartLink compact onClick={() => setOpen(false)} />
         <button
           onClick={() => setOpen(!open)}
