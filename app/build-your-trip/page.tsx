@@ -24,7 +24,6 @@ import {
 import SaveTripButton from "@/components/save-trip-button";
 import { fiveNight, threeNight } from "@/lib/island-packages";
 import { stayCartId } from "@/lib/trip-cart";
-import { buildQuoteHref, createQuoteReference } from "@/lib/trip-quote";
 
 type Mood = "relax" | "romance" | "adventure" | "ocean";
 type Dining = "flexible" | "Half Board" | "Full Board";
@@ -170,6 +169,7 @@ export default function BuildYourTripPage() {
   const [room, setRoom] = useState("ROOM 101");
   const [includeTransfer, setIncludeTransfer] = useState(true);
   const [quoteError, setQuoteError] = useState("");
+  const [quoteCreating, setQuoteCreating] = useState(false);
 
   const recommendation = useMemo(() => {
     return packageOptions
@@ -207,7 +207,8 @@ export default function BuildYourTripPage() {
     else setComplete(true);
   }
 
-  function createQuote() {
+  async function createQuote() {
+    if (quoteCreating) return;
     setQuoteError("");
     if (!arrival) {
       setQuoteError("Choose an approximate arrival date first so we can save your 48-hour quote.");
@@ -221,16 +222,28 @@ export default function BuildYourTripPage() {
       return;
     }
     const line = { productId: stayCartId(sourcePackage.slug, nights), quantity: 1, date: arrival };
-    const reference = createQuoteReference(new Date(), crypto.randomUUID().replace(/-/g, "").slice(0, 6));
-    const relative = buildQuoteHref(reference, [line]);
-    const url = new URL(relative, window.location.origin);
-    url.searchParams.set("room", room);
-    url.searchParams.set("meal", recommendation.meal);
-    url.searchParams.set("transferSeats", String(transferSeats));
-    url.searchParams.set("transferTotal", String(transferTotal));
-    url.searchParams.set("request", bookingHref);
-    url.searchParams.set("customize", "/build-your-trip");
-    window.location.href = `${url.pathname}${url.search}`;
+    setQuoteCreating(true);
+    try {
+      const response = await fetch("/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: [line],
+          room,
+          meal: recommendation.meal,
+          transferSeats,
+          requestHref: bookingHref,
+          customizeHref: "/build-your-trip",
+        }),
+        signal: AbortSignal.timeout(15000),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.url) throw new Error(data.error || "We could not prepare this quote.");
+      window.location.href = data.url;
+    } catch (error) {
+      setQuoteError(error instanceof Error && error.name !== "TimeoutError" ? error.message : "We could not prepare this quote. Please try again.");
+      setQuoteCreating(false);
+    }
   }
 
   function editPlan() {
@@ -490,8 +503,8 @@ export default function BuildYourTripPage() {
 
                 <div className="mt-7 grid gap-3">
                   <Link href={bookingHref} className="btn-gold w-full">Continue to Private Booking <ArrowRight className="h-4 w-4" /></Link>
-                  <button type="button" onClick={createQuote} className="btn-outline w-full border-[#9c7d3d] text-[#7c622e]">
-                    <FileText className="h-4 w-4" /> Create My 48-Hour Quote
+                  <button type="button" onClick={createQuote} disabled={quoteCreating} className="btn-outline w-full border-[#9c7d3d] text-[#7c622e] disabled:opacity-60">
+                    <FileText className="h-4 w-4" /> {quoteCreating ? "Creating Quote…" : "Create My 48-Hour Quote"}
                   </button>
                   {quoteError && <p className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-700">{quoteError}</p>}
                   <SaveTripButton
