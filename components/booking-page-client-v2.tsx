@@ -22,6 +22,7 @@ import AvailabilityDatePicker from "@/components/availability-date-picker";
 import AvailabilityAlertButton from "@/components/availability-alert-button";
 import { propertyRateForDate, seasonalRateForDate } from "@/lib/property-model";
 import type { PublicProperty } from "@/lib/property-model";
+import { translations, type ProfessionalLocale } from "@/lib/professional-translations";
 
 const PACKAGE_HOTEL = "Uhoo's Lavish Oasis";
 
@@ -54,9 +55,10 @@ const RIVETHI_RATES: Record<string, Record<string, [number, number]>> = {
   "Deluxe Double Sea View": { "Bed & Breakfast": [130, 130], "Full Board": [195, 195] },
 };
 
-function formatDate(date: string) {
+function formatDate(date: string, locale: ProfessionalLocale = "en") {
   if (!date) return "";
-  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" }).format(
+  const language = locale === "it" ? "it-IT" : locale === "ru" ? "ru-RU" : "en-GB";
+  return new Intl.DateTimeFormat(language, { day: "numeric", month: "long", year: "numeric" }).format(
     new Date(`${date}T00:00:00`),
   );
 }
@@ -80,7 +82,24 @@ function stayDates(checkIn: string, checkOut: string) {
   return dates;
 }
 
-export default function BookingPageClientV2() {
+export default function BookingPageClientV2({ locale = "en" }: { locale?: ProfessionalLocale }) {
+  const copy = translations[locale].booking;
+  const fill = (template: string, values: Record<string,string|number>) => Object.entries(values).reduce((text,[key,value]) => text.replace(`{${key}}`,String(value)),template);
+  const roomDisplay = (value: string, fallback = value) => ({
+    "ROOM 101": copy.deluxeRoom,
+    "ROOM 102": copy.doubleDeluxeRoom,
+    "Standard Double Room": copy.standardDoubleRoom,
+    "Family Room with Sea View": copy.familySeaView,
+    "Deluxe Double": copy.deluxeDouble,
+    "Deluxe Twin": copy.deluxeTwin,
+    "Deluxe Double Sea View": copy.deluxeSeaView,
+  } as Record<string,string>)[value] || fallback;
+  const mealDisplay = (value: string) => ({
+    "Room Only": copy.roomOnly,
+    "Bed & Breakfast": copy.bedBreakfast,
+    "Half Board": copy.halfBoard,
+    "Full Board": copy.fullBoard,
+  } as Record<string,string>)[value] || value;
   const [propertyName, setPropertyName] = useState(PACKAGE_HOTEL);
   const [packageName, setPackageName] = useState("");
   const [packagePrice, setPackagePrice] = useState<number | null>(null);
@@ -115,7 +134,7 @@ export default function BookingPageClientV2() {
     ? managedProperty.rooms
         .filter((room, index, all) => all.findIndex((candidate) => candidate.name === room.name) === index)
         .map((room) => ({ value: room.name, label: room.name, maxGuests: room.capacity }))
-    : PROPERTY_ROOMS[propertyName] || PROPERTY_ROOMS[PACKAGE_HOTEL];
+    : (PROPERTY_ROOMS[propertyName] || PROPERTY_ROOMS[PACKAGE_HOTEL]).map((room) => ({ ...room, label: roomDisplay(room.value, room.label) }));
   const selectedRoom = roomOptions.find((room) => room.value === roomType) || roomOptions[0];
   const roomLabel = selectedRoom?.label || roomType;
   const maxGuests = selectedRoom?.maxGuests || 2;
@@ -277,7 +296,7 @@ export default function BookingPageClientV2() {
   async function checkAvailability() {
     setStatus("");
     if (!checkIn || !checkOut) {
-      setStatus("Please select your dates first.");
+      setStatus(copy.selectDatesFirst);
       return false;
     }
     setChecking(true);
@@ -288,13 +307,13 @@ export default function BookingPageClientV2() {
         body: JSON.stringify({ propertyName, roomType, checkIn, checkOut, rooms: 1 }),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result?.error || "Unable to check availability.");
+      if (!response.ok) throw new Error(result?.error || copy.unableAvailability);
       setAvailability(result);
       setCheckedSelection(selectionKey);
-      if (!result.available) setStatus("Sorry, no rooms are available for the selected dates.");
+      if (!result.available) setStatus(copy.noRooms);
       return Boolean(result.available);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Unable to check availability.");
+      setStatus(error instanceof Error ? error.message : copy.unableAvailability);
       return false;
     } finally {
       setChecking(false);
@@ -303,31 +322,31 @@ export default function BookingPageClientV2() {
 
   function validate() {
     if (!checkIn || !checkOut) {
-      setStatus("Please select your check-in and check-out dates.");
+      setStatus(copy.selectCheckDates);
       return false;
     }
     if (nights <= 0) {
-      setStatus("Check-out must be after check-in.");
+      setStatus(copy.checkoutAfter);
       return false;
     }
     if (packageName && nights !== packageNights) {
-      setStatus(`This package is for exactly ${packageNights} nights.`);
+      setStatus(fill(copy.exactNights,{nights:packageNights}));
       return false;
     }
     if (Number(adults) + Number(children) > maxGuests) {
-      setStatus(`${roomLabel} accommodates up to ${maxGuests} guests. Please adjust the guest count or select another room.`);
+      setStatus(fill(copy.maxGuests,{room:roomLabel,guests:maxGuests}));
       return false;
     }
     if (!fullName.trim()) {
-      setStatus("Please enter your full name.");
+      setStatus(copy.enterName);
       return false;
     }
     if (!email.includes("@")) {
-      setStatus("Please enter a valid email address.");
+      setStatus(copy.validEmail);
       return false;
     }
     if (!phone.trim()) {
-      setStatus("Please enter your phone / WhatsApp number.");
+      setStatus(copy.enterPhone);
       return false;
     }
     return true;
@@ -366,8 +385,8 @@ export default function BookingPageClientV2() {
           email: email.trim(),
           phone: phone.trim(),
           destination: location,
-          checkIn: formatDate(checkIn),
-          checkOut: formatDate(finalCheckOut),
+          checkIn: formatDate(checkIn, locale),
+          checkOut: formatDate(finalCheckOut, locale),
           checkInISO: checkIn,
           checkOutISO: finalCheckOut,
           nights: finalNights,
@@ -384,16 +403,16 @@ export default function BookingPageClientV2() {
         }),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result?.error || "Unable to send booking request.");
+      if (!response.ok) throw new Error(result?.error || copy.unableRequest);
 
       const title = packageName || `${propertyName} · ${roomLabel}`;
       window.location.href = `/booking/confirmation?name=${encodeURIComponent(fullName.trim())}&title=${encodeURIComponent(
         title,
-      )}&dates=${encodeURIComponent(`${formatDate(checkIn)} – ${formatDate(finalCheckOut)}`)}&ref=${encodeURIComponent(
+      )}&dates=${encodeURIComponent(`${formatDate(checkIn, locale)} – ${formatDate(finalCheckOut, locale)}`)}&ref=${encodeURIComponent(
         result.bookingReference || result.reservationId || "",
       )}&total=${encodeURIComponent(String(result.finalTotal ?? estimatedTotal ?? ""))}`;
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Unable to send booking request.");
+      setStatus(error instanceof Error ? error.message : copy.unableRequest);
       setAvailability(null);
     } finally {
       setSending(false);
@@ -404,18 +423,18 @@ export default function BookingPageClientV2() {
     <section className="bg-[#f1ebdf] pb-24 text-[#071922]">
       <div className="bg-[#06151c] text-white">
         <div className="container py-16 md:py-20">
-          <p className="eyebrow">Tripelor private booking</p>
+          <p className="eyebrow">{copy.eyebrow}</p>
           <h1 className="font-display mt-4 max-w-4xl text-5xl leading-tight md:text-7xl">
-            {packageName || "Your stay, beautifully arranged."}
+            {packageName || copy.title}
           </h1>
           <p className="mt-5 max-w-2xl leading-8 text-white/55">
-            Select your stay, confirm live dates and share your details. A Tripelor concierge reviews every request before confirmation.
+            {copy.intro}
           </p>
           <div className="mt-10 grid max-w-3xl grid-cols-3 gap-px overflow-hidden border border-white/10 bg-white/10">
             {[
-              ["01", "Choose your stay"],
-              ["02", "Share your details"],
-              ["03", "Receive confirmation"],
+              ["01", copy.stepChoose],
+              ["02", copy.stepDetails],
+              ["03", copy.stepConfirm],
             ].map(([number, label]) => (
               <div key={number} className="bg-[#071922] p-4 md:p-5">
                 <p className="font-display text-xl italic text-[#d9bd7b]">{number}</p>
@@ -436,10 +455,10 @@ export default function BookingPageClientV2() {
               <div className="flex gap-4">
                 <PackageCheck className="mt-1 h-6 w-6 shrink-0 text-[#8d7037]" />
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[.2em] text-[#8d7037]">Selected couple package</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[.2em] text-[#8d7037]">{copy.selectedPackage}</p>
                   <h2 className="font-display mt-2 text-3xl">{packageName}</h2>
                   <p className="mt-2 flex items-center gap-2 text-sm text-[#58656c]">
-                    <Heart className="h-4 w-4 text-[#9c7d3d]" /> 2 adults · 1 room · {packageNights} nights
+                    <Heart className="h-4 w-4 text-[#9c7d3d]" /> {copy.adultsRoomNights} · {packageNights} {copy.nights}
                   </p>
                 </div>
               </div>
@@ -450,15 +469,15 @@ export default function BookingPageClientV2() {
             <div className="mb-7 flex items-start gap-4">
               <span className="font-display text-2xl italic text-[#9c7d3d]">01</span>
               <div>
-                <h2 className="font-display text-3xl">Choose your stay</h2>
-                <p className="mt-1 text-sm text-[#6a767a]">Property, dates, room and dining preferences.</p>
+                <h2 className="font-display text-3xl">{copy.stepChoose}</h2>
+                <p className="mt-1 text-sm text-[#6a767a]">{copy.staySectionBody}</p>
               </div>
             </div>
 
             {!packageName && (
               <div className="grid gap-5 md:grid-cols-2">
                 <label className="premium-label">
-                  <span><Hotel className="h-4 w-4 text-[#9c7d3d]" /> Property</span>
+                  <span><Hotel className="h-4 w-4 text-[#9c7d3d]" /> {copy.property}</span>
                   <select value={propertyName} onChange={(event) => handlePropertyChange(event.target.value)} className="premium-control">
                     <option>Uhoo&apos;s Lavish Oasis</option>
                     <option>Masfalhi View Inn</option>
@@ -467,16 +486,16 @@ export default function BookingPageClientV2() {
                   </select>
                 </label>
                 <div className="premium-label">
-                  <span><MapPin className="h-4 w-4 text-[#9c7d3d]" /> Location</span>
+                  <span><MapPin className="h-4 w-4 text-[#9c7d3d]" /> {copy.location}</span>
                   <div className="premium-control flex items-center">{location}</div>
                 </div>
               </div>
             )}
 
             <div className="mt-5 grid gap-5 md:grid-cols-2">
-              <AvailabilityDatePicker allowUnavailable label="Check-in" value={checkIn} onChange={handleCheckIn} propertyName={propertyName} roomType={roomType} />
+              <AvailabilityDatePicker allowUnavailable label={copy.checkIn} value={checkIn} onChange={handleCheckIn} propertyName={propertyName} roomType={roomType} />
               <AvailabilityDatePicker
-                label="Check-out"
+                label={copy.checkOut}
                 value={checkOut}
                 onChange={setCheckOut}
                 propertyName={propertyName}
@@ -489,20 +508,20 @@ export default function BookingPageClientV2() {
 
             <div className="mt-5 grid gap-5 md:grid-cols-2">
               <label className="premium-label">
-                <span><BedDouble className="h-4 w-4 text-[#9c7d3d]" /> Room type</span>
+                <span><BedDouble className="h-4 w-4 text-[#9c7d3d]" /> {copy.roomType}</span>
                 <select value={roomType} onChange={(event) => handleRoomChange(event.target.value)} className="premium-control">
                   {roomOptions.map((room) => <option key={room.value} value={room.value}>{room.label}</option>)}
                 </select>
               </label>
               <label className="premium-label">
-                <span><Utensils className="h-4 w-4 text-[#9c7d3d]" /> Meal plan</span>
+                <span><Utensils className="h-4 w-4 text-[#9c7d3d]" /> {copy.mealPlan}</span>
                 <select
                   value={mealPlan}
                   disabled={!!packageName}
                   onChange={(event) => setMealPlan(event.target.value)}
                   className="premium-control disabled:opacity-60"
                 >
-                  {mealOptions.map((option) => <option key={option}>{option}</option>)}
+                  {mealOptions.map((option) => <option key={option} value={option}>{mealDisplay(option)}</option>)}
                 </select>
               </label>
             </div>
@@ -510,13 +529,13 @@ export default function BookingPageClientV2() {
             {!packageName && (
               <div className="mt-5 grid gap-5 md:grid-cols-2">
                 <label className="premium-label">
-                  <span><Users className="h-4 w-4 text-[#9c7d3d]" /> Adults</span>
+                  <span><Users className="h-4 w-4 text-[#9c7d3d]" /> {copy.adults}</span>
                   <select value={adults} onChange={(event) => setAdults(event.target.value)} className="premium-control">
                     {adultOptions.map((number) => <option key={number}>{number}</option>)}
                   </select>
                 </label>
                 <label className="premium-label">
-                  <span><Users className="h-4 w-4 text-[#9c7d3d]" /> Children</span>
+                  <span><Users className="h-4 w-4 text-[#9c7d3d]" /> {copy.children}</span>
                   <select value={children} onChange={(event) => setChildren(event.target.value)} className="premium-control">
                     {childOptions.map((number) => <option key={number}>{number}</option>)}
                   </select>
@@ -526,13 +545,13 @@ export default function BookingPageClientV2() {
 
             {isMasfalhi && (
               <div className="mt-5 border border-[#8ea99a]/45 bg-[#e5eee7] p-4 text-sm leading-6 text-[#40564a]">
-                <strong>Masfalhi room-category booking.</strong> Select the room type you prefer and Tripelor will assign an available room from that category after the live date check.
+                <strong>{copy.masfalhiTitle}</strong> {copy.masfalhiBody}
               </div>
             )}
 
             {isRivethi && (
               <div className="mt-5 border border-[#8ea99a]/45 bg-[#e5eee7] p-4 text-sm leading-6 text-[#40564a]">
-                <strong>Rivethi live booking is enabled.</strong> Tripelor checks the hotel&apos;s pooled inventory before final room-category confirmation.
+                <strong>{copy.rivethiTitle}</strong> {copy.rivethiBody}
               </div>
             )}
 
@@ -542,20 +561,20 @@ export default function BookingPageClientV2() {
               disabled={checking || !checkIn || !checkOut}
               className="btn-outline mt-6 border-[#8d7037] text-[#745b2e] disabled:opacity-45"
             >
-              <SearchCheck className="h-4 w-4" /> {checking ? "Checking Dates…" : "Check Live Availability"}
+              <SearchCheck className="h-4 w-4" /> {checking ? copy.checking : copy.checkAvailability}
             </button>
 
             {checkedSelection === selectionKey && availability?.available && availability.rooms_left === 1 && (
               <div className="mt-5 flex items-center gap-3 border border-[#b9964f]/45 bg-[#efe2c5] p-4 text-[#745b2e]">
-                <Flame className="h-5 w-5" /> <strong>Only one room remains in this category for these dates.</strong>
+                <Flame className="h-5 w-5" /> <strong>{copy.oneRoom}</strong>
               </div>
             )}
             {checkedSelection === selectionKey && availability && (
               <div className={`mt-5 flex items-center gap-3 border p-4 text-sm ${availability.available ? "border-[#8ea99a]/45 bg-[#e5eee7] text-[#40564a]" : "border-[#c69292]/45 bg-[#f2dfdc] text-[#744740]"}`}>
                 <CheckCircle2 className="h-5 w-5 shrink-0" />
                 {availability.available
-                  ? `${roomLabel} is available · ${availability.rooms_left ?? ""} room${availability.rooms_left === 1 ? "" : "s"} left for these dates.`
-                  : "Sold out for the selected dates."}
+                  ? `${roomLabel} ${copy.available} · ${availability.rooms_left ?? ""} ${availability.rooms_left === 1 ? copy.room : copy.rooms} ${copy.roomsLeft}`
+                  : copy.soldOut}
               </div>
             )}
             {checkedSelection === selectionKey && availability?.available === false && <AvailabilityAlertButton
@@ -567,34 +586,34 @@ export default function BookingPageClientV2() {
             <div className="mb-7 flex items-start gap-4">
               <span className="font-display text-2xl italic text-[#9c7d3d]">02</span>
               <div>
-                <h2 className="font-display text-3xl">Your details</h2>
-                <p className="mt-1 text-sm text-[#6a767a]">So your concierge can prepare the reservation correctly.</p>
+                <h2 className="font-display text-3xl">{copy.detailsTitle}</h2>
+                <p className="mt-1 text-sm text-[#6a767a]">{copy.detailsBody}</p>
               </div>
             </div>
 
             <div className="grid gap-5 md:grid-cols-3">
               <label className="premium-label">
-                <span>Full name</span>
-                <input value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Your full name" className="premium-control" />
+                <span>{copy.fullName}</span>
+                <input value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder={copy.fullNamePlaceholder} className="premium-control" />
               </label>
               <label className="premium-label">
-                <span>Email address</span>
+                <span>{copy.email}</span>
                 <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@email.com" type="email" className="premium-control" />
               </label>
               <label className="premium-label">
-                <span>Phone / WhatsApp</span>
-                <input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Include country code" className="premium-control" />
+                <span>{copy.phone}</span>
+                <input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder={copy.phonePlaceholder} className="premium-control" />
               </label>
             </div>
 
             {!packageName && (
               <label className="premium-label mt-5">
-                <span>Personal requests</span>
+                <span>{copy.requests}</span>
                 <textarea
                   value={specialRequests}
                   onChange={(event) => setSpecialRequests(event.target.value)}
                   rows={4}
-                  placeholder="Airport transfer, honeymoon setup, extra bed or anything we should arrange"
+                  placeholder={copy.requestsPlaceholder}
                   className="premium-control resize-y"
                 />
               </label>
@@ -606,7 +625,7 @@ export default function BookingPageClientV2() {
 
         <aside className="border border-[#c9a86a]/35 bg-[#071922] p-7 text-white shadow-2xl lg:sticky lg:top-24">
           <div className="flex items-center justify-between gap-4">
-            <p className="eyebrow">Your journey</p>
+            <p className="eyebrow">{copy.journey}</p>
             <Sparkles className="h-5 w-5 text-[#d9bd7b]" />
           </div>
           <h2 className="font-display mt-4 text-3xl leading-tight">{packageName || propertyName}</h2>
@@ -615,30 +634,30 @@ export default function BookingPageClientV2() {
           </p>
 
           <div className="mt-7 space-y-3 border-y border-white/10 py-6 text-sm text-white/60">
-            <p className="flex items-center justify-between gap-4"><span>Room type</span><strong className="text-right text-white">{roomLabel}</strong></p>
-            <p className="flex items-center justify-between gap-4"><span>Stay</span><strong className="text-white">{nights ? `${nights} night${nights === 1 ? "" : "s"}` : "Select dates"}</strong></p>
-            <p className="flex items-center justify-between gap-4"><span>Dining</span><strong className="text-right text-white">{mealPlan}</strong></p>
-            {nightlyRate > 0 && <p className="flex items-center justify-between gap-4"><span>Nightly rate</span><strong className="text-white">USD {nightlyRate}</strong></p>}
-            {activeSeason && <p className="flex items-center justify-between gap-4"><span>Rate period</span><strong className="text-right text-[#d9bd7b]">{activeSeason.name}</strong></p>}
+            <p className="flex items-center justify-between gap-4"><span>{copy.roomType}</span><strong className="text-right text-white">{roomLabel}</strong></p>
+            <p className="flex items-center justify-between gap-4"><span>{copy.stay}</span><strong className="text-white">{nights ? `${nights} ${nights === 1 ? copy.night : copy.nights}` : copy.selectDates}</strong></p>
+            <p className="flex items-center justify-between gap-4"><span>{copy.dining}</span><strong className="text-right text-white">{mealDisplay(mealPlan)}</strong></p>
+            {nightlyRate > 0 && <p className="flex items-center justify-between gap-4"><span>{copy.nightlyRate}</span><strong className="text-white">USD {nightlyRate}</strong></p>}
+            {activeSeason && <p className="flex items-center justify-between gap-4"><span>{copy.ratePeriod}</span><strong className="text-right text-[#d9bd7b]">{activeSeason.name}</strong></p>}
           </div>
 
           <div className="py-6">
-            <p className="text-[10px] uppercase tracking-[.2em] text-white/35">Estimated total</p>
+            <p className="text-[10px] uppercase tracking-[.2em] text-white/35">{copy.estimatedTotal}</p>
             <p className="font-display mt-2 text-5xl text-[#d9bd7b]">USD {estimatedTotal || 0}</p>
             {speedboatSeats > 0 && (
               <p className="mt-3 flex items-center gap-2 text-xs text-white/45">
-                <Ship className="h-4 w-4 text-[#c9a86a]" /> {speedboatSeats} speedboat seat(s) included
+                <Ship className="h-4 w-4 text-[#c9a86a]" /> {speedboatSeats} {copy.speedboatIncluded}
               </p>
             )}
           </div>
 
           <button type="button" onClick={sendBooking} disabled={sending} className="btn-gold w-full disabled:opacity-60">
-            {sending ? "Preparing Request…" : "Request My Stay"} <ArrowRight className="h-4 w-4" />
+            {sending ? copy.preparing : copy.requestStay} <ArrowRight className="h-4 w-4" />
           </button>
 
           <div className="mt-6 space-y-4 border-t border-white/10 pt-6 text-xs leading-5 text-white/40">
-            <p className="flex gap-3"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#c9a86a]" /> No automatic charge is taken. Confirmation and payment instructions follow after review.</p>
-            <p className="flex gap-3"><Headphones className="mt-0.5 h-4 w-4 shrink-0 text-[#c9a86a]" /> Need help? WhatsApp your Tripelor concierge on +960 942 9403.</p>
+            <p className="flex gap-3"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#c9a86a]" /> {copy.noCharge}</p>
+            <p className="flex gap-3"><Headphones className="mt-0.5 h-4 w-4 shrink-0 text-[#c9a86a]" /> {copy.needHelp}</p>
           </div>
         </aside>
       </div>
