@@ -123,3 +123,39 @@ export function localizePackages(items: StayPackage[], locale: ProfessionalLocal
     return { ...pkg, ...localized };
   });
 }
+
+
+export function localizedVaavuBlue(locale: ProfessionalLocale) {
+  if (locale === "it") return {
+    description: "Scopri Vaavu sopra e sotto la superficie: Shark Bay, un relitto, tartarughe, delfini e vita sulle isole locali, con pranzo incluso.",
+    inclusions: ["Snorkeling a Shark Bay", "Avvistamento delfini", "Pranzo", "Snorkeling sul relitto", "Avvistamento tartarughe", "Island hopping a Thinadhoo o Keyodhoo"],
+  };
+  if (locale === "ru") return {
+    description: "Откройте Вааву над водой и под ней: Shark Bay, затонувшее судно, черепахи, дельфины и жизнь локальных островов. Обед включён.",
+    inclusions: ["Снорклинг в Shark Bay", "Наблюдение за дельфинами", "Обед", "Снорклинг у затонувшего судна", "Наблюдение за черепахами", "Поездка на Thinadhoo или Keyodhoo"],
+  };
+  return null;
+}
+
+const vaavuExcursionsIt: Record<string, {name:string;duration?:string;highlights:string[]}> = {
+  "two-point-snorkeling": { name: "Snorkeling in due punti", highlights: ["Snorkeling in due spot differenti"] },
+  "two-point-snorkeling-sandbank": { name: "Snorkeling in due punti & banco di sabbia", highlights: ["Snorkeling in due spot differenti", "Visita a un banco di sabbia", "Possibilità di avvistare delfini"] },
+  "turtle-shark-reef-snorkeling": { name: "Snorkeling con tartarughe, squali & barriera", highlights: ["Snorkeling con tartarughe e squali", "Snorkeling sulla barriera", "Possibilità di avvistare delfini"] },
+  "guided-house-reef-snorkeling": { name: "Snorkeling guidato sulla house reef", highlights: ["Snorkeling sulla house reef", "Guida inclusa"] },
+  "night-fishing": { name: "Pesca notturna", duration: "2 ore", highlights: ["Esperienza di pesca notturna"] },
+  "night-fishing-live-bbq": { name: "Pesca notturna con BBQ", highlights: ["Esperienza di pesca notturna", "BBQ preparato al momento"] },
+};
+const vaavuExcursionsRu: Record<string, {name:string;duration?:string;highlights:string[]}> = {
+  "two-point-snorkeling": { name: "Снорклинг в двух точках", highlights: ["Снорклинг в двух разных местах"] },
+  "two-point-snorkeling-sandbank": { name: "Снорклинг в двух точках и песчаная отмель", highlights: ["Снорклинг в двух разных местах", "Посещение песчаной отмели", "Возможность увидеть дельфинов"] },
+  "turtle-shark-reef-snorkeling": { name: "Черепахи, акулы и риф", highlights: ["Снорклинг с черепахами и акулами", "Снорклинг на рифе", "Возможность увидеть дельфинов"] },
+  "guided-house-reef-snorkeling": { name: "Снорклинг на домашнем рифе с гидом", highlights: ["Снорклинг на домашнем рифе", "Гид включён"] },
+  "night-fishing": { name: "Ночная рыбалка", duration: "2 часа", highlights: ["Ночная рыбалка"] },
+  "night-fishing-live-bbq": { name: "Ночная рыбалка с BBQ", highlights: ["Ночная рыбалка", "BBQ на месте"] },
+};
+
+export function localizedVaavuExcursion(slug: string, locale: ProfessionalLocale) {
+  if (locale === "it") return vaavuExcursionsIt[slug] || null;
+  if (locale === "ru") return vaavuExcursionsRu[slug] || null;
+  return null;
+}
