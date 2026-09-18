@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useSiteLanguage } from "@/components/use-site-language";
 
 const iso = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-const pretty = (value: string) =>
+const pretty = (value: string, locale: string, empty: string) =>
   value
-    ? new Date(`${value}T00:00:00`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
-    : "Select date";
+    ? new Date(`${value}T00:00:00`).toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" })
+    : empty;
 
 export default function AvailabilityDatePicker({
   label,
@@ -29,6 +30,13 @@ export default function AvailabilityDatePicker({
   disabled?: boolean;
   allowUnavailable?: boolean;
 }) {
+  const siteLocale = useSiteLanguage();
+  const locale = siteLocale === "it" ? "it-IT" : siteLocale === "ru" ? "ru-RU" : "en-GB";
+  const copy = siteLocale === "it"
+    ? { select: "Seleziona una data", close: "Chiudi calendario", prev: "Mese precedente", next: "Mese successivo", available: "Disponibile", booked: "Occupato", past: "Passato", alert: "Puoi selezionare date occupate per richiedere un avviso di disponibilità." }
+    : siteLocale === "ru"
+      ? { select: "Выберите дату", close: "Закрыть календарь", prev: "Предыдущий месяц", next: "Следующий месяц", available: "Свободно", booked: "Занято", past: "Прошедшая дата", alert: "Можно выбрать занятые даты и запросить уведомление о появлении мест." }
+      : { select: "Select date", close: "Close calendar", prev: "Previous month", next: "Next month", available: "Available", booked: "Booked", past: "Past", alert: "{copy.alert}" };
   const [open, setOpen] = useState(false);
   const initial = value ? new Date(`${value}T00:00:00`) : new Date();
   const [month, setMonth] = useState(() => new Date(initial.getFullYear(), initial.getMonth(), 1));
@@ -83,7 +91,7 @@ export default function AvailabilityDatePicker({
         onClick={() => setOpen(true)}
         className="premium-control flex items-center justify-between text-left disabled:opacity-60"
       >
-        <span className={value ? "text-[#071922]" : "text-[#879094]"}>{pretty(value)}</span>
+        <span className={value ? "text-[#071922]" : "text-[#879094]"}>{pretty(value, locale, copy.select)}</span>
         <CalendarDays className="h-4 w-4 text-[#9c7d3d]" />
       </button>
 
@@ -95,25 +103,25 @@ export default function AvailabilityDatePicker({
                 <p className="eyebrow">{month.getFullYear()}</p>
                 <p className="font-display mt-2 text-3xl">
                   {value
-                    ? new Date(`${value}T00:00:00`).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" })
+                    ? new Date(`${value}T00:00:00`).toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" })
                     : label}
                 </p>
                 <p className="mt-2 text-xs uppercase tracking-[.14em] text-white/40">{roomType}</p>
               </div>
-              <button type="button" onClick={() => setOpen(false)} className="border border-white/10 p-2 text-white/70 transition hover:border-[#c9a86a]/40 hover:text-white" aria-label="Close calendar">
+              <button type="button" onClick={() => setOpen(false)} className="border border-white/10 p-2 text-white/70 transition hover:border-[#c9a86a]/40 hover:text-white" aria-label={copy.close}>
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="p-5 md:p-6">
               <div className="flex items-center justify-between">
-                <button type="button" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="border border-white/10 p-2 transition hover:border-[#c9a86a]/40" aria-label="Previous month">
+                <button type="button" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="border border-white/10 p-2 transition hover:border-[#c9a86a]/40" aria-label={copy.prev}>
                   <ChevronLeft />
                 </button>
                 <strong className="font-display text-xl font-normal">
-                  {month.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                  {month.toLocaleDateString(locale, { month: "long", year: "numeric" })}
                 </strong>
-                <button type="button" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="border border-white/10 p-2 transition hover:border-[#c9a86a]/40" aria-label="Next month">
+                <button type="button" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="border border-white/10 p-2 transition hover:border-[#c9a86a]/40" aria-label={copy.next}>
                   <ChevronRight />
                 </button>
               </div>
@@ -151,9 +159,9 @@ export default function AvailabilityDatePicker({
               </div>
 
               <div className="mt-6 flex flex-wrap justify-center gap-5 border-t border-white/10 pt-5 text-[10px] uppercase tracking-[.12em] text-white/40">
-                <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 bg-[#c9a86a]" /> Available</span>
-                <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 bg-red-400/60" /> Booked</span>
-                <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 bg-white/15" /> Past</span>
+                <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 bg-[#c9a86a]" /> {copy.available}</span>
+                <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 bg-red-400/60" /> {copy.booked}</span>
+                <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 bg-white/15" /> {copy.past}</span>
               </div>
               {allowUnavailable && <p className="mt-4 text-center text-xs leading-5 text-white/60">You can select booked dates to request an availability alert.</p>}
             </div>
