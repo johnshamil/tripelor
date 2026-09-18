@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { ArrowRight, CheckCircle2, Compass, FileText, MapPin } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
@@ -18,7 +17,6 @@ type Receipt = { bookingReference: string; total: number };
 
 export default function CartCheckout() {
   const { lines, ready, storageNotice, complete } = useCart();
-  const searchParams = useSearchParams();
   const locale = useSiteLanguage();
   const quoteCopy = locale === "it"
     ? {
@@ -48,6 +46,7 @@ export default function CartCheckout() {
   const [error, setError] = useState("");
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [view, setView] = useState<"explore" | "plan">("explore");
+  const [loadedQuote, setLoadedQuote] = useState("");
   const viewNavigation = useRef<HTMLDivElement>(null);
   const receiptHeading = useRef<HTMLHeadingElement>(null);
   const attempt = useRef<{ signature: string; key: string } | null>(null);
@@ -68,8 +67,11 @@ export default function CartCheckout() {
   }, []);
   useEffect(() => { if (receipt) receiptHeading.current?.focus(); }, [receipt]);
   useEffect(() => {
-    if (searchParams.get("view") === "plan" || searchParams.get("quote")) setView("plan");
-  }, [searchParams]);
+    const params = new URLSearchParams(window.location.search);
+    const quote = params.get("quote") || "";
+    if (params.get("view") === "plan" || quote) setView("plan");
+    if (quote) setLoadedQuote(quote);
+  }, []);
 
   function createQuote() {
     setError("");
@@ -153,7 +155,7 @@ export default function CartCheckout() {
         <h2 className="font-display mt-4 text-3xl">Let’s plan your escape</h2>
         <p className="mt-4 text-sm leading-6 text-gray-300">Tell us when you’d like to travel. We’ll help bring your chosen experiences together.</p>
         <div className="mt-6 border-y border-gold/20 py-5"><span className="text-xs uppercase tracking-[.18em] text-gray-300">Your trip estimate</span><strong className="font-display mt-2 block text-4xl text-gold">{usd(total)}</strong><p className="mt-2 text-xs leading-5 text-gray-400">Based on your selected guests and stays. Any separate transfers and final inclusions will be confirmed with you.</p></div>
-        {searchParams.get("quote") && <p className="mt-4 rounded-xl border border-gold/25 bg-gold/5 p-3 text-xs text-gold">{quoteCopy.loaded} · {searchParams.get("quote")}</p>}
+        {loadedQuote && <p className="mt-4 rounded-xl border border-gold/25 bg-gold/5 p-3 text-xs text-gold">{quoteCopy.loaded} · {loadedQuote}</p>}
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[.035] p-4">
           <p className="flex items-center gap-2 text-sm font-semibold text-white"><FileText className="h-4 w-4 text-gold" /> {quoteCopy.creating}</p>
           <p className="mt-2 text-xs leading-5 text-gray-400">{quoteCopy.helper}</p>
