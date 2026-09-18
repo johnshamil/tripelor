@@ -50,8 +50,8 @@ export function quoteStatus(issued: number, now = Date.now()) {
   return { expired: now > expiresAt, expiresAt };
 }
 
-export function quoteFromLines(lines: CartLine[]) {
-  return quoteCart(lines);
+export function quoteFromLines(lines: CartLine[], today?: string) {
+  return quoteCart(lines, today);
 }
 
 export function buildQuoteHref(reference: string, lines: CartLine[], issued = Date.now()) {
