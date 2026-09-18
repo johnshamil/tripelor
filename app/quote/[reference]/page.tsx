@@ -23,7 +23,16 @@ export default function QuotePage({
   searchParams,
 }: {
   params: { reference: string };
-  searchParams?: { issued?: string; item?: string | string[] };
+  searchParams?: {
+    issued?: string;
+    item?: string | string[];
+    room?: string;
+    meal?: string;
+    transferSeats?: string;
+    transferTotal?: string;
+    request?: string;
+    customize?: string;
+  };
 }) {
   const locale = professionalLocale(cookies().get("tripelor_lang")?.value);
   const copy = locale === "it"
@@ -56,6 +65,11 @@ export default function QuotePage({
         invalidBody: "Il link potrebbe essere incompleto o non più valido.",
         back: "Torna al mio viaggio",
         kinds: { stay: "soggiorno", package: "pacchetto", excursion: "escursione" },
+        tripDetails: "Dettagli del viaggio",
+        room: "Camera",
+        meal: "Piano pasti",
+        transfer: "Trasferimento",
+        speedboatSeats: "posti in motoscafo",
       }
     : locale === "ru"
       ? {
@@ -87,6 +101,11 @@ export default function QuotePage({
           invalidBody: "Ссылка может быть неполной или уже недействительной.",
           back: "Вернуться к моей поездке",
           kinds: { stay: "проживание", package: "пакет", excursion: "экскурсия" },
+          tripDetails: "Детали поездки",
+          room: "Номер",
+          meal: "План питания",
+          transfer: "Трансфер",
+          speedboatSeats: "мест(а) на скоростном катере",
         }
       : {
           eyebrow: "Tripelor private travel proposal",
@@ -117,6 +136,11 @@ export default function QuotePage({
           invalidBody: "The quote link may be incomplete or no longer valid.",
           back: "Back to My Trip",
           kinds: { stay: "stay", package: "package", excursion: "excursion" },
+          tripDetails: "Trip details",
+          room: "Room",
+          meal: "Meal plan",
+          transfer: "Transfer",
+          speedboatSeats: "speedboat seat(s)",
         };
 
   let lines: CartLine[] = [];
@@ -161,6 +185,19 @@ export default function QuotePage({
   }
 
   const displayItems = quote.items.map(item => localizeQuotedLine(item, locale));
+  const room = typeof searchParams?.room === "string" && searchParams.room.length <= 100 ? searchParams.room : "";
+  const meal = typeof searchParams?.meal === "string" && searchParams.meal.length <= 100 ? searchParams.meal : "";
+  const transferSeatsValue = Number(searchParams?.transferSeats || 0);
+  const transferTotalValue = Number(searchParams?.transferTotal || 0);
+  const transferSeats = Number.isInteger(transferSeatsValue) && transferSeatsValue >= 0 && transferSeatsValue <= 20 ? transferSeatsValue : 0;
+  const transferTotal = Number.isFinite(transferTotalValue) && transferTotalValue >= 0 && transferTotalValue <= 10000 ? transferTotalValue : 0;
+  const requestHref = typeof searchParams?.request === "string" && searchParams.request.startsWith("/booking?") && searchParams.request.length <= 2500
+    ? searchParams.request
+    : undefined;
+  const customizeHref = typeof searchParams?.customize === "string" && searchParams.customize.startsWith("/build-your-trip") && searchParams.customize.length <= 500
+    ? searchParams.customize
+    : undefined;
+  const proposalTotal = quote.total + transferTotal;
 
   return (
     <main className="quote-page bg-[#f1ebdf] text-[#071922]">
@@ -254,11 +291,27 @@ export default function QuotePage({
           </div>
 
           <aside className="quote-print-card quote-dark border border-[#c9a86a]/40 bg-[#071922] p-6 text-white shadow-2xl lg:sticky lg:top-28 md:p-8">
+            {(room || meal || transferSeats > 0) && (
+              <div className="mb-6 border-b border-white/10 pb-6">
+                <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#d9bd7b]">{copy.tripDetails}</p>
+                <div className="mt-4 space-y-3 text-sm text-white/65">
+                  {room && <p className="flex justify-between gap-4"><span>{copy.room}</span><strong className="text-right text-white">{room}</strong></p>}
+                  {meal && <p className="flex justify-between gap-4"><span>{copy.meal}</span><strong className="text-right text-white">{meal}</strong></p>}
+                  {transferSeats > 0 && <p className="flex justify-between gap-4"><span>{copy.transfer}</span><strong className="text-right text-white">{transferSeats} {copy.speedboatSeats} · USD {transferTotal.toLocaleString("en-US")}</strong></p>}
+                </div>
+              </div>
+            )}
             <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#d9bd7b]">{copy.estimate}</p>
-            <p className="font-display mt-3 text-5xl text-[#ead7aa]">USD {quote.total.toLocaleString("en-US")}</p>
+            <p className="font-display mt-3 text-5xl text-[#ead7aa]">USD {proposalTotal.toLocaleString("en-US")}</p>
             <p className="mt-4 text-sm leading-6 text-white/50">{copy.validFor}</p>
 
-            <TripQuoteActions reference={params.reference} lines={lines} total={quote.total} />
+            <TripQuoteActions
+              reference={params.reference}
+              lines={lines}
+              total={proposalTotal}
+              requestHref={requestHref}
+              customizeHref={customizeHref}
+            />
 
             <div className="mt-8 border-t border-white/10 pt-6">
               <p className="flex items-center gap-2 text-sm font-semibold text-[#ead7aa]">
