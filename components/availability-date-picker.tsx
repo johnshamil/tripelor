@@ -37,6 +37,11 @@ export default function AvailabilityDatePicker({
     : siteLocale === "ru"
       ? { select: "Выберите дату", close: "Закрыть календарь", prev: "Предыдущий месяц", next: "Следующий месяц", available: "Свободно", booked: "Занято", past: "Прошедшая дата", alert: "Можно выбрать занятые даты и запросить уведомление о появлении мест." }
       : { select: "Select date", close: "Close calendar", prev: "Previous month", next: "Next month", available: "Available", booked: "Booked", past: "Past", alert: "You can select booked dates to request an availability alert." };
+  const weekdayLabels = siteLocale === "it"
+    ? ["D", "L", "M", "M", "G", "V", "S"]
+    : siteLocale === "ru"
+      ? ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"]
+      : ["S", "M", "T", "W", "T", "F", "S"];
   const [open, setOpen] = useState(false);
   const initial = value ? new Date(`${value}T00:00:00`) : new Date();
   const [month, setMonth] = useState(() => new Date(initial.getFullYear(), initial.getMonth(), 1));
@@ -127,7 +132,7 @@ export default function AvailabilityDatePicker({
               </div>
 
               <div className="mt-6 grid grid-cols-7 gap-1 text-center text-[10px] font-semibold uppercase tracking-[.14em] text-white/35">
-                {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => <span key={`${day}${index}`}>{day}</span>)}
+                {weekdayLabels.map((day, index) => <span key={`${day}${index}`}>{day}</span>)}
               </div>
               <div className="mt-3 grid grid-cols-7 gap-1">
                 {cells.map((date, index) => {
