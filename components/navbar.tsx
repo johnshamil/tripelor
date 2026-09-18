@@ -109,7 +109,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {!adminSurface && <Link href="/help-me-choose" onClick={() => setOpen(false)} className="flex min-h-[44px] items-center justify-center gap-2 border-t border-white/10 px-4 text-xs text-[#ead7aa] xl:hidden">{copy.unsure} <span className="font-semibold underline">Help Me Choose</span></Link>}
+      {!adminSurface && <Link href="/help-me-choose" onClick={() => setOpen(false)} className="flex min-h-[44px] items-center justify-center gap-2 border-t border-white/10 px-4 text-xs text-[#ead7aa] xl:hidden">{copy.unsure} <span className="font-semibold underline">{copy.helpMeChoose}</span></Link>}
 
       {open && (
         <div className="fixed inset-x-0 top-[64px] z-[100] h-[calc(100dvh-64px)] overflow-hidden border-t border-white/10 bg-[#041117] md:top-[76px] md:h-[calc(100dvh-76px)] xl:hidden">
