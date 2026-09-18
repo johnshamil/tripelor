@@ -185,6 +185,7 @@ export default function LanguageSwitcher({
   useEffect(() => {
     const code = savedLanguage();
     if (LANGUAGES.some((item) => item.code === code)) setLanguage(code);
+    document.documentElement.lang = code;
     if (code !== "it" && code !== "ru" && code !== "en") {
       loadGoogleTranslate().catch(() => {});
     }
@@ -199,6 +200,7 @@ export default function LanguageSwitcher({
     if (code === language || busy) return;
     setBusy(true);
     setLanguage(code);
+    document.documentElement.lang = code;
     setLanguageCookies(code);
 
     if (code === "en" || code === "it" || code === "ru") {
@@ -229,7 +231,7 @@ export default function LanguageSwitcher({
         "group relative inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/15 bg-white/[.04] text-white transition hover:border-[#d9bd7b]/45 hover:bg-white/[.07]",
         fullWidth ? "w-full px-4" : compact ? "px-3" : "px-3.5",
       ].join(" ")}
-      title="Choose your language"
+      title={language === "it" ? "Scegli la lingua" : language === "ru" ? "Выберите язык" : "Choose your language"}
     >
       <Globe2 className="h-4 w-4 shrink-0 text-[#d9bd7b]" aria-hidden="true" />
       <span className={compact ? "text-[11px] font-semibold" : "text-xs font-semibold"}>
@@ -239,7 +241,7 @@ export default function LanguageSwitcher({
         value={language}
         disabled={busy}
         onChange={(event) => changeLanguage(event.target.value)}
-        aria-label="Choose website language"
+        aria-label={language === "it" ? "Scegli la lingua del sito" : language === "ru" ? "Выберите язык сайта" : "Choose website language"}
         className={[
           "absolute inset-0 h-full w-full cursor-pointer opacity-0",
           busy ? "cursor-wait" : "",
