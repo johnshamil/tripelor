@@ -137,8 +137,8 @@ export default function UpcomingTripCountdown({trip, stage}: {trip: Trip; stage:
             <Link href="/account/pre-arrival" className="btn-outline justify-center gap-2 px-4 py-2 text-[10px]">
               <Headphones className="h-4 w-4" /> Pre-Arrival Concierge
             </Link>
-            <Link href="#my-bookings" className="inline-flex items-center justify-center gap-2 px-1 py-2 text-[10px] font-semibold uppercase tracking-[.15em] text-[#e3ca91] transition hover:text-white sm:col-span-2">
-              <CalendarDays className="h-4 w-4" /> Journey details
+            <Link href="/account/journey" className="inline-flex min-h-11 items-center justify-center gap-2 border border-[#e3ca91]/25 bg-[#e3ca91]/10 px-3 py-2 text-[10px] font-semibold uppercase tracking-[.15em] text-[#e3ca91] transition hover:border-[#e3ca91]/50 hover:bg-[#e3ca91]/15 hover:text-white sm:col-span-2">
+              <CalendarDays className="h-4 w-4" /> Open Journey Mode
             </Link>
           </div>
         </aside>
