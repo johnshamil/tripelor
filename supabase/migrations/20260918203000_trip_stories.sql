@@ -15,6 +15,9 @@ create table if not exists public.trip_stories (
   unique (share_token)
 );
 
+create index if not exists trip_stories_reservation_idx
+  on public.trip_stories(reservation_id);
+
 create index if not exists trip_stories_user_updated_idx
   on public.trip_stories(user_id, updated_at desc);
 
