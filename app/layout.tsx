@@ -6,6 +6,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import WhatsAppFloat from "@/components/whatsapp-float";
 import SmoothExperience from "@/components/smooth-experience";
+import AnalyticsTracker from "@/components/analytics-tracker";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tripelor.com"),
@@ -94,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main><SmoothExperience>{children}</SmoothExperience></main>
         <Footer />
         <WhatsAppFloat />
+        <AnalyticsTracker />
         </CartProvider>
       </body>
     </html>

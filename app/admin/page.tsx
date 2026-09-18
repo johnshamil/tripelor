@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
+  BarChart3,
   Building2,
   CheckCircle2,
   CircleDollarSign,
@@ -187,6 +188,9 @@ export default function AdminPage() {
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
             <Link href="/admin/sales" className="btn-gold min-h-[46px] gap-2 px-4 text-xs">
               <CircleDollarSign className="h-4 w-4" /> Sales
+            </Link>
+            <Link href="/admin/analytics" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
+              <BarChart3 className="h-4 w-4" /> Analytics
             </Link>
             <Link href="/admin/room-calendar" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
               <CalendarDays className="h-4 w-4" /> Calendar
