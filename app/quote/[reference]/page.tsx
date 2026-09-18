@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import TripQuoteActions from "@/components/trip-quote-actions";
 import { professionalLocale } from "@/lib/professional-translations";
 import { decodeQuoteLines, quoteFromLines, quoteIssuedAt, quoteStatus, validQuoteReference, QUOTE_VALID_HOURS } from "@/lib/trip-quote";
+import type { CartLine } from "@/lib/trip-cart";
 
 export const dynamic = "force-dynamic";
 
@@ -114,8 +115,8 @@ export default function QuotePage({
           back: "Back to My Trip",
         };
 
-  let lines;
-  let quote;
+  let lines: CartLine[] = [];
+  let quote: ReturnType<typeof quoteFromLines>;
   let issued = 0;
   let expiresAt = 0;
 
