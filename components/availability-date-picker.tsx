@@ -36,7 +36,7 @@ export default function AvailabilityDatePicker({
     ? { select: "Seleziona una data", close: "Chiudi calendario", prev: "Mese precedente", next: "Mese successivo", available: "Disponibile", booked: "Occupato", past: "Passato", alert: "Puoi selezionare date occupate per richiedere un avviso di disponibilità." }
     : siteLocale === "ru"
       ? { select: "Выберите дату", close: "Закрыть календарь", prev: "Предыдущий месяц", next: "Следующий месяц", available: "Свободно", booked: "Занято", past: "Прошедшая дата", alert: "Можно выбрать занятые даты и запросить уведомление о появлении мест." }
-      : { select: "Select date", close: "Close calendar", prev: "Previous month", next: "Next month", available: "Available", booked: "Booked", past: "Past", alert: "{copy.alert}" };
+      : { select: "Select date", close: "Close calendar", prev: "Previous month", next: "Next month", available: "Available", booked: "Booked", past: "Past", alert: "You can select booked dates to request an availability alert." };
   const [open, setOpen] = useState(false);
   const initial = value ? new Date(`${value}T00:00:00`) : new Date();
   const [month, setMonth] = useState(() => new Date(initial.getFullYear(), initial.getMonth(), 1));
@@ -163,7 +163,7 @@ export default function AvailabilityDatePicker({
                 <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 bg-red-400/60" /> {copy.booked}</span>
                 <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 bg-white/15" /> {copy.past}</span>
               </div>
-              {allowUnavailable && <p className="mt-4 text-center text-xs leading-5 text-white/60">You can select booked dates to request an availability alert.</p>}
+              {allowUnavailable && <p className="mt-4 text-center text-xs leading-5 text-white/60">{copy.alert}</p>}
             </div>
           </div>
         </div>
