@@ -5,6 +5,7 @@ import TripQuoteActions from "@/components/trip-quote-actions";
 import { professionalLocale } from "@/lib/professional-translations";
 import { decodeQuoteLines, quoteFromLines, quoteIssuedAt, quoteStatus, validQuoteReference, QUOTE_VALID_HOURS } from "@/lib/trip-quote";
 import type { CartLine } from "@/lib/trip-cart";
+import { localizeQuotedLine } from "@/lib/quote-display";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +55,7 @@ export default function QuotePage({
         invalidTitle: "Impossibile aprire questa proposta.",
         invalidBody: "Il link potrebbe essere incompleto o non più valido.",
         back: "Torna al mio viaggio",
+        kinds: { stay: "soggiorno", package: "pacchetto", excursion: "escursione" },
       }
     : locale === "ru"
       ? {
@@ -84,6 +86,7 @@ export default function QuotePage({
           invalidTitle: "Не удалось открыть предложение.",
           invalidBody: "Ссылка может быть неполной или уже недействительной.",
           back: "Вернуться к моей поездке",
+          kinds: { stay: "проживание", package: "пакет", excursion: "экскурсия" },
         }
       : {
           eyebrow: "Tripelor private travel proposal",
@@ -113,6 +116,7 @@ export default function QuotePage({
           invalidTitle: "We couldn’t open this quote.",
           invalidBody: "The quote link may be incomplete or no longer valid.",
           back: "Back to My Trip",
+          kinds: { stay: "stay", package: "package", excursion: "excursion" },
         };
 
   let lines: CartLine[] = [];
@@ -155,6 +159,8 @@ export default function QuotePage({
       </main>
     );
   }
+
+  const displayItems = quote.items.map(item => localizeQuotedLine(item, locale));
 
   return (
     <main className="quote-page bg-[#f1ebdf] text-[#071922]">
@@ -202,7 +208,7 @@ export default function QuotePage({
       <section className="container py-10 pb-24 md:py-16">
         <div className="grid gap-8 lg:grid-cols-[1.25fr_.75fr] lg:items-start">
           <div className="space-y-5">
-            {quote.items.map((item, index) => {
+            {displayItems.map((item, index) => {
               const quantityLabel = item.unit === "couple"
                 ? item.quantity === 1 ? copy.couple : copy.couples
                 : item.quantity === 1 ? copy.guest : copy.guests;
@@ -212,7 +218,7 @@ export default function QuotePage({
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#8d7037]">
-                        {String(index + 1).padStart(2, "0")} · {item.kind}
+                        {String(index + 1).padStart(2, "0")} · {copy.kinds[item.kind]}
                       </p>
                       <h2 className="font-display mt-2 text-3xl">{item.name}</h2>
                     </div>
