@@ -10,10 +10,14 @@ export default function TripQuoteActions({
   reference,
   lines,
   total,
+  requestHref,
+  customizeHref,
 }: {
   reference: string;
   lines: CartLine[];
   total: number;
+  requestHref?: string;
+  customizeHref?: string;
 }) {
   const locale = useSiteLanguage();
   const [copied, setCopied] = useState(false);
@@ -96,11 +100,19 @@ export default function TripQuoteActions({
   }
 
   function customize() {
+    if (customizeHref && customizeHref.startsWith("/")) {
+      window.location.href = customizeHref;
+      return;
+    }
     savePlan();
     window.location.href = "/my-trip?view=plan";
   }
 
   function requestTrip() {
+    if (requestHref && requestHref.startsWith("/booking?")) {
+      window.location.href = requestHref;
+      return;
+    }
     savePlan();
     window.location.href = `/my-trip?view=plan&quote=${encodeURIComponent(reference)}#request-trip`;
   }
