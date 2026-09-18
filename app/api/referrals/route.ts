@@ -13,7 +13,7 @@ export async function GET(req:Request){
  await fetch(`${url}/rest/v1/referral_codes?on_conflict=owner_email`,{method:"POST",headers:{...headers,Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({code,owner_email:email})});
  const r=await fetch(`${url}/rest/v1/referrals?select=status,reward_points,discount_usd,created_at&code=eq.${encodeURIComponent(code)}&order=created_at.desc`,{headers:{apikey:key,Authorization:`Bearer ${key}`},cache:"no-store"});
  const refs=r.ok?await r.json():[];
- return Response.json({code,discountUsd:20,rewardPoints:200,referrals:refs});
+ return Response.json({code,discountUsd:20,rewardPoints:100,referrals:refs});
 }
 
 export async function POST(req:Request){
@@ -23,5 +23,5 @@ export async function POST(req:Request){
  const r=await fetch(`${url}/rest/v1/referral_codes?select=code,owner_email&code=eq.${encodeURIComponent(code)}&limit=1`,{headers:{apikey:key,Authorization:`Bearer ${key}`},cache:"no-store"});
  const rows=r.ok?await r.json():[];
  if(!rows.length)return Response.json({valid:false,error:"Referral code not found."},{status:404});
- return Response.json({valid:true,code,discountUsd:20,rewardPoints:200});
+ return Response.json({valid:true,code,discountUsd:20,rewardPoints:100});
 }

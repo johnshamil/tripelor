@@ -15,6 +15,7 @@ import {
 import SaveTripButton from "@/components/save-trip-button";
 import { propertyPhotoUrl } from "@/lib/property-model";
 import RewardsChecker from "@/components/rewards-checker";
+import HomeReferralRewards from "@/components/home-referral-rewards";
 import SmartOffers from "@/components/smart-offers";
 import PropertyCards from "@/components/room-first-booking-cards";
 import { publishedProperties } from "@/lib/property-store";
@@ -90,6 +91,7 @@ export default async function Home() {
 
   return (
     <>
+      <HomeReferralRewards />
       <section className="luxury-hero">
         <img
           src="/properties/rivethi-beach-hotel/1719713475.jpeg"
