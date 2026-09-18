@@ -6,6 +6,7 @@ import { professionalLocale } from "@/lib/professional-translations";
 import { publicStoryByToken } from "@/lib/trip-story-server";
 
 export const dynamic = "force-dynamic";
+export const metadata = { robots: { index: false, follow: true } };
 
 const badgeMeta: Record<string, [string, string]> = {
   "first-turtle": ["🐢", "First Turtle"],
