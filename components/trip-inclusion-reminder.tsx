@@ -31,7 +31,7 @@ export default function TripInclusionReminder({ productId, onReview }: { product
           title: "Already listed in your package",
           includes: "includes",
           other: (count: number) => `${count} other selected packages also list similar activities.`,
-          note: "{copy.note}",
+          note: "Exact outings and participants may differ. Keep this for an extra outing or additional guests; our team will confirm the details.",
           review: "Review my selections →",
         };
   const { lines } = useCart();
@@ -41,7 +41,7 @@ export default function TripInclusionReminder({ productId, onReview }: { product
     <p className="flex items-start gap-2 font-semibold text-gold"><Info aria-hidden="true" className="mt-1 h-4 w-4 shrink-0" />{copy.title}</p>
     <ul className="mt-2 space-y-2">{overlaps.slice(0, 2).map(overlap => <li key={overlap.productId}><strong className="font-medium text-white">{overlap.packageName}</strong> {copy.includes} {overlap.activities.join(", ")}.</li>)}</ul>
     {overlaps.length > 2 && <p className="mt-2">{copy.other(overlaps.length - 2)}</p>}
-    <p className="mt-2">Exact outings and participants may differ. Keep this for an extra outing or additional guests; our team will confirm the details.</p>
+    <p className="mt-2">{copy.note}</p>
     {onReview && <button type="button" onClick={onReview} className="mt-1 min-h-11 text-left font-semibold text-gold">{copy.review}</button>}
   </aside>;
 }
