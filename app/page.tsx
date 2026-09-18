@@ -20,6 +20,8 @@ import SmartOffers from "@/components/smart-offers";
 import PropertyCards from "@/components/room-first-booking-cards";
 import { publishedProperties } from "@/lib/property-store";
 import { VAAVU_BLUE_ESCAPE } from "@/lib/vaavu-blue-escape";
+import { cookies } from "next/headers";
+import { professionalLocale, translations } from "@/lib/professional-translations";
 
 const escapes = [
   {
@@ -81,6 +83,8 @@ async function getReviews(): Promise<Review[]> {
 }
 
 export default async function Home() {
+  const locale = professionalLocale(cookies().get("tripelor_lang")?.value);
+  const copy = translations[locale].home;
   const [reviews, managedProperties] = await Promise.all([getReviews(), publishedProperties()]);
   const experiences = managedProperties
     .filter(property => property.status === "published")
@@ -88,10 +92,21 @@ export default async function Home() {
       .filter(item => item.enabled && item.photos.length > 0)
       .map(item => ({ item, propertyName: property.name, island: property.island, slug: property.slug })));
 
+  const localizedEscapes = [
+    { ...escapes[0], title: copy.escape3Title, label: copy.escape3Label, badge: copy.escape3Badge, text: copy.escape3Body },
+    { ...escapes[1], title: copy.escape5Title, label: copy.escape5Label, badge: copy.escape5Badge, text: copy.escape5Body },
+    {
+      ...escapes[2],
+      label: copy.vaavuLabel,
+      badge: `USD ${VAAVU_BLUE_ESCAPE.price} ${copy.perPerson}`,
+      text: copy.vaavuBody,
+    },
+  ];
+
 
   return (
     <>
-      <HomeReferralRewards />
+      <HomeReferralRewards locale={locale} />
       <section className="luxury-hero">
         <img
           src="/properties/rivethi-beach-hotel/1719713475.jpeg"
@@ -103,46 +118,45 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#021016]/90 via-[#021016]/60 to-[#021016]/25" />
         <div className="container relative z-10 grid min-h-[76svh] items-center gap-12 py-16 md:py-24 lg:grid-cols-[1fr_320px]">
           <div className="max-w-4xl">
-            <p className="eyebrow text-[#ead7aa]">Maldives, planned with care</p>
+            <p className="eyebrow text-[#ead7aa]">{copy.heroEyebrow}</p>
             <h1 className="font-display mt-6 max-w-4xl text-[2.8rem] leading-[1.05] text-white sm:text-6xl md:text-7xl lg:text-[5.5rem]">
-              Your Maldives island escape
-              <span className="block italic text-[#ead7aa]">starts here.</span>
+              {copy.heroTitle1}
+              <span className="block italic text-[#ead7aa]">{copy.heroTitle2}</span>
             </h1>
             <p className="mt-7 max-w-2xl text-base leading-8 text-white/75 md:text-lg">
-              Find your island home, discover ocean experiences and arrange your
-              transfers with a Maldives team who helps you bring it all together.
+              {copy.heroBody}
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link href="#properties" className="btn-gold w-full sm:w-auto">
-                Explore Stays <ArrowRight className="h-4 w-4" />
+                {copy.exploreStays} <ArrowRight className="h-4 w-4" />
               </Link>
               <Link href="/speedboat" className="btn-outline w-full border-white/40 bg-black/20 text-white sm:w-auto">
-                <Ship className="h-4 w-4" /> Find Transfers
+                <Ship className="h-4 w-4" /> {copy.findTransfers}
               </Link>
             </div>
-            <Link href="/help-me-choose" className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-sm text-[#ead7aa] underline">Not sure where to start? Help Me Choose <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/help-me-choose" className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-sm text-[#ead7aa] underline">{copy.unsure} <ArrowRight className="h-4 w-4" /></Link>
             <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-white/65">
               <span className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-[#d9bd7b]" /> Transparent pricing
+                <ShieldCheck className="h-4 w-4 text-[#d9bd7b]" /> {copy.transparentPricing}
               </span>
               <span className="flex items-center gap-2">
-                <Hotel className="h-4 w-4 text-[#d9bd7b]" /> Rooms & meal plans
+                <Hotel className="h-4 w-4 text-[#d9bd7b]" /> {copy.roomsMeals}
               </span>
               <span className="flex items-center gap-2">
-                <Headphones className="h-4 w-4 text-[#d9bd7b]" /> Local support
+                <Headphones className="h-4 w-4 text-[#d9bd7b]" /> {copy.localSupport}
               </span>
             </div>
           </div>
 
           <aside className="hidden border-l border-white/20 pl-8 text-white lg:block">
             <p className="text-xs uppercase tracking-[.3em] text-[#d9bd7b]">
-              The Tripelor way
+              {copy.tripelorWay}
             </p>
             <div className="mt-7 space-y-7">
               {[
-                ["01", "Choose a stay", "Compare selected Maldives properties."],
-                ["02", "Add experiences", "Shape each day around your pace."],
-                ["03", "Arrange arrival", "Bring rooms and transfers together."],
+                ["01", copy.step1Title, copy.step1Body],
+                ["02", copy.step2Title, copy.step2Body],
+                ["03", copy.step3Title, copy.step3Body],
               ].map(([number, title, text]) => (
                 <div key={number} className="grid grid-cols-[34px_1fr] gap-3">
                   <span className="font-display text-xl italic text-[#d9bd7b]">{number}</span>
@@ -156,44 +170,44 @@ export default async function Home() {
           </aside>
         </div>
         <div className="absolute bottom-8 right-6 hidden rotate-90 text-[10px] uppercase tracking-[.42em] text-white/45 xl:block">
-          The art of exploring
+          {copy.artExploring}
         </div>
       </section>
 
       <section className="border-y border-gold/20 bg-[#0b2731]">
         <div className="container grid items-center gap-6 py-12 md:grid-cols-[1fr_auto]">
-          <div><p className="eyebrow">Adventure · Reconnect · Slow down · Celebrate</p><h2 className="font-display mt-4 text-3xl md:text-4xl">What will your island story be?</h2><p className="mt-3 max-w-2xl leading-7 text-white/65">Start with a feeling. Choose your stay and shape a holiday chapter of your own.</p></div>
-          <Link href="/island-story" className="btn-gold">Create My Island Story <ArrowRight className="h-4 w-4" /></Link>
+          <div><p className="eyebrow">{copy.islandStoryEyebrow}</p><h2 className="font-display mt-4 text-3xl md:text-4xl">{copy.islandStoryTitle}</h2><p className="mt-3 max-w-2xl leading-7 text-white/65">{copy.islandStoryBody}</p></div>
+          <Link href="/island-story" className="btn-gold">{copy.islandStoryCta} <ArrowRight className="h-4 w-4" /></Link>
         </div>
       </section>
 
       <section className="border-b border-gold/20 bg-[#071922]">
         <div className="container grid items-center gap-6 py-12 md:grid-cols-[1fr_auto]">
-          <div><p className="eyebrow">Find your perfect middle</p><h2 className="font-display mt-4 text-3xl md:text-4xl">Two Hearts, One Island</h2><p className="mt-3 max-w-2xl leading-7 text-white/65">Answer separately. Discover what you both love. Build a Maldives holiday with one special moment for each of you.</p></div>
-          <Link href="/couple-match" className="btn-gold">Find Our Island Match <ArrowRight className="h-4 w-4" /></Link>
+          <div><p className="eyebrow">{copy.coupleEyebrow}</p><h2 className="font-display mt-4 text-3xl md:text-4xl">{copy.coupleTitle}</h2><p className="mt-3 max-w-2xl leading-7 text-white/65">{copy.coupleBody}</p></div>
+          <Link href="/couple-match" className="btn-gold">{copy.coupleCta} <ArrowRight className="h-4 w-4" /></Link>
         </div>
       </section>
 
       <section className="border-b border-gold/20 bg-[#0b2731]">
         <div className="container grid items-center gap-6 py-12 md:grid-cols-[1fr_auto]">
-          <div><p className="eyebrow">Dream it. Choose it. Let us help plan it.</p><h2 className="font-display mt-4 text-3xl md:text-4xl">What is on your Maldives wishlist?</h2><p className="mt-3 max-w-2xl leading-7 text-white/65">Pick the moments you want, discover matching stays and experiences, and send us your holiday wishes.</p></div>
-          <Link href="/wishlist" className="btn-gold">Build My Wishlist <ArrowRight className="h-4 w-4"/></Link>
+          <div><p className="eyebrow">{copy.wishlistEyebrow}</p><h2 className="font-display mt-4 text-3xl md:text-4xl">{copy.wishlistTitle}</h2><p className="mt-3 max-w-2xl leading-7 text-white/65">{copy.wishlistBody}</p></div>
+          <Link href="/wishlist" className="btn-gold">{copy.wishlistCta} <ArrowRight className="h-4 w-4"/></Link>
         </div>
       </section>
 
-      <PropertyCards managedProperties={managedProperties} featured />
+      <PropertyCards managedProperties={managedProperties} featured locale={locale} />
 
       {experiences.length > 0 && (
         <section id="discover-experiences" aria-labelledby="discover-experiences-title" className="scroll-mt-24 border-b border-white/10 bg-[#06151c] text-white">
           <div className="container py-16 md:py-20">
-            <p className="eyebrow">Make more of your island days</p>
-            <h2 id="discover-experiences-title" className="section-title mt-4">Discover Maldives Experiences</h2>
-            <p className="mt-5 max-w-2xl leading-7 text-white/65">Find something to look forward to. Explore activities offered through our properties and save your favourites to My Trip.</p>
+            <p className="eyebrow">{copy.expEyebrow}</p>
+            <h2 id="discover-experiences-title" className="section-title mt-4">{copy.expTitle}</h2>
+            <p className="mt-5 max-w-2xl leading-7 text-white/65">{copy.expBody}</p>
             <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {experiences.map(({ item, propertyName, island, slug }) => {
                 const href = `/stays/${slug}#experience-${item.id}`;
                 const imageUrl = propertyPhotoUrl(item.photos[0]);
-                const priceLabel = item.price > 0 ? `From USD ${item.price} ${item.priceUnit}` : "Price on request";
+                const priceLabel = item.price > 0 ? `${copy.fromUsd} ${item.price} ${item.priceUnit}` : copy.priceOnRequest;
                 return (
                   <article key={`${slug}-${item.id}`} className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[.025]">
                     <Link href={href} aria-label={`Explore ${item.name} at ${propertyName}`} className="group block overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold">
@@ -202,14 +216,14 @@ export default async function Home() {
                     <div className="flex flex-1 flex-col p-6">
                       <p className="flex items-start gap-2 text-sm text-[#ead7aa]"><MapPin aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />{island}</p>
                       <h3 className="font-display mt-3 break-words text-3xl">{item.name}</h3>
-                      <p className="mt-2 text-xs text-white/55">Through {propertyName}</p>
+                      <p className="mt-2 text-xs text-white/55">{copy.through} {propertyName}</p>
                       <p className="mt-4 flex items-center gap-2 text-sm text-white/75"><Clock aria-hidden="true" className="h-4 w-4 shrink-0" />{item.duration}</p>
                       <p className="mb-6 mt-3 line-clamp-3 text-sm leading-6 text-white/65">{item.description}</p>
                       <div className="mt-auto border-t border-white/10 pt-5">
                         <p className="text-lg text-[#ead7aa]">{priceLabel}</p>
-                        <Link href={href} className="mt-3 inline-flex min-h-[48px] items-center gap-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold">Explore Experience <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+                        <Link href={href} className="mt-3 inline-flex min-h-[48px] items-center gap-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold">{copy.exploreExperience} <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
                         <div className="mt-3">
-                          <SaveTripButton itemType="package" itemKey={`experience-${slug}-${item.id}`} title={item.name} subtitle={`${propertyName} · ${item.duration} · ${priceLabel}`} imageUrl={imageUrl} href={href} label="Add to My Trip" />
+                          <SaveTripButton itemType="package" itemKey={`experience-${slug}-${item.id}`} title={item.name} subtitle={`${propertyName} · ${item.duration} · ${priceLabel}`} imageUrl={imageUrl} href={href} label={copy.addToTrip} />
                         </div>
                       </div>
                     </div>
@@ -217,7 +231,7 @@ export default async function Home() {
                 );
               })}
             </div>
-            <p className="mt-6 text-sm leading-6 text-white/55">Saving an experience keeps it in your favourites. Our team confirms the price and availability before booking.</p>
+            <p className="mt-6 text-sm leading-6 text-white/55">{copy.saveNote}</p>
           </div>
         </section>
       )}
@@ -225,17 +239,15 @@ export default async function Home() {
       <section className="section-shell overflow-hidden">
         <div className="container grid gap-12 py-24 lg:grid-cols-[.8fr_1.2fr] lg:items-end">
           <div>
-            <p className="eyebrow">A quieter kind of luxury</p>
-            <h2 className="section-title mt-5">Travel that feels effortless.</h2>
+            <p className="eyebrow">{copy.quietLuxury}</p>
+            <h2 className="section-title mt-5">{copy.effortlessTitle}</h2>
           </div>
           <div className="lg:border-l lg:border-white/10 lg:pl-12">
             <p className="max-w-2xl text-lg leading-8 text-white/65">
-              From your first search to your island arrival, Tripelor keeps the
-              details clear and the journey personal. Choose your dates, compare
-              stays and bring the whole experience together in one place.
+              {copy.effortlessBody}
             </p>
             <Link href="/about" className="luxury-link mt-7">
-              Discover Tripelor <ArrowUpRight className="h-4 w-4" />
+              {copy.discoverTripelor} <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -244,19 +256,18 @@ export default async function Home() {
       <section className="bg-[#f1ebdf] text-[#071922]">
         <div className="container py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="eyebrow text-[#8d7037]">Curated escapes</p>
+            <p className="eyebrow text-[#8d7037]">{copy.curated}</p>
             <h2 className="font-display mt-4 text-4xl leading-tight md:text-6xl">
-              Choose your island escape.
+              {copy.chooseEscape}
             </h2>
             <p className="mx-auto mt-5 max-w-2xl leading-7 text-[#40505a]">
-              Discover an ocean excursion or a longer island stay, with the
-              details you need to plan your Maldives escape.
+              {copy.chooseEscapeBody}
             </p>
-            <Link href="/island-adventures#excursions" className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-sm font-semibold text-[#715721] underline">View snorkeling & night fishing excursions <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+            <Link href="/island-adventures#excursions" className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-sm font-semibold text-[#715721] underline">{copy.viewExcursions} <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
           </div>
 
           <div className="mt-12 grid gap-6 lg:grid-cols-3">
-            {escapes.map((escape) => (
+            {localizedEscapes.map((escape) => (
               <Link key={escape.title} href={escape.href} className="escape-card group flex items-end">
                 <img src={escape.image} alt={escape.title} />
                 <div className="escape-card-shade" />
@@ -279,27 +290,26 @@ export default async function Home() {
         </div>
       </section>
 
-      <SmartOffers />
-      <RewardsChecker />
+      <SmartOffers locale={locale} />
+      <RewardsChecker locale={locale} />
 
       <section className="bg-[#f1ebdf] text-[#071922]">
         <div className="container py-24">
           <div className="grid gap-12 lg:grid-cols-[.75fr_1.25fr]">
             <div>
-              <p className="eyebrow text-[#8d7037]">One seamless journey</p>
+              <p className="eyebrow text-[#8d7037]">{copy.seamlessEyebrow}</p>
               <h2 className="font-display mt-4 text-4xl leading-tight md:text-6xl">
-                Everything your Maldives needs.
+                {copy.seamlessTitle}
               </h2>
               <p className="mt-5 max-w-md leading-7 text-[#53616a]">
-                A simple way to plan your stay, your island experiences and the
-                transfer that brings it all together.
+                {copy.seamlessBody}
               </p>
             </div>
             <div className="grid gap-px overflow-hidden border border-[#cfc4af] bg-[#cfc4af] md:grid-cols-3">
               {[
-                [Hotel, "Selected stays", "Compare rooms, meal plans and rates."],
-                [Compass, "Island experiences", "Choose ocean adventures and slower island moments."],
-                [Ship, "Speedboat transfers", "Arrange your arrival and departure in one journey."],
+                [Hotel, copy.selectedStays, copy.selectedStaysBody],
+                [Compass, copy.islandExperiences, copy.islandExperiencesBody],
+                [Ship, copy.speedboatTransfers, copy.speedboatTransfersBody],
               ].map(([Icon, title, text]) => {
                 const FeatureIcon = Icon as typeof Hotel;
                 return (
@@ -319,17 +329,17 @@ export default async function Home() {
         <div className="container py-24">
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="eyebrow">Guest experiences</p>
-              <h2 className="section-title mt-4">Words from the journey.</h2>
+              <p className="eyebrow">{copy.guestExperiences}</p>
+              <h2 className="section-title mt-4">{copy.wordsJourney}</h2>
             </div>
             <Link href="/reviews" className="luxury-link">
-              Share Your Experience <ArrowRight className="h-4 w-4" />
+              {copy.shareExperience} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
           {reviews.length === 0 ? (
             <div className="mt-10 border border-white/10 bg-white/[.025] p-10 text-center text-white/45">
-              Guest stories will appear here soon.
+              {copy.guestStoriesSoon}
             </div>
           ) : (
             <div className="mobile-scroll mt-10 flex gap-5 pb-4">
@@ -353,15 +363,15 @@ export default async function Home() {
       <section className="border-y border-[#c9a86a]/25 bg-[#0b2731]">
         <div className="container py-24 text-center">
           <Sparkles className="mx-auto h-7 w-7 text-[#d9bd7b]" />
-          <p className="eyebrow mt-6">Your island story starts here</p>
+          <p className="eyebrow mt-6">{copy.storyStarts}</p>
           <h2 className="font-display mx-auto mt-4 max-w-4xl text-4xl leading-tight text-white md:text-6xl">
-            Stay beautifully. Explore deeply. Remember everything.
+            {copy.finalTitle}
           </h2>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <Link href="/build-your-trip" className="btn-gold">
-              Build Your Trip <ArrowRight className="h-4 w-4" />
+              {copy.buildTrip} <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/contact" className="btn-outline">Speak With Tripelor</Link>
+            <Link href="/contact" className="btn-outline">{copy.speakTripelor}</Link>
           </div>
         </div>
       </section>
