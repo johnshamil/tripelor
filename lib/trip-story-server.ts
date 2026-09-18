@@ -1,5 +1,3 @@
-import type { User } from "@supabase/supabase-js";
-
 export type StoryReservation = {
   id: string;
   booking_reference?: string | null;
