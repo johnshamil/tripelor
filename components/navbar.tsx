@@ -7,30 +7,34 @@ import { useEffect, useState } from "react";
 import CartLink from "@/components/cart-link";
 import TripelorMark from "@/components/tripelor-mark";
 import LanguageSwitcher from "@/components/language-switcher";
+import { useSiteLanguage } from "@/components/use-site-language";
+import { translations } from "@/lib/professional-translations";
 
 type User = { email: string; fullName: string; isAdmin?: boolean };
 
-const primaryLinks = [
-  ["/stays", "Stays"],
-  ["/island-adventures", "Packages"],
-  ["/shared-excursions", "Shared Excursions"],
-  ["/experience-bundles", "Experiences"],
-  ["/speedboat", "Transfers"],
-  ["/reviews", "Reviews"],
-];
-
-const mobileLinks = [
-  ["/", "Home"],
-  ["/help-me-choose", "Help Me Choose"],
-  ["/holiday-shortlist", "Holiday Shortlist"],
-  ["/my-trip", "My Trip Plan"],
-  ...primaryLinks,
-  ["/account#referral-rewards", "Referral & Earn"],
-  ["/contact", "Contact"],
-];
+const primaryRoutes = [
+  ["/stays", "stays"],
+  ["/island-adventures", "packages"],
+  ["/shared-excursions", "sharedExcursions"],
+  ["/experience-bundles", "experiences"],
+  ["/speedboat", "transfers"],
+  ["/reviews", "reviews"],
+] as const;
 
 export default function Navbar() {
   const pathname = usePathname();
+  const locale = useSiteLanguage();
+  const copy = translations[locale].nav;
+  const primaryLinks = primaryRoutes.map(([href, key]) => [href, copy[key]] as const);
+  const mobileLinks = [
+    ["/", copy.home],
+    ["/help-me-choose", copy.helpMeChoose],
+    ["/holiday-shortlist", copy.holidayShortlist],
+    ["/my-trip", copy.myTripPlan],
+    ...primaryLinks,
+    ["/account#referral-rewards", copy.referralEarn],
+    ["/contact", copy.contact],
+  ] as const;
   const adminSurface = pathname === "/admin" || pathname.startsWith("/admin/");
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -70,7 +74,7 @@ export default function Navbar() {
               TRIPELOR
             </span>
             <span className="mt-1 block text-[7px] uppercase tracking-[.26em] text-[#c9a86a] md:text-[8px] md:tracking-[.3em]">
-              Maldives Travel
+              {copy.maldivesTravel}
             </span>
           </span>
         </Link>
@@ -84,10 +88,10 @@ export default function Navbar() {
           <LanguageSwitcher />
           <CartLink />
           <Link href="/account" className="nav-tab gap-2" aria-label="My Tripelor account">
-            <UserRound className="h-4 w-4" /> {user ? "My Account" : "Sign In"}
+            <UserRound className="h-4 w-4" /> {user ? copy.myAccount : copy.signIn}
           </Link>
           <Link href="/help-me-choose" className="btn-gold min-h-[44px] px-5 py-2">
-            Help Me Choose
+            {copy.helpMeChoose}
           </Link>
         </nav>
 
@@ -105,18 +109,18 @@ export default function Navbar() {
         </div>
       </div>
 
-      {!adminSurface && <Link href="/help-me-choose" onClick={() => setOpen(false)} className="flex min-h-[44px] items-center justify-center gap-2 border-t border-white/10 px-4 text-xs text-[#ead7aa] xl:hidden">Not sure where to start? <span className="font-semibold underline">Help Me Choose</span></Link>}
+      {!adminSurface && <Link href="/help-me-choose" onClick={() => setOpen(false)} className="flex min-h-[44px] items-center justify-center gap-2 border-t border-white/10 px-4 text-xs text-[#ead7aa] xl:hidden">{copy.unsure} <span className="font-semibold underline">Help Me Choose</span></Link>}
 
       {open && (
         <div className="fixed inset-x-0 top-[64px] z-[100] h-[calc(100dvh-64px)] overflow-hidden border-t border-white/10 bg-[#041117] md:top-[76px] md:h-[calc(100dvh-76px)] xl:hidden">
           <div className="flex h-full flex-col overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 md:px-6 md:pt-5">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-[10px] uppercase tracking-[.25em] text-[#c9a86a]">Explore Tripelor</p>
-              <p className="text-[10px] text-white/35">Tap anywhere to continue</p>
+              <p className="text-[10px] uppercase tracking-[.25em] text-[#c9a86a]">{copy.exploreTripelor}</p>
+              <p className="text-[10px] text-white/35">{copy.tapToContinue}</p>
             </div>
 
             <nav className="grid" aria-label="Mobile navigation">
-              {user?.isAdmin && <div className="mb-3 grid grid-cols-2 gap-2 border-b border-gold/20 pb-4">{[["/admin", "Admin home"], ["/admin/properties", "Properties"], ["/admin/host-questions", "Host Questions"]].map(([href, label]) => <Link key={href} href={href} onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-center rounded-xl border border-gold/30 px-3 py-2 text-center text-sm text-gold">{label}</Link>)}</div>}
+              {user?.isAdmin && <div className="mb-3 grid grid-cols-2 gap-2 border-b border-gold/20 pb-4">{[["/admin", copy.adminHome], ["/admin/properties", copy.properties], ["/admin/host-questions", copy.hostQuestions]].map(([href, label]) => <Link key={href} href={href} onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-center rounded-xl border border-gold/30 px-3 py-2 text-center text-sm text-gold">{label}</Link>)}</div>}
               {mobileLinks.map(([href, label], index) => (
                 <Link
                   key={href}
@@ -138,14 +142,14 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 className="flex min-h-[50px] items-center gap-2 text-white/75"
               >
-                <UserRound className="h-5 w-5 text-[#c9a86a]" /> {user ? "My Tripelor Account" : "Sign In to Tripelor"}
+                <UserRound className="h-5 w-5 text-[#c9a86a]" /> {user ? copy.myTripelorAccount : copy.signInToTripelor}
               </Link>
               {user && (
                 <button
                   onClick={logout}
                   className="flex min-h-[50px] w-full items-center gap-2 text-left text-red-300"
                 >
-                  <LogOut className="h-5 w-5" /> Log Out
+                  <LogOut className="h-5 w-5" /> {copy.logOut}
                 </button>
               )}
             </div>
@@ -156,14 +160,14 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 className="btn-gold min-h-[52px] w-full px-3 text-center text-xs"
               >
-                Plan Trip
+                {copy.planTrip}
               </Link>
               <Link
                 href="/booking?property=Uhoo%27s%20Lavish%20Oasis&mealPlan=Bed%20%26%20Breakfast"
                 onClick={() => setOpen(false)}
                 className="btn-outline min-h-[52px] w-full px-3 text-center text-xs"
               >
-                Book Stay
+                {copy.bookStay}
               </Link>
             </div>
           </div>
