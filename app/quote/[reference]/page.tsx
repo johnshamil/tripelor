@@ -6,6 +6,7 @@ import { professionalLocale } from "@/lib/professional-translations";
 import { decodeQuoteLines, quoteFromLines, quoteIssuedAt, quoteStatus, validQuoteReference, QUOTE_VALID_HOURS } from "@/lib/trip-quote";
 import type { CartLine } from "@/lib/trip-cart";
 import { localizeQuotedLine } from "@/lib/quote-display";
+import { verifyQuoteSignature, type QuoteExtras } from "@/lib/trip-quote-server";
 
 export const dynamic = "force-dynamic";
 
@@ -29,9 +30,9 @@ export default function QuotePage({
     room?: string;
     meal?: string;
     transferSeats?: string;
-    transferTotal?: string;
     request?: string;
     customize?: string;
+    sig?: string;
   };
 }) {
   const locale = professionalLocale(cookies().get("tripelor_lang")?.value);
@@ -147,10 +148,29 @@ export default function QuotePage({
   let quote: ReturnType<typeof quoteFromLines>;
   let issued = 0;
   let expiresAt = 0;
+  let extras: QuoteExtras = { room: "", meal: "", transferSeats: 0, requestHref: "", customizeHref: "" };
 
   try {
     if (!validQuoteReference(params.reference)) throw new Error("Invalid reference.");
     issued = quoteIssuedAt(searchParams?.issued);
+    lines = decodeQuoteLines(searchParams?.item);
+
+    const room = typeof searchParams?.room === "string" && searchParams.room.length <= 100 ? searchParams.room : "";
+    const meal = typeof searchParams?.meal === "string" && searchParams.meal.length <= 100 ? searchParams.meal : "";
+    const transferSeatsValue = Number(searchParams?.transferSeats || 0);
+    const transferSeats = Number.isInteger(transferSeatsValue) && transferSeatsValue >= 0 && transferSeatsValue <= 20 ? transferSeatsValue : 0;
+    const requestHref = typeof searchParams?.request === "string" && searchParams.request.startsWith("/booking?") && searchParams.request.length <= 2500
+      ? searchParams.request
+      : "";
+    const customizeHref = typeof searchParams?.customize === "string" && searchParams.customize.startsWith("/build-your-trip") && searchParams.customize.length <= 500
+      ? searchParams.customize
+      : "";
+    extras = { room, meal, transferSeats, requestHref, customizeHref };
+
+    if (!searchParams?.sig || !verifyQuoteSignature(searchParams.sig, params.reference, issued, lines, extras)) {
+      throw new Error("Invalid quote signature.");
+    }
+
     const status = quoteStatus(issued);
     expiresAt = status.expiresAt;
     if (status.expired) {
@@ -167,8 +187,8 @@ export default function QuotePage({
         </main>
       );
     }
-    lines = decodeQuoteLines(searchParams?.item);
-    quote = quoteFromLines(lines);
+    const issuedMaldivesDate = new Date(issued + 5 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    quote = quoteFromLines(lines, issuedMaldivesDate);
   } catch {
     return (
       <main className="quote-page bg-[#06151c] text-white">
@@ -185,18 +205,12 @@ export default function QuotePage({
   }
 
   const displayItems = quote.items.map(item => localizeQuotedLine(item, locale));
-  const room = typeof searchParams?.room === "string" && searchParams.room.length <= 100 ? searchParams.room : "";
-  const meal = typeof searchParams?.meal === "string" && searchParams.meal.length <= 100 ? searchParams.meal : "";
-  const transferSeatsValue = Number(searchParams?.transferSeats || 0);
-  const transferTotalValue = Number(searchParams?.transferTotal || 0);
-  const transferSeats = Number.isInteger(transferSeatsValue) && transferSeatsValue >= 0 && transferSeatsValue <= 20 ? transferSeatsValue : 0;
-  const transferTotal = Number.isFinite(transferTotalValue) && transferTotalValue >= 0 && transferTotalValue <= 10000 ? transferTotalValue : 0;
-  const requestHref = typeof searchParams?.request === "string" && searchParams.request.startsWith("/booking?") && searchParams.request.length <= 2500
-    ? searchParams.request
-    : undefined;
-  const customizeHref = typeof searchParams?.customize === "string" && searchParams.customize.startsWith("/build-your-trip") && searchParams.customize.length <= 500
-    ? searchParams.customize
-    : undefined;
+  const room = extras.room;
+  const meal = extras.meal;
+  const transferSeats = extras.transferSeats;
+  const transferTotal = transferSeats * 50;
+  const requestHref = extras.requestHref || undefined;
+  const customizeHref = extras.customizeHref || undefined;
   const proposalTotal = quote.total + transferTotal;
 
   return (
