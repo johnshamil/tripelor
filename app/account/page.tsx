@@ -136,6 +136,17 @@ export default function AccountPage() {
         </Link>
       )}
 
+      {bookings.length > 0 && (
+        <Link href="/account/story" className="mt-4 flex min-h-20 items-center justify-between gap-5 rounded-[1.5rem] border border-[#d9bd7b]/30 bg-[radial-gradient(circle_at_right,rgba(217,189,123,.14),transparent_40%),linear-gradient(135deg,rgba(217,189,123,.08),rgba(255,255,255,.02))] p-5 transition hover:border-[#e3ca91]/55">
+          <span>
+            <span className="text-[10px] font-semibold uppercase tracking-[.24em] text-[#e3ca91]">My Maldives Story ✨</span>
+            <strong className="mt-1 block text-xl text-white">Turn your journey into a beautiful memory book.</strong>
+            <span className="mt-1 block text-sm text-gray-400">Photos, favourite moments, island stamps, a shareable story and a PDF keepsake.</span>
+          </span>
+          <span className="shrink-0 text-[#e3ca91]">Open →</span>
+        </Link>
+      )}
+
       <section className="relative mt-8 overflow-hidden rounded-[2rem] border border-gold/20 bg-gradient-to-br from-white/[.05] via-black to-gold/[.06]">
         {trip ? (
           <>
@@ -269,6 +280,9 @@ export default function AccountPage() {
                       <p className="mt-1 text-xs text-gray-400">Share a verified review of this completed stay.</p>
                       <Link href={`/reviews?reservationId=${encodeURIComponent(booking.id)}`} className="btn-gold mt-3 w-full">
                         Review My Stay
+                      </Link>
+                      <Link href={`/account/story?reservationId=${encodeURIComponent(booking.id)}`} className="btn-outline mt-3 w-full">
+                        Create My Maldives Story ✨
                       </Link>
                     </div>
                   )}

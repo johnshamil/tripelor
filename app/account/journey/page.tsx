@@ -135,6 +135,8 @@ export default function JourneyModePage() {
         guestBody: "Durante il soggiorno: pulizia, colazione, attrezzatura ed escursioni.",
         transferTitle: "Trasferimenti",
         transferBody: "Controlla o organizza il motoscafo.",
+        storyTitle: "My Maldives Story",
+        storyBody: "Salva foto, momenti preferiti e ricordi del viaggio.",
         whatsapp: "Chatta con Tripelor",
         map: "Apri la posizione",
         whatNextPreArrival: "Completa i dettagli pre-arrivo",
@@ -203,6 +205,8 @@ export default function JourneyModePage() {
           guestBody: "Во время проживания: уборка, завтрак, снаряжение и экскурсии.",
           transferTitle: "Трансферы",
           transferBody: "Проверьте или организуйте скоростной катер.",
+          storyTitle: "My Maldives Story",
+          storyBody: "Сохраняйте фотографии, любимые моменты и воспоминания о поездке.",
           whatsapp: "Написать Tripelor",
           map: "Открыть карту",
           whatNextPreArrival: "Заполните данные перед прилётом",
@@ -270,6 +274,8 @@ export default function JourneyModePage() {
           guestBody: "During your stay: housekeeping, breakfast, gear and excursions.",
           transferTitle: "Transfers",
           transferBody: "Check or arrange your speedboat.",
+          storyTitle: "My Maldives Story",
+          storyBody: "Save photos, favourite moments and memories from your journey.",
           whatsapp: "Chat with Tripelor",
           map: "Open Location",
           whatNextPreArrival: "Complete your pre-arrival details",
@@ -593,6 +599,7 @@ export default function JourneyModePage() {
               <QuickLink href="/account/pre-arrival" icon={Headphones} title={copy.conciergeTitle} body={copy.conciergeBody} />
               {stage === "staying" && <QuickLink href="/account/guest-portal" icon={BellRing} title={copy.guestTitle} body={copy.guestBody} />}
               <QuickLink href="/speedboat" icon={Ship} title={copy.transferTitle} body={copy.transferBody} />
+              <QuickLink href={`/account/story?reservationId=${encodeURIComponent(trip.id)}`} icon={Sparkles} title={copy.storyTitle} body={copy.storyBody} />
             </div>
           </section>
         </aside>
