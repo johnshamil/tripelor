@@ -90,10 +90,11 @@ function ensureTranslateMount() {
 }
 
 function initGoogleTranslate(resolve: () => void) {
-  if (!window.google?.translate?.TranslateElement) return false;
+  const google = window.google;
+  if (!google?.translate?.TranslateElement) return false;
   const mount = ensureTranslateMount();
   if (!mount.dataset.initialized) {
-    new window.google.translate.TranslateElement(
+    new google.translate.TranslateElement(
       {
         pageLanguage: "en",
         includedLanguages: LANGUAGES.filter((language) => language.code !== "en")
