@@ -7,7 +7,6 @@ import { useCart } from "@/components/cart-provider";
 import TripExperienceCatalog from "@/components/trip-experience-catalog";
 import TripDayPlanner from "@/components/trip-day-planner";
 import { findCartProduct, quoteCart } from "@/lib/trip-cart";
-import { buildQuoteHref, createQuoteReference } from "@/lib/trip-quote";
 import { useSiteLanguage } from "@/components/use-site-language";
 
 const field = "mt-2 min-h-12 w-full rounded-xl border border-white/20 bg-[#041117] px-4 py-3 text-white focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold [color-scheme:dark]";
@@ -24,6 +23,8 @@ export default function CartCheckout() {
         creating: "Crea una proposta condivisibile",
         helper: "Salva questa selezione per 48 ore in una proposta elegante da condividere, inviare via WhatsApp o salvare in PDF.",
         loaded: "Proposta caricata",
+        pending: "Creazione proposta…",
+        failed: "Non siamo riusciti a creare la proposta. Riprova.",
       }
     : locale === "ru"
       ? {
@@ -31,12 +32,16 @@ export default function CartCheckout() {
           creating: "Создать предложение для отправки",
           helper: "Сохраните этот выбор на 48 часов как красивое предложение: его можно отправить, поделиться в WhatsApp или сохранить в PDF.",
           loaded: "Предложение загружено",
+          pending: "Создаём предложение…",
+          failed: "Не удалось создать предложение. Попробуйте ещё раз.",
         }
       : {
           create: "Create My Quote",
           creating: "Create a shareable proposal",
           helper: "Save this selection for 48 hours as a polished proposal you can share, send on WhatsApp or save as PDF.",
           loaded: "Quote loaded",
+          pending: "Creating quote…",
+          failed: "We could not create the quote. Please try again.",
         };
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [name, setName] = useState("");
@@ -47,6 +52,7 @@ export default function CartCheckout() {
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [view, setView] = useState<"explore" | "plan">("explore");
   const [loadedQuote, setLoadedQuote] = useState("");
+  const [quoteCreating, setQuoteCreating] = useState(false);
   const viewNavigation = useRef<HTMLDivElement>(null);
   const receiptHeading = useRef<HTMLHeadingElement>(null);
   const attempt = useRef<{ signature: string; key: string } | null>(null);
@@ -73,14 +79,24 @@ export default function CartCheckout() {
     if (quote) setLoadedQuote(quote);
   }, []);
 
-  function createQuote() {
+  async function createQuote() {
+    if (quoteCreating) return;
     setError("");
     try {
       quoteCart(lines);
-      const reference = createQuoteReference(new Date(), crypto.randomUUID().replace(/-/g, "").slice(0, 6));
-      window.location.href = buildQuoteHref(reference, lines);
+      setQuoteCreating(true);
+      const response = await fetch("/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: lines }),
+        signal: AbortSignal.timeout(15000),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.url) throw new Error(data.error || quoteCopy.failed);
+      window.location.href = data.url;
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Please check your trip plan before creating a quote.");
+      setError(e instanceof Error && e.name !== "TimeoutError" ? e.message : quoteCopy.failed);
+      setQuoteCreating(false);
     }
   }
 
@@ -159,8 +175,8 @@ export default function CartCheckout() {
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[.035] p-4">
           <p className="flex items-center gap-2 text-sm font-semibold text-white"><FileText className="h-4 w-4 text-gold" /> {quoteCopy.creating}</p>
           <p className="mt-2 text-xs leading-5 text-gray-400">{quoteCopy.helper}</p>
-          <button type="button" onClick={createQuote} disabled={pending} className="btn-outline mt-4 min-h-12 w-full gap-2 disabled:opacity-60">
-            <FileText className="h-4 w-4" /> {quoteCopy.create}
+          <button type="button" onClick={createQuote} disabled={pending || quoteCreating} className="btn-outline mt-4 min-h-12 w-full gap-2 disabled:opacity-60">
+            <FileText className="h-4 w-4" /> {quoteCreating ? quoteCopy.pending : quoteCopy.create}
           </button>
         </div>
         {user ? <fieldset disabled={pending} className="mt-6 space-y-4">
