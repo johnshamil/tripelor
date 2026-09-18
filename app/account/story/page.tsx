@@ -236,8 +236,10 @@ export default function MaldivesStoryPage() {
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const [origin, setOrigin] = useState("");
 
   useEffect(() => {
+    setOrigin(window.location.origin);
     (async () => {
       try {
         const me = await fetch("/api/auth/me", { cache: "no-store" });
@@ -619,7 +621,7 @@ export default function MaldivesStoryPage() {
             {status && <p className="mt-4 border border-emerald-600/20 bg-emerald-50 p-3 text-sm text-emerald-700">{status}</p>}
             {error && <p className="mt-4 border border-red-500/20 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
             {isPublic && shareUrl && (
-              <p className="mt-4 break-all text-xs leading-5 text-[#687377]">{window.location.origin}{shareUrl}</p>
+              <p className="mt-4 break-all text-xs leading-5 text-[#687377]">{origin}{shareUrl}</p>
             )}
             <p className="mt-5 text-xs leading-6 text-[#687377]">{copy.privacy}</p>
           </section>
