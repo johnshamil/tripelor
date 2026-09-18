@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, CalendarDays, Clock3, Flame, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
+import { translations, type ProfessionalLocale } from "@/lib/professional-translations";
 
 const hotels = [
   { name: "Uhoo's Lavish Oasis", rooms: ["ROOM 101", "ROOM 102"] },
@@ -20,7 +21,8 @@ const addDays = (days: number) => {
   return formatDate(date);
 };
 
-export default function SmartOffers() {
+export default function SmartOffers({ locale = "en" }: { locale?: ProfessionalLocale }) {
+  const copy = translations[locale].offers;
   const [availability, setAvailability] = useState<Record<string, number>>({});
   const today = formatDate(new Date());
   const tomorrow = addDays(1);
@@ -65,13 +67,13 @@ export default function SmartOffers() {
       <div className="container py-24">
         <div className="grid gap-8 lg:grid-cols-[.65fr_1.35fr]">
           <div>
-            <p className="eyebrow">Timely escapes</p>
-            <h2 className="section-title mt-4">A beautiful reason to stay longer.</h2>
+            <p className="eyebrow">{copy.eyebrow}</p>
+            <h2 className="section-title mt-4">{copy.title}</h2>
             <p className="mt-5 max-w-md leading-7 text-white/50">
-              Thoughtful packages and current availability, presented clearly so you can choose with confidence.
+              {copy.body}
             </p>
             <Link href="/island-adventures" className="luxury-link mt-8">
-              Explore All Packages <ArrowRight className="h-4 w-4" />
+              {copy.allPackages} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
@@ -82,31 +84,31 @@ export default function SmartOffers() {
                 className="offer-card group"
               >
                 <Flame className="h-6 w-6 text-[#d9bd7b]" />
-                <p className="offer-tag mt-8">Live availability</p>
-                <h3 className="font-display mt-3 text-3xl">Only one room left tonight.</h3>
+                <p className="offer-tag mt-8">{copy.live}</p>
+                <h3 className="font-display mt-3 text-3xl">{copy.oneLeft}</h3>
                 <p className="mt-3 text-sm leading-6 text-white/45">{scarce.name}</p>
-                <span className="luxury-link mt-7">View Room <ArrowRight className="h-4 w-4" /></span>
+                <span className="luxury-link mt-7">{copy.viewRoom} <ArrowRight className="h-4 w-4" /></span>
               </Link>
             )}
 
             <Link href="/island-adventures?duration=5" className="offer-card group">
               <CalendarDays className="h-6 w-6 text-[#d9bd7b]" />
-              <p className="offer-tag mt-8">Five-night journey</p>
-              <h3 className="font-display mt-3 text-3xl">More time for the Maldives.</h3>
+              <p className="offer-tag mt-8">{copy.fiveNight}</p>
+              <h3 className="font-display mt-3 text-3xl">{copy.moreTime}</h3>
               <p className="mt-3 text-sm leading-6 text-white/45">
-                A longer island stay with more room for ocean experiences.
+                {copy.moreTimeBody}
               </p>
-              <span className="luxury-link mt-7">Explore Journey <ArrowRight className="h-4 w-4" /></span>
+              <span className="luxury-link mt-7">{copy.exploreJourney} <ArrowRight className="h-4 w-4" /></span>
             </Link>
 
             <Link href="/island-adventures?duration=5" className="offer-card group">
               <Heart className="h-6 w-6 text-[#d9bd7b]" />
-              <p className="offer-tag mt-8">For two</p>
-              <h3 className="font-display mt-3 text-3xl">A romantic island escape.</h3>
+              <p className="offer-tag mt-8">{copy.forTwo}</p>
+              <h3 className="font-display mt-3 text-3xl">{copy.romantic}</h3>
               <p className="mt-3 text-sm leading-6 text-white/45">
-                Sunset moments, island stays and memorable dinners for two.
+                {copy.romanticBody}
               </p>
-              <span className="luxury-link mt-7">Explore Couples Trips <ArrowRight className="h-4 w-4" /></span>
+              <span className="luxury-link mt-7">{copy.couples} <ArrowRight className="h-4 w-4" /></span>
             </Link>
 
             {lastMinute && (
@@ -115,12 +117,12 @@ export default function SmartOffers() {
                 className="offer-card group"
               >
                 <Clock3 className="h-6 w-6 text-[#d9bd7b]" />
-                <p className="offer-tag mt-8">This week</p>
-                <h3 className="font-display mt-3 text-3xl">The Maldives, sooner.</h3>
+                <p className="offer-tag mt-8">{copy.thisWeek}</p>
+                <h3 className="font-display mt-3 text-3xl">{copy.sooner}</h3>
                 <p className="mt-3 text-sm leading-6 text-white/45">
-                  {lastMinute.name} currently has rooms available.
+                  {lastMinute.name} {copy.available}
                 </p>
-                <span className="luxury-link mt-7">Check Dates <ArrowRight className="h-4 w-4" /></span>
+                <span className="luxury-link mt-7">{copy.checkDates} <ArrowRight className="h-4 w-4" /></span>
               </Link>
             )}
           </div>

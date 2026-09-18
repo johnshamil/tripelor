@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, Gift, Sparkles, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { translations, type ProfessionalLocale } from "@/lib/professional-translations";
 
 type Member = {
   email?: string;
@@ -11,7 +12,8 @@ type Member = {
 
 const SESSION_KEY = "tripelor_referral_welcome_seen_v1";
 
-export default function HomeReferralRewards() {
+export default function HomeReferralRewards({ locale = "en" }: { locale?: ProfessionalLocale }) {
+  const copy = translations[locale].referral;
   const [member, setMember] = useState<Member | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -51,7 +53,7 @@ export default function HomeReferralRewards() {
   }
 
   const href = member ? "/account#referral-rewards" : "/signup?next=%2Faccount";
-  const cta = member ? "Open My Rewards" : "Join & Unlock Rewards";
+  const cta = member ? copy.open : copy.join;
 
   return (
     <>
@@ -60,16 +62,13 @@ export default function HomeReferralRewards() {
         <div className="container relative flex min-h-[64px] flex-col items-center justify-center gap-2 py-3 text-center sm:flex-row sm:gap-4 sm:text-left">
           <span className="inline-flex items-center gap-2 rounded-full border border-[#071922]/15 bg-[#071922]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.2em]">
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-            New Reward
+            {copy.newReward}
           </span>
           <span className="inline-flex items-center gap-2 text-sm font-semibold sm:text-base">
             <Gift className="h-5 w-5 shrink-0" aria-hidden="true" />
-            <strong className="font-black">Referral Rewards</strong>
+            <strong className="font-black">{copy.title}</strong>
             <span className="hidden sm:inline">—</span>
-            <span>
-              Give <strong className="font-black">USD 20 off</strong> · Earn{" "}
-              <strong className="font-black">100 Tripelor Points</strong>
-            </span>
+            <span>{copy.banner}</span>
           </span>
           <Link
             href={href}
@@ -98,7 +97,7 @@ export default function HomeReferralRewards() {
               type="button"
               onClick={close}
               className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/20 text-white/70 transition hover:text-white"
-              aria-label="Close rewards welcome"
+              aria-label={copy.close}
             >
               <X className="h-5 w-5" />
             </button>
@@ -108,29 +107,26 @@ export default function HomeReferralRewards() {
                 <Sparkles className="h-6 w-6 text-[#f3dfaa]" aria-hidden="true" />
               </div>
               <span className="rounded-full border border-[#ead7aa]/35 bg-[#ead7aa]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.22em] text-[#f3dfaa]">
-                Welcome Reward
+                {copy.welcomeReward}
               </span>
             </div>
 
             <p className="mt-6 text-[10px] font-semibold uppercase tracking-[.28em] text-[#ead7aa]">
-              Tripelor Referral Rewards
+              {copy.eyebrow}
             </p>
             <h2 id="welcome-reward-title" className="font-display mt-3 text-4xl leading-tight sm:text-5xl">
-              Your rewards start here.
+              {copy.headline}
             </h2>
-            <p className="mt-4 max-w-lg text-sm leading-7 text-white/65 sm:text-base">
-              Create your Tripelor account to unlock your personal referral link. Your friend receives USD 20 off an
-              eligible booking, and you receive 100 Tripelor Points after their completed stay.
-            </p>
+            <p className="mt-4 max-w-lg text-sm leading-7 text-white/65 sm:text-base">{copy.body}</p>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-2xl border border-[#ead7aa]/35 bg-[#ead7aa]/10 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,.03)]">
-                <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/50">Friend receives</p>
-                <p className="mt-2 text-3xl font-black text-[#f3dfaa]">USD 20 OFF</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/50">{copy.friendReceives}</p>
+                <p className="mt-2 text-3xl font-black text-[#f3dfaa]">{copy.usd20}</p>
               </div>
               <div className="rounded-2xl border border-[#ead7aa]/35 bg-[#ead7aa]/10 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,.03)]">
-                <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/50">You earn</p>
-                <p className="mt-2 text-3xl font-black text-[#f3dfaa]">100 POINTS</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/50">{copy.youEarn}</p>
+                <p className="mt-2 text-3xl font-black text-[#f3dfaa]">{copy.points100}</p>
               </div>
             </div>
 
@@ -139,14 +135,11 @@ export default function HomeReferralRewards() {
                 {cta} <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
               <button type="button" onClick={close} className="btn-outline flex-1 justify-center">
-                Maybe Later
+                {copy.maybeLater}
               </button>
             </div>
 
-            <p className="mt-4 text-center text-[11px] leading-5 text-white/40">
-              Referral discount applies to eligible bookings. Points are awarded after the referred guest completes
-              their stay.
-            </p>
+            <p className="mt-4 text-center text-[11px] leading-5 text-white/40">{copy.note}</p>
           </section>
         </div>
       )}

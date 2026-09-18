@@ -46,23 +46,33 @@ function readCookieLanguage() {
   return value.split("/").filter(Boolean).pop() || "";
 }
 
+function readTripelorLanguage() {
+  if (typeof document === "undefined") return "";
+  const match = document.cookie.match(/(?:^|;\s*)tripelor_lang=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
 function savedLanguage() {
   if (typeof window === "undefined") return "en";
   try {
-    return readCookieLanguage() || localStorage.getItem(STORAGE_KEY) || "en";
+    return readTripelorLanguage() || readCookieLanguage() || localStorage.getItem(STORAGE_KEY) || "en";
   } catch {
-    return readCookieLanguage() || "en";
+    return readTripelorLanguage() || readCookieLanguage() || "en";
   }
 }
 
-function setTranslateCookie(code: string) {
-  const value = code === "en" ? "" : `/en/${code}`;
-  const maxAge = code === "en" ? 0 : 60 * 60 * 24 * 365;
+function setLanguageCookies(code: string) {
+  const professional = code === "it" || code === "ru";
+  const googleValue = code === "en" || professional ? "" : `/en/${code}`;
+  const googleMaxAge = googleValue ? 60 * 60 * 24 * 365 : 0;
+  const languageMaxAge = 60 * 60 * 24 * 365;
 
-  document.cookie = `googtrans=${value}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  document.cookie = `tripelor_lang=${encodeURIComponent(code)}; path=/; max-age=${languageMaxAge}; SameSite=Lax`;
+  document.cookie = `googtrans=${googleValue}; path=/; max-age=${googleMaxAge}; SameSite=Lax`;
 
   if (location.hostname === "tripelor.com" || location.hostname.endsWith(".tripelor.com")) {
-    document.cookie = `googtrans=${value}; path=/; domain=.tripelor.com; max-age=${maxAge}; SameSite=Lax`;
+    document.cookie = `tripelor_lang=${encodeURIComponent(code)}; path=/; domain=.tripelor.com; max-age=${languageMaxAge}; SameSite=Lax`;
+    document.cookie = `googtrans=${googleValue}; path=/; domain=.tripelor.com; max-age=${googleMaxAge}; SameSite=Lax`;
   }
 
   try {
@@ -70,6 +80,8 @@ function setTranslateCookie(code: string) {
   } catch {
     // Language selection still works with the cookie.
   }
+
+  window.dispatchEvent(new Event("tripelor:language-changed"));
 }
 
 function ensureTranslateMount() {
@@ -173,7 +185,10 @@ export default function LanguageSwitcher({
   useEffect(() => {
     const code = savedLanguage();
     if (LANGUAGES.some((item) => item.code === code)) setLanguage(code);
-    loadGoogleTranslate().catch(() => {});
+    document.documentElement.lang = code;
+    if (code !== "it" && code !== "ru" && code !== "en") {
+      loadGoogleTranslate().catch(() => {});
+    }
   }, []);
 
   const current = useMemo(
@@ -185,9 +200,10 @@ export default function LanguageSwitcher({
     if (code === language || busy) return;
     setBusy(true);
     setLanguage(code);
-    setTranslateCookie(code);
+    document.documentElement.lang = code;
+    setLanguageCookies(code);
 
-    if (code === "en") {
+    if (code === "en" || code === "it" || code === "ru") {
       window.location.reload();
       return;
     }
@@ -215,17 +231,17 @@ export default function LanguageSwitcher({
         "group relative inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/15 bg-white/[.04] text-white transition hover:border-[#d9bd7b]/45 hover:bg-white/[.07]",
         fullWidth ? "w-full px-4" : compact ? "px-3" : "px-3.5",
       ].join(" ")}
-      title="Choose your language"
+      title={language === "it" ? "Scegli la lingua" : language === "ru" ? "Выберите язык" : "Choose your language"}
     >
       <Globe2 className="h-4 w-4 shrink-0 text-[#d9bd7b]" aria-hidden="true" />
       <span className={compact ? "text-[11px] font-semibold" : "text-xs font-semibold"}>
-        {compact ? current.short : "Language"}
+        {compact ? current.short : language === "it" ? "Lingua" : language === "ru" ? "Язык" : "Language"}
       </span>
       <select
         value={language}
         disabled={busy}
         onChange={(event) => changeLanguage(event.target.value)}
-        aria-label="Choose website language"
+        aria-label={language === "it" ? "Scegli la lingua del sito" : language === "ru" ? "Выберите язык сайта" : "Choose website language"}
         className={[
           "absolute inset-0 h-full w-full cursor-pointer opacity-0",
           busy ? "cursor-wait" : "",
