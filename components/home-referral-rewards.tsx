@@ -68,10 +68,7 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
             <Gift className="h-5 w-5 shrink-0" aria-hidden="true" />
             <strong className="font-black">{copy.title}</strong>
             <span className="hidden sm:inline">—</span>
-            <span>
-              Give <strong className="font-black">USD 20 off</strong> · Earn{" "}
-              <strong className="font-black">100 Tripelor Points</strong>
-            </span>
+            <span>{copy.banner}</span>
           </span>
           <Link
             href={href}
@@ -120,10 +117,7 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
             <h2 id="welcome-reward-title" className="font-display mt-3 text-4xl leading-tight sm:text-5xl">
               {copy.headline}
             </h2>
-            <p className="mt-4 max-w-lg text-sm leading-7 text-white/65 sm:text-base">
-              Create your Tripelor account to unlock your personal referral link. Your friend receives USD 20 off an
-              eligible booking, and you receive 100 Tripelor Points after their completed stay.
-            </p>
+            <p className="mt-4 max-w-lg text-sm leading-7 text-white/65 sm:text-base">{copy.body}</p>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-2xl border border-[#ead7aa]/35 bg-[#ead7aa]/10 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,.03)]">
@@ -145,10 +139,7 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
               </button>
             </div>
 
-            <p className="mt-4 text-center text-[11px] leading-5 text-white/40">
-              Referral discount applies to eligible bookings. Points are awarded after the referred guest completes
-              their stay.
-            </p>
+            <p className="mt-4 text-center text-[11px] leading-5 text-white/40">{copy.note}</p>
           </section>
         </div>
       )}
