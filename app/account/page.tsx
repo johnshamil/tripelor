@@ -125,6 +125,17 @@ export default function AccountPage() {
       <Link href="/account/availability-alerts" className="mt-7 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>Availability Alerts</strong><span className="mt-1 block text-sm text-gray-400">Get an email when your preferred room opens up for your dates.</span></span><span className="text-gold">Manage →</span></Link>
       <ReferralRewardsCard email={user.email} />
 
+      {trip && (
+        <Link href="/account/journey" className="mt-8 flex min-h-20 items-center justify-between gap-5 rounded-[1.5rem] border border-gold/35 bg-gradient-to-r from-gold/15 via-gold/[.06] to-transparent p-5 transition hover:border-gold/60 hover:bg-gold/[.12]">
+          <span>
+            <span className="text-[10px] font-semibold uppercase tracking-[.24em] text-gold">Tripelor Journey Mode</span>
+            <strong className="mt-1 block text-xl text-white">What do I do next?</strong>
+            <span className="mt-1 block text-sm text-gray-400">Your live travel timeline, checklist, wallet, concierge and guest services in one place.</span>
+          </span>
+          <span className="shrink-0 text-gold">Open →</span>
+        </Link>
+      )}
+
       <section className="relative mt-8 overflow-hidden rounded-[2rem] border border-gold/20 bg-gradient-to-br from-white/[.05] via-black to-gold/[.06]">
         {trip ? (
           <>
