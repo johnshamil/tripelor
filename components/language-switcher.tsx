@@ -59,10 +59,10 @@ function setTranslateCookie(code: string) {
   const value = code === "en" ? "" : `/en/${code}`;
   const maxAge = code === "en" ? 0 : 60 * 60 * 24 * 365;
 
-  document.cookie = `googtrans=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  document.cookie = `googtrans=${value}; path=/; max-age=${maxAge}; SameSite=Lax`;
 
   if (location.hostname === "tripelor.com" || location.hostname.endsWith(".tripelor.com")) {
-    document.cookie = `googtrans=${encodeURIComponent(value)}; path=/; domain=.tripelor.com; max-age=${maxAge}; SameSite=Lax`;
+    document.cookie = `googtrans=${value}; path=/; domain=.tripelor.com; max-age=${maxAge}; SameSite=Lax`;
   }
 
   try {
