@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { ArrowRight, CheckCircle2, Compass, MapPin } from "lucide-react";
+import { ArrowRight, CheckCircle2, Compass, FileText, MapPin } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import TripExperienceCatalog from "@/components/trip-experience-catalog";
 import TripDayPlanner from "@/components/trip-day-planner";
 import { findCartProduct, quoteCart } from "@/lib/trip-cart";
+import { buildQuoteHref, createQuoteReference } from "@/lib/trip-quote";
+import { useSiteLanguage } from "@/components/use-site-language";
 
 const field = "mt-2 min-h-12 w-full rounded-xl border border-white/20 bg-[#041117] px-4 py-3 text-white focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold [color-scheme:dark]";
 const usd = (value: number) => `USD ${value.toLocaleString("en-US")}`;
@@ -15,6 +18,28 @@ type Receipt = { bookingReference: string; total: number };
 
 export default function CartCheckout() {
   const { lines, ready, storageNotice, complete } = useCart();
+  const searchParams = useSearchParams();
+  const locale = useSiteLanguage();
+  const quoteCopy = locale === "it"
+    ? {
+        create: "Crea la mia proposta",
+        creating: "Crea una proposta condivisibile",
+        helper: "Salva questa selezione per 48 ore in una proposta elegante da condividere, inviare via WhatsApp o salvare in PDF.",
+        loaded: "Proposta caricata",
+      }
+    : locale === "ru"
+      ? {
+          create: "Создать предложение",
+          creating: "Создать предложение для отправки",
+          helper: "Сохраните этот выбор на 48 часов как красивое предложение: его можно отправить, поделиться в WhatsApp или сохранить в PDF.",
+          loaded: "Предложение загружено",
+        }
+      : {
+          create: "Create My Quote",
+          creating: "Create a shareable proposal",
+          helper: "Save this selection for 48 hours as a polished proposal you can share, send on WhatsApp or save as PDF.",
+          loaded: "Quote loaded",
+        };
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -42,6 +67,20 @@ export default function CartCheckout() {
     }).catch(() => setUser(null));
   }, []);
   useEffect(() => { if (receipt) receiptHeading.current?.focus(); }, [receipt]);
+  useEffect(() => {
+    if (searchParams.get("view") === "plan" || searchParams.get("quote")) setView("plan");
+  }, [searchParams]);
+
+  function createQuote() {
+    setError("");
+    try {
+      quoteCart(lines);
+      const reference = createQuoteReference(new Date(), crypto.randomUUID().replace(/-/g, "").slice(0, 6));
+      window.location.href = buildQuoteHref(reference, lines);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Please check your trip plan before creating a quote.");
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -109,11 +148,19 @@ export default function CartCheckout() {
         <TripDayPlanner />
         <button type="button" onClick={() => changeView("explore")} className="mt-5 inline-flex min-h-12 items-center gap-2 text-sm font-semibold text-gold">Add more packages & excursions <ArrowRight aria-hidden="true" className="h-4 w-4" /></button>
       </fieldset>
-      <div className="min-w-0 rounded-3xl border border-gold/25 bg-gradient-to-br from-[#123039] to-[#07181f] p-6 sm:p-7 lg:sticky lg:top-28">
+      <div id="request-trip" className="min-w-0 scroll-mt-28 rounded-3xl border border-gold/25 bg-gradient-to-br from-[#123039] to-[#07181f] p-6 sm:p-7 lg:sticky lg:top-28">
         <p className="flex items-center gap-2 text-xs uppercase tracking-[.18em] text-gold"><MapPin aria-hidden="true" className="h-4 w-4" />Your island team</p>
         <h2 className="font-display mt-4 text-3xl">Let’s plan your escape</h2>
         <p className="mt-4 text-sm leading-6 text-gray-300">Tell us when you’d like to travel. We’ll help bring your chosen experiences together.</p>
         <div className="mt-6 border-y border-gold/20 py-5"><span className="text-xs uppercase tracking-[.18em] text-gray-300">Your trip estimate</span><strong className="font-display mt-2 block text-4xl text-gold">{usd(total)}</strong><p className="mt-2 text-xs leading-5 text-gray-400">Based on your selected guests and stays. Any separate transfers and final inclusions will be confirmed with you.</p></div>
+        {searchParams.get("quote") && <p className="mt-4 rounded-xl border border-gold/25 bg-gold/5 p-3 text-xs text-gold">{quoteCopy.loaded} · {searchParams.get("quote")}</p>}
+        <div className="mt-6 rounded-2xl border border-white/10 bg-white/[.035] p-4">
+          <p className="flex items-center gap-2 text-sm font-semibold text-white"><FileText className="h-4 w-4 text-gold" /> {quoteCopy.creating}</p>
+          <p className="mt-2 text-xs leading-5 text-gray-400">{quoteCopy.helper}</p>
+          <button type="button" onClick={createQuote} disabled={pending} className="btn-outline mt-4 min-h-12 w-full gap-2 disabled:opacity-60">
+            <FileText className="h-4 w-4" /> {quoteCopy.create}
+          </button>
+        </div>
         {user ? <fieldset disabled={pending} className="mt-6 space-y-4">
           <legend className="sr-only">Your contact details</legend>
           <label className="block text-sm text-gray-300">Your name<input className={field} autoComplete="name" required maxLength={120} value={name} onChange={e => setName(e.target.value)} /></label>
