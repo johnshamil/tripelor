@@ -14,6 +14,7 @@ function displayDate(value: string) {
 }
 export default function ManagedPropertyView({ property, preview = false }: { property: PublicProperty; preview?: boolean }) {
   const photos = property.photos.map(imageUrl);
+  const directBookingUrl = property.directBookingUrl || "";
   const roomGroups = new Map<string, typeof property.rooms>();
   for (const room of property.rooms) {
     const group = roomGroups.get(room.name) || [];
@@ -28,7 +29,7 @@ export default function ManagedPropertyView({ property, preview = false }: { pro
       name: variant.mealPlan,
       price: variant.sellingRate,
       detail: variant.mealPlan === "Bed & Breakfast" ? "Breakfast included" : variant.mealPlan === "Half Board" ? "Breakfast and dinner included" : variant.mealPlan === "Full Board" ? "Breakfast, lunch and dinner included" : variant.mealPlan,
-      bookingHref: `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(room.name)}&mealPlan=${encodeURIComponent(variant.mealPlan)}`,
+      bookingHref: directBookingUrl || `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(room.name)}&mealPlan=${encodeURIComponent(variant.mealPlan)}`,
     }));
     return {
       name: room.name,
@@ -45,7 +46,7 @@ export default function ManagedPropertyView({ property, preview = false }: { pro
     name: `${rate.name} · ${rate.roomName} · ${rate.mealPlan}`,
     price: rate.sellingRate,
     detail: `${displayDate(rate.startDate)} – ${displayDate(rate.endDate)} · ${rate.mealPlan}`,
-    bookingHref: `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(rate.roomName)}&mealPlan=${encodeURIComponent(rate.mealPlan)}&checkIn=${encodeURIComponent(rate.startDate)}`,
+    bookingHref: directBookingUrl || `/booking?property=${encodeURIComponent(property.name)}&roomType=${encodeURIComponent(rate.roomName)}&mealPlan=${encodeURIComponent(rate.mealPlan)}&checkIn=${encodeURIComponent(rate.startDate)}`,
   }));
   const rates = seasonalRates;
   const amounts = [...property.rooms.map(room => room.sellingRate), ...property.seasonalRates.map(rate => rate.sellingRate)].filter(rate => Number.isFinite(rate) && rate > 0);
@@ -58,7 +59,8 @@ export default function ManagedPropertyView({ property, preview = false }: { pro
     description={property.description}
     photos={photos}
     startingFrom={startingFrom}
-    bookingHref={`/booking?property=${encodeURIComponent(property.name)}`}
+    rateNote={property.rateNote || ""}
+    bookingHref={directBookingUrl || `/booking?property=${encodeURIComponent(property.name)}`}
     highlights={[
       { icon: "island", title: "Island location", text: property.island },
       { icon: "dining", title: "Flexible meal plans", text: "Choose from the meal plans shown for each room." },

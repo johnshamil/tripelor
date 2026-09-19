@@ -4,8 +4,26 @@ export function isLegacyPhotoPath(value: string) {
   return value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/api/") && !value.includes("..");
 }
 
+const trustedPhotoHosts = new Set([
+  "h-img1.us2.cloudbeds.com",
+  "h-img2.us2.cloudbeds.com",
+  "h-img3.us2.cloudbeds.com",
+  "images.trvl-media.com",
+  "cf.bstatic.com",
+]);
+
+export function isTrustedRemotePhotoUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && trustedPhotoHosts.has(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 export function propertyPhotoUrl(photo: string) {
-  return isLegacyPhotoPath(photo) ? photo : `/api/property-photo/${encodeURIComponent(photo)}`;
+  if (isLegacyPhotoPath(photo) || isTrustedRemotePhotoUrl(photo)) return photo;
+  return `/api/property-photo/${encodeURIComponent(photo)}`;
 }
 
 export type Room = { name: string; capacity: number; totalRooms: number; amenities: string; mealPlan: string; sellingRate: number; contractedRate: number; photos?: string[]; bathroomPhotos?: string[] };
@@ -98,6 +116,8 @@ export type ManagedProperty = {
   partnerName: string;
   partnerEmail: string;
   partnerPhone: string;
+  directBookingUrl?: string;
+  rateNote?: string;
 };
 export type PublicProperty = Omit<ManagedProperty, "partnerName" | "partnerEmail" | "partnerPhone" | "rooms" | "seasonalRates" | "inventoryRules"> & {
   rooms: Omit<Room, "contractedRate">[];
@@ -136,6 +156,8 @@ export function publicProperty(p: ManagedProperty): PublicProperty {
     transfers:p.transfers,
     cancellation:p.cancellation,
     payment:p.payment,
+    directBookingUrl:p.directBookingUrl || "",
+    rateNote:p.rateNote || "",
     inventoryRules:(p.inventoryRules || []).map(r=>({id:r.id,roomName:r.roomName,startDate:r.startDate,endDate:r.endDate,roomsAvailable:r.roomsAvailable,stopSale:r.stopSale})),
     rooms:p.rooms.map(r=>({name:r.name,capacity:r.capacity,totalRooms:r.totalRooms,amenities:r.amenities,mealPlan:r.mealPlan,sellingRate:r.sellingRate,photos:Array.isArray(r.photos)?r.photos:[],bathroomPhotos:Array.isArray(r.bathroomPhotos)?r.bathroomPhotos:[]})),
     seasonalRates:(p.seasonalRates || []).map(r=>({id:r.id,name:r.name,startDate:r.startDate,endDate:r.endDate,roomName:r.roomName,mealPlan:r.mealPlan,sellingRate:r.sellingRate})),
@@ -151,7 +173,7 @@ export function validateProperty(input: any) {
     if(!Array.isArray(list) || list.length > max) throw new Error(`Use up to ${max} photographs in each section.`);
     return list.map((p: unknown) => {
       const s=text(p,200);
-      if(!/^[0-9a-f-]{36}\.(jpg|png|webp)$/.test(s) && !(allowLegacy && isLegacyPhotoPath(s))) throw new Error("Use uploaded photographs.");
+      if(!/^[0-9a-f-]{36}\.(jpg|png|webp)$/.test(s) && !isTrustedRemotePhotoUrl(s) && !(allowLegacy && isLegacyPhotoPath(s))) throw new Error("Use uploaded photographs or an approved hotel image URL.");
       return s;
     });
   };
@@ -177,11 +199,22 @@ export function validateProperty(input: any) {
   if (!Array.isArray(rawExperiences) || rawExperiences.length > 30) throw new Error("Use up to 30 experiences per property.");
   const experiences: PropertyExperience[] = rawExperiences.map((e:any,index:number) => {
     const experience = { wishlistTags:tags(e.wishlistTags), id:rowId(e.id,index), name:text(e.name,150), description:text(e.description,2000), duration:text(e.duration,100), price:money(e.price), priceUnit:text(e.priceUnit,60), inclusions:text(e.inclusions,2000), photos:photosForSection(e.photos,20), enabled:e.enabled === true };
-    if(experience.enabled && (!experience.name || !experience.description || !experience.duration || !experience.priceUnit || !experience.inclusions || !experience.photos.length)) throw new Error(`Complete the name, description, duration, price unit, inclusions and photo for experience ${index+1}, or hide it while editing.`);
+    if(experience.enabled && (!experience.name || !experience.description || !experience.duration || !experience.priceUnit || !experience.inclusions)) throw new Error(`Complete the name, description, duration, price unit and inclusions for experience ${index+1}, or hide it while editing.`);
     return experience;
   });
   if (new Set(experiences.map(e=>e.id)).size !== experiences.length) throw new Error("Experience IDs must be unique.");
-  const data={ host:normalizePropertyHost(input.host), knowBeforeBooking:normalizePropertyKnowDetails(input.knowBeforeBooking), arrival:normalizePropertyArrival(input.arrival), wishlistTags, experiences, name, island:text(input.island,200), description:text(input.description), photos, rooms, seasonalRates, inventoryRules, amenities:text(input.amenities), taxes:text(input.taxes), transfers:text(input.transfers), cancellation:text(input.cancellation), payment:text(input.payment), partnerName:text(input.partnerName,200), partnerEmail:text(input.partnerEmail,250), partnerPhone:text(input.partnerPhone,80) };
+  const directBookingUrlRaw=text(input.directBookingUrl || "",1000);
+  let directBookingUrl="";
+  if(directBookingUrlRaw) {
+    try {
+      const url=new URL(directBookingUrlRaw);
+      if(url.protocol!=="https:" || !["us2.cloudbeds.com","hotels.cloudbeds.com"].includes(url.hostname)) throw new Error();
+      directBookingUrl=url.toString();
+    } catch {
+      throw new Error("Use a valid Cloudbeds booking URL.");
+    }
+  }
+  const data={ host:normalizePropertyHost(input.host), knowBeforeBooking:normalizePropertyKnowDetails(input.knowBeforeBooking), arrival:normalizePropertyArrival(input.arrival), wishlistTags, experiences, name, island:text(input.island,200), description:text(input.description), photos, rooms, seasonalRates, inventoryRules, amenities:text(input.amenities), taxes:text(input.taxes), transfers:text(input.transfers), cancellation:text(input.cancellation), payment:text(input.payment), partnerName:text(input.partnerName,200), partnerEmail:text(input.partnerEmail,250), partnerPhone:text(input.partnerPhone,80), directBookingUrl, rateNote:text(input.rateNote || "",500) };
   if(input.status==="published" && data.host.enabled && (!data.host.name || !data.host.introduction || !data.host.photo || (data.host.audio && !data.host.transcript))) throw new Error("Complete the host name, introduction, photograph and voice transcript, or hide the host section while editing.");
   if(data.partnerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.partnerEmail)) throw new Error("Enter a valid partner email.");
   if(input.status==="published" && (!data.island||!data.description||!photos.length||!rooms.length||rooms.some(r=>!r.name||!r.mealPlan||r.sellingRate<=0||r.totalRooms<1)||!data.taxes||!data.transfers||!data.cancellation||!data.payment)) throw new Error("Before publishing, add an island, description, photo, room name, meal plan, selling rate, room inventory and booking conditions.");
