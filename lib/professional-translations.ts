@@ -9,7 +9,7 @@ export const translations = {
     nav: {
       stays: "Stays",
       packages: "Packages",
-      sharedExcursions: "Shared Excursions",
+      sharedExcursions: "Excursions",
       experiences: "Experiences",
       transfers: "Transfers",
       reviews: "Reviews",
@@ -323,7 +323,7 @@ export const translations = {
     nav: {
       stays: "Soggiorni",
       packages: "Pacchetti",
-      sharedExcursions: "Escursioni condivise",
+      sharedExcursions: "Escursioni",
       experiences: "Esperienze",
       transfers: "Trasferimenti",
       reviews: "Recensioni",
@@ -637,7 +637,7 @@ export const translations = {
     nav: {
       stays: "Проживание",
       packages: "Пакеты",
-      sharedExcursions: "Групповые экскурсии",
+      sharedExcursions: "Экскурсии",
       experiences: "Впечатления",
       transfers: "Трансферы",
       reviews: "Отзывы",
