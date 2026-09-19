@@ -340,7 +340,7 @@ function PropertyForm({ form, update, updateRoom, updateSeasonalRate, updateInve
         <PropertyHostEditor value={form.host} onChange={value => update("host", value)} busy={uploading || saving} onBusyChange={onHostBusy}/>
         <section id="property-know"><PropertyKnowEditor value={form.knowBeforeBooking} onChange={value => update("knowBeforeBooking", value)}/></section>
         <section id="property-arrival"><PropertyArrivalEditor value={form.arrival} onChange={value => update("arrival", value)}/></section>
-        <Panel id="property-commercial" title="Booking conditions" subtitle="Shown on the public property page.">
+        <Panel id="property-commercial" title="Booking conditions" subtitle="Shown on the public property page." open={openSections.commercial} onToggle={() => toggle("commercial")}>
           <Field label="Direct Cloudbeds booking URL" value={form.directBookingUrl || ""} onChange={v => update("directBookingUrl", v)} placeholder="https://us2.cloudbeds.com/reservation/..." hint="Optional. When set, room booking buttons open the partner's live Cloudbeds rate."/>
           <TextArea label="Public rate note" value={form.rateNote || ""} onChange={v => update("rateNote", v)} placeholder="e.g. Reference price only. Live rate varies by dates, occupancy and promotion."/>
           <TextArea label="Taxes & service charges" value={form.taxes} onChange={v => update("taxes", v)} placeholder="e.g. 10% service charge and 17% GST included / excluded."/>
