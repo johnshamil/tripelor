@@ -15,7 +15,7 @@ type User = { email: string; fullName: string; isAdmin?: boolean };
 const primaryRoutes = [
   ["/stays", "stays"],
   ["/island-adventures", "packages"],
-  ["/shared-excursions", "sharedExcursions"],
+  ["/excursions", "sharedExcursions"],
   ["/experience-bundles", "experiences"],
   ["/speedboat", "transfers"],
   ["/reviews", "reviews"],
