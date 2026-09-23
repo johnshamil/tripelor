@@ -16,6 +16,7 @@ import SaveTripButton from "@/components/save-trip-button";
 import { propertyPhotoUrl } from "@/lib/property-model";
 import RewardsChecker from "@/components/rewards-checker";
 import HomeReferralRewards from "@/components/home-referral-rewards";
+import HomeStoryPreview from "@/components/home-story-preview";
 import SmartOffers from "@/components/smart-offers";
 import PropertyCards from "@/components/room-first-booking-cards";
 import { publishedProperties } from "@/lib/property-store";
@@ -174,12 +175,11 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="border-y border-gold/20 bg-[#0b2731]">
-        <div className="container grid items-center gap-6 py-12 md:grid-cols-[1fr_auto]">
-          <div><p className="eyebrow">{copy.islandStoryEyebrow}</p><h2 className="font-display mt-4 text-3xl md:text-4xl">{copy.islandStoryTitle}</h2><p className="mt-3 max-w-2xl leading-7 text-white/65">{copy.islandStoryBody}</p></div>
-          <Link href="/island-story" className="btn-gold">{copy.islandStoryCta} <ArrowRight className="h-4 w-4" /></Link>
-        </div>
-      </section>
+      <HomeStoryPreview
+        properties={managedProperties}
+        locale={locale}
+        copy={{ title: copy.islandStoryTitle, body: copy.islandStoryBody, cta: copy.islandStoryCta }}
+      />
 
       <section className="border-b border-gold/20 bg-[#071922]">
         <div className="container grid items-center gap-6 py-12 md:grid-cols-[1fr_auto]">

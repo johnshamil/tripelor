@@ -75,7 +75,7 @@ export const translations = {
     },
     home: {
       heroEyebrow: "Maldives, planned with care",
-      heroTitle1: "Your Maldives island escape",
+      heroTitle1: "Your Maldives story",
       heroTitle2: "starts here.",
       heroBody: "Find your island home, discover ocean experiences and arrange your transfers with a Maldives team who helps you bring it all together.",
       exploreStays: "Explore Stays",
@@ -389,7 +389,7 @@ export const translations = {
     },
     home: {
       heroEyebrow: "Maldive, pianificate con cura",
-      heroTitle1: "La tua fuga su un’isola delle Maldive",
+      heroTitle1: "La tua storia alle Maldive",
       heroTitle2: "comincia qui.",
       heroBody: "Trova l’isola che fa per te, scopri esperienze sull’oceano e organizza i trasferimenti con un team locale alle Maldive che coordina ogni dettaglio del viaggio.",
       exploreStays: "Scopri i soggiorni",
@@ -703,7 +703,7 @@ export const translations = {
     },
     home: {
       heroEyebrow: "Мальдивы, спланированные с заботой",
-      heroTitle1: "Ваш островной отдых на Мальдивах",
+      heroTitle1: "Ваша история на Мальдивах",
       heroTitle2: "начинается здесь.",
       heroBody: "Найдите свой остров, выберите океанские впечатления и организуйте трансферы с местной командой на Мальдивах, которая поможет собрать поездку воедино.",
       exploreStays: "Смотреть варианты",
