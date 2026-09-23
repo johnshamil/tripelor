@@ -78,6 +78,7 @@ function score(property: PublicProperty, mood: Mood) {
   const descriptiveText = `${property.name} ${property.description}`;
   return (moodTerms[mood].test(tags) ? 3 : 0)
     + (moodTerms[mood].test(descriptiveText) ? 1 : 0)
+    + (mood === "reconnect" && /ocean[- ]?view|sea[- ]?view|seaview|private balcony/i.test(descriptiveText) ? 3 : 0)
     + (mood === "adventure" ? (property.experiences || []).filter(item => item.enabled).length : 0);
 }
 
