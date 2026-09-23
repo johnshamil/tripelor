@@ -81,6 +81,11 @@ function score(property: PublicProperty, mood: Mood) {
     + (mood === "adventure" ? (property.experiences || []).filter(item => item.enabled).length : 0);
 }
 
+function suitableRooms(property: PublicProperty, mood: Mood) {
+  return property.rooms.filter(room => room.sellingRate > 0 && room.totalRooms > 0 &&
+    (mood !== "reconnect" || room.capacity >= 2));
+}
+
 export default function HomeStoryPreview({
   properties,
   locale,
@@ -95,10 +100,10 @@ export default function HomeStoryPreview({
   const selected = labels.moods[mood];
   const available = properties.filter(property =>
     property.status === "published" && property.photos[0] &&
-    property.rooms.some(room => room.sellingRate > 0 && room.totalRooms > 0),
+    suitableRooms(property, mood).length > 0,
   );
   const property = [...available].sort((a, b) => score(b, mood) - score(a, mood))[0];
-  const room = property?.rooms.filter(item => item.sellingRate > 0 && item.totalRooms > 0)
+  const room = property && suitableRooms(property, mood)
     .sort((a, b) => a.sellingRate - b.sellingRate)[0];
   const experience = property?.experiences?.find(item => item.enabled && moodTerms[mood].test(
     `${item.name} ${(item.wishlistTags || []).join(" ")}`,
