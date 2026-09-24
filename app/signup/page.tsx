@@ -35,6 +35,12 @@ export default function SignupPage() {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Unable to create account.");
+      window.dispatchEvent(new CustomEvent("tripelor:analytics", {
+        detail: {
+          eventName: "account_signup",
+          metadata: { signedIn: result.signedIn ? "true" : "false" },
+        },
+      }));
       if (result.signedIn) {
         window.location.href = nextPath || "/account";
         return;
@@ -57,12 +63,14 @@ export default function SignupPage() {
           <aside className="bg-[#06151c] p-8 text-white md:p-10">
             <TripelorMark className="h-14 w-14 text-[#d9bd7b]" />
             <p className="eyebrow mt-9">Tripelor membership</p>
-            <h1 className="font-display mt-4 text-4xl leading-tight">One account for your Maldives journey.</h1>
+            <h1 className="font-display mt-4 text-4xl leading-tight">Unlock more of your Maldives journey.</h1>
             <div className="mt-8 space-y-5">
               {[
-                "Continue directly to the service you selected",
-                "Keep booking requests and vouchers together",
-                "Save plans and reach your concierge easily",
+                "Get first access to private Maldives member offers",
+                "Save stays, trip plans and booking requests in one place",
+                "Earn Tripelor Points and unlock referral rewards",
+                "Set availability alerts for stays you are watching",
+                "Keep your local Tripelor concierge connected to your journey",
               ].map((item) => (
                 <p key={item} className="flex items-start gap-3 text-sm leading-6 text-white/60">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#d9bd7b]" /> {item}
@@ -73,8 +81,8 @@ export default function SignupPage() {
 
           <section className="p-7 md:p-10 lg:p-12">
             <p className="eyebrow text-[#8d7037]">Create your account</p>
-            <h2 className="font-display mt-3 text-4xl md:text-5xl">Join Tripelor.</h2>
-            <p className="mt-4 text-sm leading-7 text-[#687377]">Create your private travel profile and continue with your selected service.</p>
+            <h2 className="font-display mt-3 text-4xl md:text-5xl">Join Tripelor. Unlock member benefits.</h2>
+            <p className="mt-4 text-sm leading-7 text-[#687377]">Create your free travel account to unlock private offers, save your plans, earn Tripelor Points and keep your Maldives requests together.</p>
 
             <form onSubmit={submit} className="mt-8 grid gap-5">
               <label className="premium-label">
