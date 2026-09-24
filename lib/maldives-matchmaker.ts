@@ -166,7 +166,7 @@ export function matchMaldives(properties: PublicProperty[], input: MatchInput): 
     }
   }
 
-  return [...bestPerProperty.values()]
+  return Array.from(bestPerProperty.values())
     .sort((a, b) => b.score - a.score || a.total - b.total)
     .slice(0, 3);
 }
