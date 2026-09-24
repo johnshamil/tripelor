@@ -87,6 +87,11 @@ img, video { max-width: 100%; height: auto; }
 .premium-control::placeholder { color: #899294; }
 .premium-control option { background: #fffdf8; color: #071922; }
 
+.admin-flight-control { min-height: 46px; width: 100%; border: 1px solid rgba(255,255,255,.1); border-radius: .65rem; background: rgba(0,0,0,.28); padding: .7rem .85rem; color: #fff; font-size: .875rem; font-weight: 400; letter-spacing: normal; text-transform: none; transition: border-color .2s ease, box-shadow .2s ease; }
+.admin-flight-control:focus { border-color: rgba(201,168,106,.65); outline: none; box-shadow: 0 0 0 3px rgba(201,168,106,.08); }
+.admin-flight-control::placeholder { color: rgba(255,255,255,.3); }
+.admin-flight-control option { background: #071922; color: white; }
+
 .escape-card { position: relative; min-height: 580px; overflow: hidden; background: #071922; }
 .escape-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1s cubic-bezier(.22, 1, .36, 1); }
 .escape-card:hover img { transform: scale(1.055); }
