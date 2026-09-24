@@ -1,4 +1,4 @@
-import { propertyRateForDate, type PublicProperty, type Room } from "@/lib/property-model";
+import { propertyRateForDate, type PublicProperty } from "@/lib/property-model";
 
 export type MatchStyle = "romance" | "family" | "ocean" | "adventure" | "relax";
 export type MatchDestination = "flexible" | "vaavu" | "ukulhas" | "maafushi" | "airport";
@@ -17,7 +17,7 @@ export type MatchInput = {
 
 export type MatchRecommendation = {
   property: PublicProperty;
-  room: Room;
+  room: PublicProperty["rooms"][number];
   total: number;
   nightly: number;
   reasons: string[];
@@ -69,7 +69,7 @@ function destinationMatches(property: PublicProperty, destination: MatchDestinat
   return /hulhumal[eé]|male|mal[eé]|airport/.test(haystack);
 }
 
-function styleScore(property: PublicProperty, room: Room, style: MatchStyle) {
+function styleScore(property: PublicProperty, room: PublicProperty["rooms"][number], style: MatchStyle) {
   const experienceText = (property.experiences || []).map(item => `${item.name} ${item.description} ${item.inclusions}`).join(" ");
   const text = [
     property.name,
@@ -85,7 +85,7 @@ function styleScore(property: PublicProperty, room: Room, style: MatchStyle) {
   return Math.min(28, hits * 5);
 }
 
-function inventoryBlocked(property: PublicProperty, room: Room, dates: string[]) {
+function inventoryBlocked(property: PublicProperty, room: PublicProperty["rooms"][number], dates: string[]) {
   if (!dates.length) return false;
   return dates.some(date =>
     (property.inventoryRules || []).some(rule =>
@@ -97,7 +97,7 @@ function inventoryBlocked(property: PublicProperty, room: Room, dates: string[])
   );
 }
 
-function roomStayTotal(property: PublicProperty, room: Room, arrival: string, nights: number) {
+function roomStayTotal(property: PublicProperty, room: PublicProperty["rooms"][number], arrival: string, nights: number) {
   const dates = datesForStay(arrival, nights);
   if (inventoryBlocked(property, room, dates)) return null;
   const rates = dates.length
