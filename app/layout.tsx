@@ -1,7 +1,6 @@
 import "../styles/globals.css";
 import "../styles/mobile-comfort.css";
 import type { Metadata } from "next";
-import Script from "next/script";
 import { CartProvider } from "@/components/cart-provider";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
@@ -88,19 +87,23 @@ const website = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>
-        <Script
+      <head>
+        <script
+          async
           src="https://www.googletagmanager.com/gtag/js?id=AW-18458548937"
-          strategy="afterInteractive"
         />
-        <Script id="google-ads-tag" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'AW-18458548937');
-          `}
-        </Script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-18458548937');
+            `,
+          }}
+        />
+      </head>
+      <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }} />
         <CartProvider>
