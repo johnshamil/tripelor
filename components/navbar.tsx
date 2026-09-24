@@ -25,12 +25,14 @@ export default function Navbar() {
   const pathname = usePathname();
   const locale = useSiteLanguage();
   const copy = translations[locale].nav;
+  const flightsLabel = locale === "it" ? "Voli" : locale === "ru" ? "Авиабилеты" : "Flights";
   const primaryLinks = primaryRoutes.map(([href, key]) => [href, copy[key]] as const);
   const mobileLinks = [
     ["/", copy.home],
     ["/maldives-matchmaker", copy.helpMeChoose],
     ["/holiday-shortlist", copy.holidayShortlist],
     ["/my-trip", copy.myTripPlan],
+    ["/flights", flightsLabel],
     ...primaryLinks,
     ["/account#referral-rewards", copy.referralEarn],
     ["/contact", copy.contact],
@@ -85,6 +87,7 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
+          <Link href="/flights" className="nav-tab">{flightsLabel}</Link>
           <LanguageSwitcher />
           <CartLink />
           <Link href="/account" className="nav-tab gap-2" aria-label="My Tripelor account">
@@ -120,7 +123,7 @@ export default function Navbar() {
             </div>
 
             <nav className="grid" aria-label="Mobile navigation">
-              {user?.isAdmin && <div className="mb-3 grid grid-cols-2 gap-2 border-b border-gold/20 pb-4">{[["/admin", copy.adminHome], ["/admin/properties", copy.properties], ["/admin/host-questions", copy.hostQuestions]].map(([href, label]) => <Link key={href} href={href} onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-center rounded-xl border border-gold/30 px-3 py-2 text-center text-sm text-gold">{label}</Link>)}</div>}
+              {user?.isAdmin && <div className="mb-3 grid grid-cols-2 gap-2 border-b border-gold/20 pb-4">{[["/admin", copy.adminHome], ["/admin/properties", copy.properties], ["/admin/flights", "Flight Desk"], ["/admin/host-questions", copy.hostQuestions]].map(([href, label]) => <Link key={href} href={href} onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-center rounded-xl border border-gold/30 px-3 py-2 text-center text-sm text-gold">{label}</Link>)}</div>}
               {mobileLinks.map(([href, label], index) => (
                 <Link
                   key={href}

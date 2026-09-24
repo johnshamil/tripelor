@@ -11,6 +11,7 @@ import {
   MapPin,
   MessageCircle,
   PackageCheck,
+  Plane,
   ShieldCheck,
   Ship,
   Star,
@@ -119,7 +120,8 @@ export default function AccountPage() {
         </div>
       </header>
 
-      <Link href="/account/trip-requests" className="mt-7 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>My Trip Requests</strong><span className="mt-1 block text-sm text-gray-400">Follow up on the stays and experiences in your trip plan.</span></span><span className="text-gold">View →</span></Link>
+      <Link href="/account/flights" className="mt-7 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/30 bg-gold/[.06] p-5"><span className="flex items-start gap-3"><Plane className="mt-1 h-5 w-5 shrink-0 text-gold" /><span><strong>My Flights & Tickets</strong><span className="mt-1 block text-sm text-gray-400">Track fare requests, quotes, payment, PNR and e-ticket details.</span></span></span><span className="text-gold">Open →</span></Link>
+      <Link href="/account/trip-requests" className="mt-4 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>My Trip Requests</strong><span className="mt-1 block text-sm text-gray-400">Follow up on the stays and experiences in your trip plan.</span></span><span className="text-gold">View →</span></Link>
       <Link href="/account/host-questions" className="mt-7 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>Host Messages</strong><span className="mt-1 block text-sm text-gray-400">Your questions and personal replies from the island.</span></span><span className="text-gold">Open →</span></Link>
       <Rewards2Card user={user} loyalty={loyalty} />
       <Link href="/account/availability-alerts" className="mt-7 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>Availability Alerts</strong><span className="mt-1 block text-sm text-gray-400">Get an email when your preferred room opens up for your dates.</span></span><span className="text-gold">Manage →</span></Link>
