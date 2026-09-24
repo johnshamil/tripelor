@@ -144,6 +144,31 @@ function formatDate(date: string) {
   );
 }
 
+function reportRequestQuoteConversion(reference: string, onComplete: () => void) {
+  let completed = false;
+  const finish = () => {
+    if (completed) return;
+    completed = true;
+    onComplete();
+  };
+
+  const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
+  if (typeof gtag !== "function") {
+    finish();
+    return;
+  }
+
+  gtag("event", "conversion", {
+    send_to: "AW-18458548937/b8IICOvPsPscEMm13OFE",
+    value: 1.0,
+    currency: "USD",
+    transaction_id: reference,
+    event_callback: finish,
+  });
+
+  window.setTimeout(finish, 1200);
+}
+
 function packageScore(pkg: PackageOption, mood: Mood, dining: Dining, budget: Budget) {
   let score = pkg.moods.includes(mood) ? 60 : 0;
   if (dining === "flexible") score += 8;
@@ -239,7 +264,11 @@ export default function BuildYourTripPage() {
       });
       const data = await response.json();
       if (!response.ok || !data.url) throw new Error(data.error || "We could not prepare this quote.");
-      window.location.href = data.url;
+      const destination = data.url as string;
+      const reference = typeof data.reference === "string" ? data.reference : "";
+      reportRequestQuoteConversion(reference, () => {
+        window.location.href = destination;
+      });
     } catch (error) {
       setQuoteError(error instanceof Error && error.name !== "TimeoutError" ? error.message : "We could not prepare this quote. Please try again.");
       setQuoteCreating(false);
