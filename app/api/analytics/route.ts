@@ -6,6 +6,8 @@ const ALLOWED_EVENTS = new Set([
   "booking_started",
   "booking_completed",
   "whatsapp_click",
+  "account_signup",
+  "account_login",
 ]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const BOT_PATTERN = /bot|crawler|spider|preview|slurp|headless|lighthouse/i;
