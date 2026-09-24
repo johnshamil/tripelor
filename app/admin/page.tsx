@@ -11,6 +11,7 @@ import {
   Clock3,
   CreditCard,
   Search,
+  LockKeyhole,
   Sparkles,
   ShieldCheck,
   Ship,
@@ -208,6 +209,9 @@ export default function AdminPage() {
             <Link href="/admin/matchmaker-leads" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
               <Sparkles className="h-4 w-4" /> Matchmaker Leads
             </Link>
+            <Link href="/admin/secret-deal-leads" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
+              <LockKeyhole className="h-4 w-4" /> Secret Deal Leads
+            </Link>
             <Link href="#bookings" className="btn-outline min-h-[46px] px-4 text-xs">
               Bookings
             </Link>
@@ -224,6 +228,7 @@ export default function AdminPage() {
         </div>
       )}
 
+      <Link href="/admin/secret-deal-leads" className="mt-6 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/30 bg-gold/[.06] p-5"><span><strong>Secret Deal Leads</strong><span className="mt-1 block text-sm text-gray-400">Visitors who unlocked private offers by travel month, budget and holiday style.</span></span><span className="text-gold">Open leads →</span></Link>
       <Link href="/admin/matchmaker-leads" className="mt-6 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/30 bg-gold/[.04] p-5"><span><strong>Maldives Matchmaker Leads</strong><span className="mt-1 block text-sm text-gray-400">Follow up new visitors who shared their dates, budget, style and contact details.</span></span><span className="text-gold">Open leads →</span></Link>
       <Link href="/admin/trip-requests" className="mt-6 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 p-5"><span><strong>Trip Planning Requests</strong><span className="mt-1 block text-sm text-gray-400">Review guests’ trip plans, preferred dates and contact details.</span></span><span className="text-gold">Open →</span></Link>
       <Link href="/admin/host-questions" className="mt-6 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 p-5"><span><strong>Host Questions</strong><span className="mt-1 block text-sm text-gray-400">Read guest enquiries and publish personal text or voice replies.</span></span><span className="text-gold">Open inbox →</span></Link>
