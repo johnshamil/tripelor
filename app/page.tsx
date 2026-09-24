@@ -190,6 +190,16 @@ export default async function Home() {
           <Link href="/maldives-matchmaker" className="btn-gold">Find My Maldives Match <ArrowRight className="h-4 w-4" /></Link>
         </div>
       </section>
+      <section className="border-b border-[#d9bd7b]/25 bg-[#071922] text-white">
+        <div className="container grid gap-7 py-12 md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <p className="eyebrow">Private access · Secret Deals</p>
+            <h2 className="font-display mt-3 text-3xl md:text-5xl">Unlock private Maldives offers.</h2>
+            <p className="mt-3 max-w-2xl leading-7 text-white/60">Choose your travel month, budget and holiday style. Tripelor reveals matched private options and lets our team follow up with the confirmed final price.</p>
+          </div>
+          <Link href="/secret-deals" className="btn-gold">Unlock Secret Deals <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+      </section>
 
 
       <section className="border-b border-gold/20 bg-[#071922]">

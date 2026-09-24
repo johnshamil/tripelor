@@ -22,6 +22,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/travel-info`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
     { url: `${base}/reviews`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/build-your-trip`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/maldives-matchmaker`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${base}/secret-deals`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     ...managed.map((property) => ({ url: `${base}/stays/${property.slug}`, lastModified: new Date(property.updated_at), changeFrequency: "weekly" as const, priority: 0.8 })),
