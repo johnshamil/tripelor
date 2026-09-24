@@ -135,7 +135,7 @@ export default async function Home() {
                 <Ship className="h-4 w-4" /> {copy.findTransfers}
               </Link>
             </div>
-            <Link href="/help-me-choose" className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-sm text-[#ead7aa] underline">{copy.unsure} <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/maldives-matchmaker" className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-sm text-[#ead7aa] underline">{copy.unsure} <ArrowRight className="h-4 w-4" /></Link>
             <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-white/65">
               <span className="flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-[#d9bd7b]" /> {copy.transparentPricing}
@@ -180,6 +180,17 @@ export default async function Home() {
         locale={locale}
         copy={{ title: copy.islandStoryTitle, body: copy.islandStoryBody, cta: copy.islandStoryCta }}
       />
+      <section className="border-b border-[#d9bd7b]/25 bg-[#0a222c] text-white">
+        <div className="container grid items-center gap-7 py-12 md:grid-cols-[1fr_auto]">
+          <div>
+            <p className="eyebrow">New · Maldives Matchmaker</p>
+            <h2 className="font-display mt-3 text-3xl md:text-5xl">Tell us your budget. We’ll find your Maldives match.</h2>
+            <p className="mt-3 max-w-2xl leading-7 text-white/60">A quick personalised quiz compares published Tripelor rooms, seasonal rates, meal plans, destinations and your travel style — then saves the lead for concierge follow-up.</p>
+          </div>
+          <Link href="/maldives-matchmaker" className="btn-gold">Find My Maldives Match <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+      </section>
+
 
       <section className="border-b border-gold/20 bg-[#071922]">
         <div className="container grid items-center gap-6 py-12 md:grid-cols-[1fr_auto]">
