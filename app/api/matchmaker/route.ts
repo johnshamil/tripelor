@@ -35,13 +35,14 @@ function validDate(value: string) {
 }
 
 function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, character => ({
+  const entities: Record<string, string> = {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
     "'": "&#039;",
-  })[character] || character);
+  };
+  return value.replace(/[&<>"']/g, character => entities[character] || character);
 }
 
 export async function POST(request: Request) {
