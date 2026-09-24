@@ -55,6 +55,12 @@ export default function LoginPage() {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Unable to log in.");
+      window.dispatchEvent(new CustomEvent("tripelor:analytics", {
+        detail: {
+          eventName: "account_login",
+          metadata: { destination: nextPath || "/account" },
+        },
+      }));
       window.location.href = nextPath || "/account";
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Unable to log in.");
@@ -83,7 +89,7 @@ export default function LoginPage() {
             </p>
             <h1 className="font-display mt-5 text-6xl leading-[1.02]">Your journey, thoughtfully kept together.</h1>
             <div className="mt-8 grid gap-3 text-sm text-white/70">
-              {["Save your plans and preferences", "Keep booking requests in one place", "Reach your Tripelor concierge easily"].map((item) => (
+              {["Unlock private member offers", "Save plans, stays and booking requests", "Earn Tripelor Points and rewards", "Reach your Tripelor concierge easily"].map((item) => (
                 <p key={item} className="flex items-center gap-3">
                   <CheckCircle2 className="h-4 w-4 text-[#d9bd7b]" /> {item}
                 </p>
