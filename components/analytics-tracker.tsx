@@ -8,7 +8,9 @@ type AnalyticsEvent =
   | "property_view"
   | "booking_started"
   | "booking_completed"
-  | "whatsapp_click";
+  | "whatsapp_click"
+  | "account_signup"
+  | "account_login";
 
 const VISITOR_KEY = "tripelor_visitor_id";
 const SESSION_KEY = "tripelor_session_id";
@@ -144,6 +146,20 @@ export default function AnalyticsTracker() {
 
     document.addEventListener("click", trackClick, { capture: true });
     return () => document.removeEventListener("click", trackClick, { capture: true });
+  }, []);
+
+  useEffect(() => {
+    function trackAccountEvent(event: Event) {
+      const detail = (event as CustomEvent<{
+        eventName?: "account_signup" | "account_login";
+        metadata?: Record<string, string | undefined>;
+      }>).detail;
+      if (!detail || !["account_signup", "account_login"].includes(detail.eventName || "")) return;
+      sendEvent(detail.eventName as AnalyticsEvent, window.location.pathname, detail.metadata || {});
+    }
+
+    window.addEventListener("tripelor:analytics", trackAccountEvent);
+    return () => window.removeEventListener("tripelor:analytics", trackAccountEvent);
   }, []);
 
   return null;
