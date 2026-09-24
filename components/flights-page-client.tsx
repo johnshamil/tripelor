@@ -263,25 +263,25 @@ export default function FlightsPageClient() {
 
           <div className="mt-7 grid gap-5 md:grid-cols-2">
             <Field label={copy.from}>
-              <input value={origin} onChange={event => setOrigin(event.target.value)} placeholder="Dhaka (DAC)" className="flight-control" />
+              <input value={origin} onChange={event => setOrigin(event.target.value)} placeholder="Dhaka (DAC)" className="premium-control" />
             </Field>
             <Field label={copy.to}>
-              <input value={destination} onChange={event => setDestination(event.target.value.toUpperCase())} placeholder="MLE" className="flight-control" />
+              <input value={destination} onChange={event => setDestination(event.target.value.toUpperCase())} placeholder="MLE" className="premium-control" />
             </Field>
           </div>
           <p className="mt-2 text-xs text-[#778184]">{copy.routeHint}</p>
 
           <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             <Field label={copy.depart}>
-              <input type="date" min={todayMaldives()} value={departureDate} onChange={event => setDepartureDate(event.target.value)} className="flight-control" />
+              <input type="date" min={todayMaldives()} value={departureDate} onChange={event => setDepartureDate(event.target.value)} className="premium-control" />
             </Field>
             {tripType === "round-trip" && (
               <Field label={copy.return}>
-                <input type="date" min={departureDate || todayMaldives()} value={returnDate} onChange={event => setReturnDate(event.target.value)} className="flight-control" />
+                <input type="date" min={departureDate || todayMaldives()} value={returnDate} onChange={event => setReturnDate(event.target.value)} className="premium-control" />
               </Field>
             )}
             <Field label={copy.cabin}>
-              <select value={cabin} onChange={event => setCabin(event.target.value as Cabin)} className="flight-control">
+              <select value={cabin} onChange={event => setCabin(event.target.value as Cabin)} className="premium-control">
                 {(["Economy","Premium Economy","Business","First"] as Cabin[]).map(value => <option key={value}>{value}</option>)}
               </select>
             </Field>
@@ -301,16 +301,16 @@ export default function FlightsPageClient() {
             <h2 className="font-display text-3xl">Passenger contact</h2>
             <div className="mt-5 grid gap-5 md:grid-cols-2">
               <Field label={copy.name}>
-                <input value={customerName} onChange={event => setCustomerName(event.target.value)} maxLength={120} className="flight-control" />
+                <input value={customerName} onChange={event => setCustomerName(event.target.value)} maxLength={120} className="premium-control" />
               </Field>
               <Field label={copy.email}>
-                <input type="email" value={customerEmail} onChange={event => setCustomerEmail(event.target.value)} maxLength={250} className="flight-control" />
+                <input type="email" value={customerEmail} onChange={event => setCustomerEmail(event.target.value)} maxLength={250} className="premium-control" />
               </Field>
               <Field label={copy.phone}>
-                <input value={customerPhone} onChange={event => setCustomerPhone(event.target.value)} maxLength={60} placeholder="+960..." className="flight-control" />
+                <input value={customerPhone} onChange={event => setCustomerPhone(event.target.value)} maxLength={60} placeholder="+960..." className="premium-control" />
               </Field>
               <Field label={copy.notes}>
-                <input value={notes} onChange={event => setNotes(event.target.value)} maxLength={2000} placeholder="Preferred airline, baggage, transit preference..." className="flight-control" />
+                <input value={notes} onChange={event => setNotes(event.target.value)} maxLength={2000} placeholder="Preferred airline, baggage, transit preference..." className="premium-control" />
               </Field>
               <label className="hidden" aria-hidden="true">Company<input tabIndex={-1} autoComplete="off" value={company} onChange={event => setCompany(event.target.value)} /></label>
             </div>
