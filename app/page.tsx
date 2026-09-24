@@ -11,6 +11,7 @@ import {
   Ship,
   Sparkles,
   Star,
+  UserPlus,
 } from "lucide-react";
 import SaveTripButton from "@/components/save-trip-button";
 import { propertyPhotoUrl } from "@/lib/property-model";
@@ -104,6 +105,24 @@ export default async function Home() {
     },
   ];
 
+  const memberCopy = locale === "it"
+    ? {
+        cta: "Unisciti a Tripelor · Offerte Membri",
+        eyebrow: "Vantaggi per i membri",
+        benefits: ["Offerte private", "Salva i viaggi", "Tripelor Points", "Avvisi disponibilità", "Concierge locale"],
+      }
+    : locale === "ru"
+      ? {
+          cta: "Вступить в Tripelor · Закрытые предложения",
+          eyebrow: "Преимущества участника",
+          benefits: ["Закрытые предложения", "Сохранение поездок", "Tripelor Points", "Уведомления о наличии", "Местный консьерж"],
+        }
+      : {
+          cta: "Join Tripelor · Unlock Member Deals",
+          eyebrow: "Member benefits",
+          benefits: ["Private deals", "Save trips", "Tripelor Points", "Availability alerts", "Local concierge"],
+        };
+
 
   return (
     <>
@@ -134,8 +153,24 @@ export default async function Home() {
               <Link href="/speedboat" className="btn-outline w-full border-white/40 bg-black/20 text-white sm:w-auto">
                 <Ship className="h-4 w-4" /> {copy.findTransfers}
               </Link>
+              <Link
+                href="/signup?next=%2Faccount"
+                className="btn-outline w-full border-[#ead7aa]/70 bg-[#ead7aa]/10 text-[#f6e7bf] sm:w-auto"
+              >
+                <UserPlus className="h-4 w-4" /> {memberCopy.cta}
+              </Link>
             </div>
             <Link href="/maldives-matchmaker" className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-sm text-[#ead7aa] underline">{copy.unsure} <ArrowRight className="h-4 w-4" /></Link>
+            <div className="mt-6 max-w-3xl rounded-2xl border border-[#ead7aa]/20 bg-black/20 p-4 backdrop-blur-sm">
+              <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#ead7aa]">{memberCopy.eyebrow}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {memberCopy.benefits.map((benefit) => (
+                  <span key={benefit} className="rounded-full border border-white/15 bg-white/[.06] px-3 py-1.5 text-xs text-white/75">
+                    {benefit}
+                  </span>
+                ))}
+              </div>
+            </div>
             <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-white/65">
               <span className="flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-[#d9bd7b]" /> {copy.transparentPricing}
