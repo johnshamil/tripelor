@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { quoteCart, type CartLine } from "@/lib/trip-cart";
 import { buildQuoteHref, createQuoteReference, QUOTE_VALID_MS } from "@/lib/trip-quote";
 import { signQuote, type QuoteExtras } from "@/lib/trip-quote-server";
+import { speedboatTransferTotal } from "@/lib/transfer-pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     return Response.json({
       reference,
       url: `${url.pathname}${url.search}`,
-      total: quoted.total + extras.transferSeats * 50,
+      total: quoted.total + speedboatTransferTotal(extras.transferSeats),
       expiresAt: new Date(issued + QUOTE_VALID_MS).toISOString(),
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
