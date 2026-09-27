@@ -7,6 +7,7 @@ import { decodeQuoteLines, quoteFromLines, quoteIssuedAt, quoteStatus, validQuot
 import type { CartLine } from "@/lib/trip-cart";
 import { localizeQuotedLine } from "@/lib/quote-display";
 import { verifyQuoteSignature, type QuoteExtras } from "@/lib/trip-quote-server";
+import { speedboatTransferTotal } from "@/lib/transfer-pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -208,7 +209,7 @@ export default function QuotePage({
   const room = extras.room;
   const meal = extras.meal;
   const transferSeats = extras.transferSeats;
-  const transferTotal = transferSeats * 50;
+  const transferTotal = speedboatTransferTotal(transferSeats);
   const requestHref = extras.requestHref || undefined;
   const customizeHref = extras.customizeHref || undefined;
   const proposalTotal = quote.total + transferTotal;
