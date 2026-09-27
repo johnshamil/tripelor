@@ -24,6 +24,7 @@ import {
 import SaveTripButton from "@/components/save-trip-button";
 import { fiveNight, threeNight } from "@/lib/island-packages";
 import { stayCartId } from "@/lib/trip-cart";
+import { DEFAULT_SPEEDBOAT_SEAT_PRICE_USD, speedboatTransferTotal } from "@/lib/transfer-pricing";
 
 type Mood = "relax" | "romance" | "adventure" | "ocean";
 type Dining = "flexible" | "Half Board" | "Full Board";
@@ -203,7 +204,7 @@ export default function BuildYourTripPage() {
   }, [nights, mood, dining, budget]);
 
   const transferSeats = includeTransfer ? 2 : 0;
-  const transferTotal = transferSeats * 50;
+  const transferTotal = speedboatTransferTotal(transferSeats);
   const total = recommendation.price + transferTotal;
   const checkOut = addDays(arrival, nights);
   const selectedMood = moodOptions.find((option) => option.value === mood)?.title || "your preferences";
@@ -438,7 +439,7 @@ export default function BuildYourTripPage() {
                       <div>
                         <p className="premium-label"><span><Ship className="h-4 w-4 text-[#9c7d3d]" /> Airport speedboat</span></p>
                         <div className="mt-2 grid grid-cols-2 gap-3">
-                          <ChoiceButton active={includeTransfer} onClick={() => setIncludeTransfer(true)} title="Arrange it" text="2 seats · USD 100" />
+                          <ChoiceButton active={includeTransfer} onClick={() => setIncludeTransfer(true)} title="Arrange it" text={`2 seats · USD ${DEFAULT_SPEEDBOAT_SEAT_PRICE_USD * 2}`} />
                           <ChoiceButton active={!includeTransfer} onClick={() => setIncludeTransfer(false)} title="Not now" text="Decide with concierge" />
                         </div>
                       </div>
