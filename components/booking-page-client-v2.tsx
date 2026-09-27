@@ -23,6 +23,7 @@ import AvailabilityAlertButton from "@/components/availability-alert-button";
 import { propertyRateForDate, seasonalRateForDate } from "@/lib/property-model";
 import type { PublicProperty } from "@/lib/property-model";
 import { translations, type ProfessionalLocale } from "@/lib/professional-translations";
+import { DEFAULT_SPEEDBOAT_SEAT_PRICE_USD } from "@/lib/transfer-pricing";
 
 const PACKAGE_HOTEL = "Uhoo's Lavish Oasis";
 
@@ -365,7 +366,7 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
       const finalNights = packageName ? packageNights : nights;
       const builderNote =
         speedboatSeats > 0
-          ? `Speedboat requested: ${speedboatSeats} seat${speedboatSeats > 1 ? "s" : ""} at USD 50/person (USD ${speedboatTotal}).`
+          ? `Speedboat requested: ${speedboatSeats} seat${speedboatSeats > 1 ? "s" : ""} at USD ${DEFAULT_SPEEDBOAT_SEAT_PRICE_USD}/person (USD ${speedboatTotal}).`
           : "";
       const requestNote = [
         packageName ? `Couple package for 2 adults sharing ${roomLabel} at ${PACKAGE_HOTEL}.` : specialRequests.trim(),
