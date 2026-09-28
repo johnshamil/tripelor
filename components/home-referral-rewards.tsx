@@ -64,12 +64,17 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             {copy.newReward}
           </span>
-          <span className="inline-flex items-center gap-2 text-sm font-semibold sm:text-base">
-            <Gift className="h-5 w-5 shrink-0" aria-hidden="true" />
-            <strong className="font-black">{copy.title}</strong>
-            <span className="hidden sm:inline">—</span>
-            <span>{copy.banner}</span>
-          </span>
+          <div className="flex flex-col items-center gap-1 text-center sm:items-start sm:text-left">
+            <span className="inline-flex items-center justify-center gap-2 text-sm font-semibold sm:justify-start sm:text-base">
+              <Gift className="h-5 w-5 shrink-0" aria-hidden="true" />
+              <strong className="font-black">{copy.title}</strong>
+              <span className="hidden sm:inline">—</span>
+              <span>{copy.banner}</span>
+            </span>
+            <span className="max-w-xl text-[11px] font-bold leading-5 text-[#071922]/80 sm:text-xs">
+              {copy.promo}
+            </span>
+          </div>
           <Link
             href={href}
             className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[#071922] px-4 py-2 text-xs font-bold text-[#f6e7bf] shadow-[0_8px_22px_rgba(7,25,34,.28)] transition hover:-translate-y-0.5 hover:bg-black"
