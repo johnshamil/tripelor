@@ -58,7 +58,7 @@ export const translations = {
     referral: {
       newReward: "New Reward",
       title: "Referral Rewards",
-      banner: "Give USD 20 off · Earn 100 Tripelor Points",
+      banner: "Your Friend Saves $20. You Earn 100 Points.",
       open: "Open My Rewards",
       join: "Join & Unlock Rewards",
       welcomeReward: "Welcome Reward",
