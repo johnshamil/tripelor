@@ -12,9 +12,11 @@ import {
   CreditCard,
   Search,
   LockKeyhole,
+  Share2,
   Sparkles,
   ShieldCheck,
   Ship,
+  Trophy,
   Users,
   XCircle,
 } from "lucide-react";
@@ -34,6 +36,10 @@ const bookingStatusOrder: Record<string, number> = {
 export default function AdminPage() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [referralPromotion, setReferralPromotion] = useState<any>({
+    promotion: null,
+    participants: [],
+  });
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("");
   const [busyId, setBusyId] = useState("");
@@ -42,16 +48,20 @@ export default function AdminPage() {
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("all");
 
   async function load() {
-    const [bookingResponse, userResponse] = await Promise.all([
+    const [bookingResponse, userResponse, referralResponse] = await Promise.all([
       fetch("/api/admin/bookings", { cache: "no-store" }),
       fetch("/api/admin/users", { cache: "no-store" }),
+      fetch("/api/admin/referral-promotion", { cache: "no-store" }),
     ]);
     const bookingResult = await bookingResponse.json();
     const userResult = await userResponse.json();
+    const referralResult = await referralResponse.json();
     if (!bookingResponse.ok) throw new Error(bookingResult.error || "Unable to load bookings.");
     if (!userResponse.ok) throw new Error(userResult.error || "Unable to load users.");
+    if (!referralResponse.ok) throw new Error(referralResult.error || "Unable to load referral promotion.");
     setBookings(bookingResult.bookings || []);
     setUsers(userResult.users || []);
+    setReferralPromotion(referralResult || { promotion: null, participants: [] });
   }
 
   useEffect(() => {
@@ -228,6 +238,100 @@ export default function AdminPage() {
         </div>
       )}
 
+      <section
+        id="referral-promotion"
+        className="mt-6 overflow-hidden rounded-2xl border border-gold/30 bg-[radial-gradient(circle_at_top_right,rgba(217,189,123,.14),transparent_32%),rgba(255,255,255,.02)] p-5 md:p-6"
+      >
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.22em] text-gold">
+              <Trophy className="h-4 w-4" /> Referral Lucky Draw
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold md:text-3xl">
+              Who shared their referral code
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-400">
+              The prize is a free 3-night Half Board stay. The promotion closes on
+              30 December 2026, and one winner can be selected after it ends.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 sm:flex">
+            <SummaryPill
+              label="Participants"
+              value={referralPromotion?.promotion?.totalParticipants || 0}
+              icon={Users}
+            />
+            <SummaryPill
+              label="Share actions"
+              value={referralPromotion?.promotion?.totalShareActions || 0}
+              icon={Share2}
+            />
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-white/10 bg-black/20">
+          {(referralPromotion?.participants || []).length === 0 ? (
+            <div className="p-8 text-center">
+              <Share2 className="mx-auto h-5 w-5 text-gold" />
+              <p className="mt-3 text-sm text-gray-400">No referral shares have been recorded yet.</p>
+              <p className="mt-1 text-xs text-gray-600">
+                Members appear here after using the Copy or Share buttons in their Tripelor account.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-white/10">
+              {(referralPromotion.participants || []).map((participant: any) => (
+                <div
+                  key={participant.userId || participant.email}
+                  className="grid gap-4 p-4 md:grid-cols-[1.35fr_.8fr_.7fr_1fr] md:items-center"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">
+                      {participant.fullName || "Tripelor Member"}
+                    </p>
+                    <p className="mt-1 truncate text-xs text-gray-500">{participant.email}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-[9px] uppercase tracking-[.12em] text-gray-600">Referral code</p>
+                    <p className="mt-1 font-mono text-sm font-bold text-gold">
+                      {participant.referralCode}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-[9px] uppercase tracking-[.12em] text-gray-600">Activity</p>
+                    <p className="mt-1 text-sm font-semibold">
+                      {participant.shareCount} action{participant.shareCount === 1 ? "" : "s"}
+                    </p>
+                    <p className="mt-1 text-[10px] text-gray-500">
+                      {participant.nativeShares} shared · {participant.linkCopies} copied
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-[9px] uppercase tracking-[.12em] text-gray-600">Last activity</p>
+                    <p className="mt-1 text-xs text-gray-300">
+                      {formatReferralTime(participant.lastSharedAt)}
+                    </p>
+                    <p className="mt-1 text-[10px] text-gray-500">
+                      {participant.rewardedReferrals || 0} completed referral
+                      {(participant.rewardedReferrals || 0) === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <p className="mt-3 text-[11px] leading-5 text-gray-600">
+          Tripelor records website Copy and Share actions while the member is signed in.
+          It cannot see what a customer does inside WhatsApp, Instagram, or another app after leaving Tripelor.
+        </p>
+      </section>
+
       <Link href="/admin/secret-deal-leads" className="mt-4 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/30 bg-gold/[.06] p-5"><span><strong>Secret Deal Leads</strong><span className="mt-1 block text-sm text-gray-400">Visitors who unlocked private offers by travel month, budget and holiday style.</span></span><span className="text-gold">Open leads →</span></Link>
       <Link href="/admin/matchmaker-leads" className="mt-6 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/30 bg-gold/[.04] p-5"><span><strong>Maldives Matchmaker Leads</strong><span className="mt-1 block text-sm text-gray-400">Follow up new visitors who shared their dates, budget, style and contact details.</span></span><span className="text-gold">Open leads →</span></Link>
       <Link href="/admin/trip-requests" className="mt-6 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 p-5"><span><strong>Trip Planning Requests</strong><span className="mt-1 block text-sm text-gray-400">Review guests’ trip plans, preferred dates and contact details.</span></span><span className="text-gold">Open →</span></Link>
@@ -367,6 +471,22 @@ export default function AdminPage() {
       </section>
     </main>
   );
+}
+
+function formatReferralTime(value?: string | null) {
+  if (!value) return "—";
+  try {
+    return new Date(value).toLocaleString("en-GB", {
+      timeZone: "Indian/Maldives",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return String(value);
+  }
 }
 
 function SummaryPill({ label, value, icon: Icon }: { label: string; value: any; icon: any }) {
