@@ -1,11 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, Copy, Gift, Link2, Share2, Users } from "lucide-react";
+import {
+  CalendarDays,
+  CheckCircle2,
+  Copy,
+  Gift,
+  Link2,
+  Share2,
+  Trophy,
+  Users,
+} from "lucide-react";
+
+const PROMOTION_END_LABEL = "30 December 2026";
 
 export default function ReferralRewardsCard({ email }: { email: string }) {
   const [data, setData] = useState<any>(null);
   const [copied, setCopied] = useState(false);
+  const [promotionRecorded, setPromotionRecorded] = useState(false);
 
   useEffect(() => {
     if (!email) return;
@@ -32,21 +44,47 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
     (item: any) => item.status !== "rewarded" && item.status !== "cancelled",
   ).length;
 
+  async function recordPromotionAction(
+    action: "share" | "copy",
+    channel: string,
+  ) {
+    try {
+      const response = await fetch("/api/referrals/share", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, channel }),
+      });
+
+      if (response.ok) {
+        setPromotionRecorded(true);
+      }
+    } catch {
+      // Sharing should still work even if promotion tracking is temporarily unavailable.
+    }
+  }
+
   async function copy() {
     await navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
+    await recordPromotionAction("copy", "copy_link");
   }
 
   async function share() {
-    if (navigator.share) {
+    if (!navigator.share) {
+      await copy();
+      return;
+    }
+
+    try {
       await navigator.share({
-        title: "Tripelor Referral",
-        text: `Use my Tripelor referral link and get USD ${discountUsd} off your first eligible booking.`,
+        title: "Tripelor Referral – Save $20",
+        text: `Your first eligible Tripelor booking gets USD ${discountUsd} off with my referral link.`,
         url: link,
       });
-    } else {
-      await copy();
+      await recordPromotionAction("share", "native_share");
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
     }
   }
 
@@ -61,7 +99,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
             Referral Rewards
           </p>
           <h2 className="mt-2 text-3xl font-bold">
-            Give USD {discountUsd}. Earn {rewardPoints} points.
+            Your Friend Saves ${discountUsd}. You Earn {rewardPoints} Points.
           </h2>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-gray-400">
             Invite your friends and family to discover the Maldives with Tripelor.
@@ -73,10 +111,54 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
         <Gift className="h-10 w-10 shrink-0 text-gold" />
       </div>
 
+      <div className="mt-7 overflow-hidden rounded-3xl border border-gold/35 bg-[radial-gradient(circle_at_top_right,rgba(217,189,123,.22),transparent_36%),linear-gradient(135deg,rgba(217,189,123,.14),rgba(255,255,255,.025))] p-5 md:p-6">
+        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div className="max-w-3xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-gold">
+                <Trophy className="h-3.5 w-3.5" />
+                Referral Lucky Draw
+              </span>
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-white/60">
+                <CalendarDays className="h-4 w-4 text-gold" />
+                Ends {PROMOTION_END_LABEL}
+              </span>
+            </div>
+
+            <h3 className="mt-4 text-2xl font-bold md:text-3xl">
+              Share your referral code for a chance to win a FREE 3-night Half Board stay.
+            </h3>
+            <p className="mt-3 text-sm leading-7 text-gray-300">
+              Use your personal Tripelor referral link and share it with your friends.
+              The promotion ends on {PROMOTION_END_LABEL}. One winner will be selected
+              after the promotion closes. Let&apos;s see who&apos;s lucky!
+            </p>
+            <p className="mt-3 text-xs leading-6 text-gray-500">
+              To make sure your participation is recorded, use the Copy or Share buttons
+              below while signed in to your Tripelor account.
+            </p>
+          </div>
+
+          <div className="flex min-w-[180px] flex-col items-center justify-center rounded-2xl border border-gold/25 bg-black/30 p-5 text-center">
+            <Trophy className="h-8 w-8 text-gold" />
+            <p className="mt-3 text-xs uppercase tracking-[.16em] text-gray-500">Prize</p>
+            <p className="mt-1 text-lg font-black text-gold">3 Nights</p>
+            <p className="text-sm font-semibold text-white/80">Half Board</p>
+          </div>
+        </div>
+
+        {promotionRecorded && (
+          <div className="mt-4 flex items-center gap-2 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            Your referral promotion activity has been recorded.
+          </div>
+        )}
+      </div>
+
       <div className="mt-7 rounded-3xl border border-white/10 bg-white/[.03] p-5 md:p-6">
         <div className="flex items-center gap-2">
           <Link2 className="h-5 w-5 text-gold" />
-          <h3 className="text-lg font-bold">How it works</h3>
+          <h3 className="text-lg font-bold">How referral rewards work</h3>
         </div>
 
         <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -179,7 +261,8 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
           from your personal referral link or use your referral code. The USD{" "}
           {discountUsd} referral discount applies once per eligible booking.
           Tripelor Points are awarded only after the referred guest completes
-          their stay.
+          their stay. Promotion share activity is recorded only when you use the
+          Tripelor Copy or Share buttons while signed in.
         </p>
       </div>
     </section>
