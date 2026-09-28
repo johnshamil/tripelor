@@ -81,7 +81,7 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
 
       {open && (
         <div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-[#02080c]/75 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-[#02080c]/75 p-3 sm:items-center sm:p-6"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) close();
