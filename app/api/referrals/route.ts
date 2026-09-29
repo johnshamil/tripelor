@@ -69,7 +69,7 @@ export async function GET(req: Request) {
       { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
     ),
     fetch(
-      `${url}/rest/v1/referral_share_events?select=id,action,channel,created_at&referral_code=eq.${encodeURIComponent(code)}&created_at=lte.${encodeURIComponent(REFERRAL_PROMOTION.endsAt)}&order=created_at.desc&limit=2000`,
+      `${url}/rest/v1/referral_share_events?select=id,action,channel,created_at&owner_email=eq.${encodeURIComponent(email)}&created_at=lte.${encodeURIComponent(REFERRAL_PROMOTION.endsAt)}&order=created_at.desc&limit=2000`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
     ),
   ]);
