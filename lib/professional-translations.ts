@@ -56,7 +56,7 @@ export const translations = {
       services: "Maldives Travel & Holiday Services",
     },
     referral: {
-      newReward: "New Reward",
+      newReward: "Share & Win",
       title: "Referral Rewards",
       banner: "Your Friend Saves $20. You Earn 100 Points.",
       promo: "Share your code to win 3 nights at Uhoo’s Lavish Oasis, V. Felidhoo · Half Board + Thinadhoo day visit · Ends 30 Dec 2026",
@@ -371,7 +371,7 @@ export const translations = {
       services: "Viaggi e vacanze alle Maldive",
     },
     referral: {
-      newReward: "Nuovo vantaggio",
+      newReward: "Condividi e vinci",
       title: "Premi invito",
       banner: "Regala USD 20 di sconto · Ottieni 100 Punti Tripelor",
       promo: "Condividi il tuo codice per vincere 3 notti da Uhoo’s Lavish Oasis, V. Felidhoo · Mezza Pensione + visita giornaliera a Thinadhoo · Termina il 30 dic 2026",
@@ -686,7 +686,7 @@ export const translations = {
       services: "Путешествия и отдых на Мальдивах",
     },
     referral: {
-      newReward: "Новый бонус",
+      newReward: "Поделись и выиграй",
       title: "Реферальные бонусы",
       banner: "Подарите скидку USD 20 · Получите 100 баллов Tripelor",
       promo: "Поделитесь кодом и получите шанс выиграть 3 ночи в Uhoo’s Lavish Oasis, V. Felidhoo · Полупансион + дневная поездка на Thinadhoo · До 30 дек. 2026",
