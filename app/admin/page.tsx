@@ -270,7 +270,7 @@ export default function AdminPage() {
               <Trophy className="h-4 w-4" /> Tripelor Share & Win
             </p>
             <h2 className="mt-2 text-2xl font-semibold md:text-3xl">
-              Referral Lucky Draw control
+              Qualified Referral Participants
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-400">
               Grand prize: 3 nights at Uhoo’s Lavish Oasis in V. Felidhoo with Half Board
@@ -358,15 +358,15 @@ export default function AdminPage() {
           {(referralPromotion?.participants || []).length === 0 ? (
             <div className="p-8 text-center">
               <Share2 className="mx-auto h-5 w-5 text-gold" />
-              <p className="mt-3 text-sm text-gray-400">No referral entries have been recorded yet.</p>
+              <p className="mt-3 text-sm text-gray-400">No qualified referral participants yet.</p>
               <p className="mt-1 text-xs text-gray-600">
-                Members appear here after using the Copy or Share buttons in their Tripelor account.
+                Customers are automatically added here as Qualified after their first recorded Share, WhatsApp, or Copy action.
               </p>
             </div>
           ) : (
             <div className="min-w-[940px]">
               <div className="grid grid-cols-[1.3fr_.8fr_.55fr_.8fr_.8fr_1fr] gap-4 border-b border-white/10 bg-white/[.03] p-4 text-[9px] font-semibold uppercase tracking-[.12em] text-gray-600">
-                <span>Member</span>
+                <span>Qualified member</span>
                 <span>Referral code</span>
                 <span>Entries</span>
                 <span>Referrals</span>
@@ -381,10 +381,18 @@ export default function AdminPage() {
                     className="grid grid-cols-[1.3fr_.8fr_.55fr_.8fr_.8fr_1fr] gap-4 p-4 text-sm"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-semibold">
-                        {participant.fullName || "Tripelor Member"}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="truncate font-semibold">
+                          {participant.fullName || "Tripelor Member"}
+                        </p>
+                        <span className="shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[.08em] text-emerald-300">
+                          Qualified
+                        </span>
+                      </div>
                       <p className="mt-1 truncate text-xs text-gray-500">{participant.email}</p>
+                      <p className="mt-1 text-[10px] text-gray-600">
+                        Qualified {formatReferralTime(participant.qualifiedAt || participant.firstSharedAt)}
+                      </p>
                     </div>
 
                     <p className="font-mono font-bold text-gold">{participant.referralCode}</p>
