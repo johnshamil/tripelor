@@ -125,7 +125,7 @@ export async function GET() {
     return Response.json({
       promotion: {
         title: "Referral Lucky Draw 2026",
-        prize: "Free 3-night Half Board stay",
+        prize: "3-night stay at Uhoo’s Lavish Oasis, V. Felidhoo with Half Board and a Thinadhoo day visit",
         endsAt: PROMOTION_END_ISO,
         totalParticipants: participants.length,
         totalShareActions: Array.isArray(events) ? events.length : 0,
