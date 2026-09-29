@@ -118,6 +118,8 @@ async function loadPromotionData() {
       email,
       fullName: namesByEmail.get(email) || "",
       referralCode: event.referral_code || "",
+      qualificationStatus: "qualified",
+      qualifiedAt: event.created_at,
       shareCount: 0,
       nativeShares: 0,
       linkCopies: 0,
@@ -131,6 +133,7 @@ async function loadPromotionData() {
 
     if (String(event.created_at) < String(existing.firstSharedAt)) {
       existing.firstSharedAt = event.created_at;
+      existing.qualifiedAt = event.created_at;
     }
     if (String(event.created_at) > String(existing.lastSharedAt)) {
       existing.lastSharedAt = event.created_at;
