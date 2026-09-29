@@ -126,12 +126,13 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
             </div>
 
             <h3 className="mt-4 text-2xl font-bold md:text-3xl">
-              Share your referral code for a chance to win a FREE 3-night Half Board stay.
+              Share your referral code for a chance to win a FREE 3-night stay at Uhoo’s Lavish Oasis in V. Felidhoo.
             </h3>
             <p className="mt-3 text-sm leading-7 text-gray-300">
-              Use your personal Tripelor referral link and share it with your friends.
-              The promotion ends on {PROMOTION_END_LABEL}. One winner will be selected
-              after the promotion closes. Let&apos;s see who&apos;s lucky!
+              The prize includes a 3-night stay at Uhoo’s Lavish Oasis in V. Felidhoo,
+              Half Board meals, and a day visit to Thinadhoo. Use your personal Tripelor
+              referral link and share it with your friends. The promotion ends on {PROMOTION_END_LABEL}.
+              One winner will be selected after the promotion closes. Let&apos;s see who&apos;s lucky!
             </p>
             <p className="mt-3 text-xs leading-6 text-gray-500">
               To make sure your participation is recorded, use the Copy or Share buttons
@@ -143,7 +144,9 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
             <Trophy className="h-8 w-8 text-gold" />
             <p className="mt-3 text-xs uppercase tracking-[.16em] text-gray-500">Prize</p>
             <p className="mt-1 text-lg font-black text-gold">3 Nights</p>
-            <p className="text-sm font-semibold text-white/80">Half Board</p>
+            <p className="text-sm font-semibold text-white/80">Uhoo’s Lavish Oasis</p>
+            <p className="mt-1 text-xs text-white/60">V. Felidhoo</p>
+            <p className="mt-2 text-sm font-semibold text-white/80">Half Board + Thinadhoo Day Visit</p>
           </div>
         </div>
 
