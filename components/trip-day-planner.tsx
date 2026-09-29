@@ -37,6 +37,7 @@ export default function TripDayPlanner() {
   function selectionCard(line: CartLine) {
     const product = findCartProduct(line.productId);
     if (!product) return null;
+    const lastDate = product.validThrough ? addNights(product.validThrough, -(product.nights || 0)) : LAST_TRIP_DATE;
     const Icon = product.kind === "stay" ? BedDouble : Waves;
     const day = tripDay(itinerary.start, line.date);
     const lastDay = itinerary.days[itinerary.days.length - 1]?.day || 1;
@@ -53,9 +54,9 @@ export default function TripDayPlanner() {
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="min-w-0 text-sm text-gray-300">Day in my trip<select aria-label={`${product.name}: trip day`} value={day || ""} disabled={!itinerary.start} onChange={event => moveToDate(line, event.target.value ? tripDayDate(itinerary.start, Number(event.target.value)) : "")} className={`${field} disabled:opacity-50`}>
           <option value="">{itinerary.start ? "Choose a day" : "Set your trip start first"}</option>
-          {options.filter(number => tripDayDate(itinerary.start, number)).map(number => <option key={number} value={number} disabled={tripDayDate(itinerary.start, number) < maldivesToday()}>Day {number}</option>)}
+          {options.filter(number => tripDayDate(itinerary.start, number)).map(number => <option key={number} value={number} disabled={tripDayDate(itinerary.start, number) < maldivesToday() || tripDayDate(itinerary.start, number) > lastDate}>Day {number}</option>)}
         </select></label>
-        <label className="min-w-0 text-sm text-gray-300">{product.nights ? "Preferred check-in" : "Preferred experience date"}<input type="date" required min={maldivesToday()} max={LAST_TRIP_DATE} value={line.date} aria-label={`${product.name}: date`} onChange={event => { const date = event.target.value; if (!date || (isTripDate(date) && date >= maldivesToday())) moveToDate(line, date); }} className={field} /></label>
+        <label className="min-w-0 text-sm text-gray-300">{product.nights ? "Preferred check-in" : "Preferred experience date"}<input type="date" required min={maldivesToday()} max={lastDate} value={line.date} aria-label={`${product.name}: date`} onChange={event => { const date = event.target.value; if (!date || (isTripDate(date) && date >= maldivesToday() && date <= lastDate)) moveToDate(line, date); }} className={field} /></label>
         <label className="min-w-0 text-sm text-gray-300 sm:col-span-2">{product.unit === "couple" ? "Couples (2 adults, 1 room each)" : "Guests joining"}<input type="number" required min={1} max={100} step={1} value={line.quantity || ""} aria-label={`${product.name}: ${product.unit === "couple" ? "couples" : "guests"}`} onChange={event => update(product.id, { quantity: event.target.value === "" ? 0 : Number(event.target.value) })} className={field} /></label>
       </div>
       {product.nights && isTripDate(line.date) && <p className="mt-3 text-sm leading-6 text-gray-400">Check-out: {addNights(line.date, product.nights)} · {line.quantity * 2} adults · {line.quantity} {line.quantity === 1 ? "room" : "rooms"}. Included package activities will be scheduled with our island team.</p>}

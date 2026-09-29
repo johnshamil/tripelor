@@ -8,6 +8,7 @@ import { CART_PRODUCTS, stayCartId } from "@/lib/trip-cart";
 import { fiveNight, threeNight } from "@/lib/island-packages";
 import { VAAVU_BLUE_ESCAPE } from "@/lib/vaavu-blue-escape";
 import { VAAVU_EXCURSIONS } from "@/lib/vaavu-excursions";
+import { BON_ABRI_PACKAGES, bonAbriCartId } from "@/lib/bon-abri-public";
 
 type Filter = "all" | "packages" | "excursions";
 const filters: { id: Filter; label: string }[] = [
@@ -62,10 +63,11 @@ export default function TripExperienceCatalog({ onViewPlan }: { onViewPlan: () =
       {products.map(product => {
         const selected = lines.some(line => line.productId === product.id);
         const stay = stays.find(item => stayCartId(item.slug, item.nights) === product.id);
+        const bonAbri = BON_ABRI_PACKAGES.find(item => bonAbriCartId(item) === product.id);
         const fishing = VAAVU_EXCURSIONS.some(item => `excursion:${item.slug}` === product.id && item.category === "fishing");
-        const Icon = stay ? BedDouble : fishing ? Fish : Waves;
+        const Icon = product.kind === "stay" ? BedDouble : fishing ? Fish : Waves;
         const image = product.id === "package:vaavu-blue-escape" ? VAAVU_BLUE_ESCAPE.image : stay?.image;
-        const label = stay ? `${stay.nights}-night stay package` : product.kind === "package" ? "Ocean package" : fishing ? "Fishing excursion" : "Snorkeling excursion";
+        const label = bonAbri ? `${bonAbri.nights}-night Noonu Atoll stay` : stay ? `${stay.nights}-night stay package` : product.kind === "package" ? "Ocean package" : fishing ? "Fishing excursion" : "Snorkeling excursion";
         return <article key={product.id} className={`flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border bg-white/[.025] transition ${selected ? "border-gold/60" : "border-white/10 hover:border-gold/30"}`}>
           <div className="relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br from-[#174550] to-[#071923]">
             {image ? <><img src={image} alt={product.id === "package:vaavu-blue-escape" ? VAAVU_BLUE_ESCAPE.imageAlt : "Maldives island scenery"} loading="lazy" decoding="async" className="h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-[#041117]/90 to-transparent" /></> : <Icon aria-hidden="true" className="h-14 w-14 text-gold/40" />}
@@ -73,13 +75,13 @@ export default function TripExperienceCatalog({ onViewPlan }: { onViewPlan: () =
             {selected && <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-[#041117]/90 px-3 py-1.5 text-xs text-gold"><Check aria-hidden="true" className="h-3 w-3" />In your trip</span>}
           </div>
           <div className="flex flex-1 flex-col p-5 sm:p-6">
-            <h3 className="font-display text-2xl leading-tight">{stay ? stay.name : product.name}</h3>
+            <h3 className="font-display text-2xl leading-tight">{stay ? stay.name : bonAbri ? `${bonAbri.name} · Bon Abri Maldives` : product.name}</h3>
             {product.duration && <p className="mt-2 text-xs text-gray-400">{product.duration}</p>}
             <ul className="mt-4 space-y-2 text-sm leading-6 text-gray-300">{product.inclusions.slice(0, 3).map(item => <li key={item} className="flex gap-2"><Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-gold" />{item}</li>)}</ul>
             {product.inclusions.length > 3 && <details className="mt-2 text-sm leading-6 text-gray-300"><summary className="min-h-11 cursor-pointer py-2 text-gold">See all inclusions</summary><ul className="space-y-2">{product.inclusions.slice(3).map(item => <li key={item} className="flex gap-2"><Check aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-gold" />{item}</li>)}</ul></details>}
             <TripInclusionReminder productId={product.id} onReview={onViewPlan} />
             <div className="mt-auto pt-5">
-              <div className="border-t border-white/10 pt-4"><strong className="font-display text-3xl text-gold">{usd(product.price)}</strong><p className="mt-1 text-xs text-gray-300">{product.unit === "couple" ? `Total for 2 adults · ${product.nights} nights` : "Per person"}</p></div>
+              <div className="border-t border-white/10 pt-4"><strong className="font-display text-3xl text-gold">{usd(product.price)}</strong><p className="mt-1 text-xs text-gray-300">{product.unit === "couple" ? `Total for 2 adults · ${product.nights} nights${bonAbri ? ` · USD ${bonAbri.perPerson.toLocaleString("en-US")} per person` : ""}` : "Per person"}</p></div>
               <button type="button" disabled={!ready} onClick={() => { if (selected) onViewPlan(); else { add(product.id); setAnnouncement(`${product.name} added to your trip. Choose dates and guests in My selections.`); } }} aria-label={selected ? `View my selections with ${product.name}` : `Add ${product.name} to my trip`} className={`mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border px-3 py-3 text-sm font-semibold transition disabled:opacity-50 ${selected ? "border-gold/60 text-gold hover:bg-gold/10" : "border-gold bg-gold text-[#071922] hover:bg-[#e3ca91]"}`}>
                 {selected ? <Check aria-hidden="true" className="h-4 w-4 shrink-0" /> : <Plus aria-hidden="true" className="h-4 w-4 shrink-0" />}{selected ? "Added · View My Trip" : "Add to My Trip"}
               </button>
