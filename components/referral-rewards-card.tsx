@@ -52,6 +52,15 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
 
   useEffect(() => {
     refreshReferralData().catch(() => {});
+
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") {
+        refreshReferralData().catch(() => {});
+      }
+    };
+
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => document.removeEventListener("visibilitychange", refreshWhenVisible);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [email]);
 
@@ -108,6 +117,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, channel }),
+        keepalive: true,
       });
 
       if (response.ok) {
@@ -152,13 +162,15 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
       link,
     ].join("\n");
 
+    const tracking = recordPromotionAction("share", "whatsapp");
+
     window.open(
       `https://wa.me/?text=${encodeURIComponent(message)}`,
       "_blank",
       "noopener,noreferrer",
     );
 
-    await recordPromotionAction("share", "whatsapp");
+    await tracking;
   }
 
   return (
