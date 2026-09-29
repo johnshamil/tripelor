@@ -207,6 +207,44 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
               <strong> day visit to Thinadhoo</strong>. Promotion ends on {PROMOTION_END_LABEL}.
             </p>
 
+            <div
+              className={`mt-5 flex items-center gap-3 rounded-2xl border p-4 ${
+                promotion.qualified
+                  ? "border-emerald-500/30 bg-emerald-500/10"
+                  : "border-white/10 bg-black/20"
+              }`}
+            >
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                  promotion.qualified
+                    ? "bg-emerald-500/15 text-emerald-300"
+                    : "bg-white/5 text-gray-500"
+                }`}
+              >
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <p
+                  className={`text-sm font-bold ${
+                    promotion.qualified ? "text-emerald-200" : "text-white"
+                  }`}
+                >
+                  {promotion.qualified
+                    ? "Qualified — You’re Participating"
+                    : "Not yet qualified for the draw"}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-gray-500">
+                  {promotion.qualified
+                    ? `Your name is on the Qualified Participants list${
+                        promotion.qualifiedAt
+                          ? ` · joined ${formatHistoryDate(promotion.qualifiedAt)}`
+                          : ""
+                      }.`
+                    : "Use Share, WhatsApp, or Copy Referral Link once and you will automatically join the qualified list."}
+                </p>
+              </div>
+            </div>
+
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
                 <p className="text-[10px] uppercase tracking-[.14em] text-gray-500">Your entries</p>
@@ -267,7 +305,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
             {promotionRecorded && (
               <div className="mt-4 flex items-center gap-2 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
-                You’re in! Your Lucky Draw activity has been recorded.
+                Qualified! Your name has been added to the Lucky Draw participant list.
               </div>
             )}
           </div>
