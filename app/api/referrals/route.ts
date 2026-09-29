@@ -22,6 +22,14 @@ function codeFor(email: string) {
     .toUpperCase()}`;
 }
 
+function maskEmail(value: string) {
+  const email = value.trim().toLowerCase();
+  const [name, domain] = email.split("@");
+  if (!name || !domain) return "Referred friend";
+  const visible = name.length <= 2 ? name.slice(0, 1) : name.slice(0, 2);
+  return `${visible}•••@${domain}`;
+}
+
 export async function GET(req: Request) {
   if (!url || !key) {
     return Response.json({ error: "Referral service not configured" }, { status: 500 });
@@ -41,11 +49,11 @@ export async function GET(req: Request) {
 
   const [referralResponse, shareResponse] = await Promise.all([
     fetch(
-      `${url}/rest/v1/referrals?select=status,reward_points,discount_usd,referred_email,created_at,rewarded_at&code=eq.${encodeURIComponent(code)}&order=created_at.desc`,
+      `${url}/rest/v1/referrals?select=id,status,reward_points,discount_usd,referred_email,created_at,rewarded_at&code=eq.${encodeURIComponent(code)}&order=created_at.desc`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
     ),
     fetch(
-      `${url}/rest/v1/referral_share_events?select=action,channel,created_at&referral_code=eq.${encodeURIComponent(code)}&created_at=lte.${encodeURIComponent(REFERRAL_PROMOTION.endsAt)}&order=created_at.desc&limit=2000`,
+      `${url}/rest/v1/referral_share_events?select=id,action,channel,created_at&referral_code=eq.${encodeURIComponent(code)}&created_at=lte.${encodeURIComponent(REFERRAL_PROMOTION.endsAt)}&order=created_at.desc&limit=2000`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
     ),
   ]);
@@ -56,23 +64,90 @@ export async function GET(req: Request) {
   const eligibleReferrals = (Array.isArray(refs) ? refs : []).filter(
     (item: any) => String(item.status || "") !== "cancelled",
   );
-  const referredFriends = new Set(
-    eligibleReferrals
-      .map((item: any) => String(item.referred_email || "").trim().toLowerCase())
-      .filter(Boolean),
-  );
-  const completedFriends = new Set(
-    eligibleReferrals
-      .filter((item: any) => String(item.status || "") === "rewarded")
-      .map((item: any) => String(item.referred_email || "").trim().toLowerCase())
-      .filter(Boolean),
-  );
+
+  const referredFriends = new Map<string, any>();
+  const completedFriends = new Map<string, any>();
+
+  for (const item of eligibleReferrals) {
+    const referredEmail = String(item.referred_email || "").trim().toLowerCase();
+    if (!referredEmail) continue;
+
+    const existing = referredFriends.get(referredEmail);
+    if (!existing || String(item.created_at) < String(existing.created_at)) {
+      referredFriends.set(referredEmail, item);
+    }
+
+    if (String(item.status || "") === "rewarded") {
+      const completedExisting = completedFriends.get(referredEmail);
+      const rewardedAt = item.rewarded_at || item.created_at;
+      if (
+        !completedExisting ||
+        String(rewardedAt) < String(completedExisting.rewarded_at || completedExisting.created_at)
+      ) {
+        completedFriends.set(referredEmail, item);
+      }
+    }
+  }
 
   const entryBreakdown = calculateReferralPromotionEntries({
     shareActions: Array.isArray(shareEvents) ? shareEvents.length : 0,
     referredBookings: referredFriends.size,
     completedReferrals: completedFriends.size,
   });
+
+  const entryHistory: Array<{
+    id: string;
+    type: "share" | "booking" | "completed";
+    title: string;
+    detail: string;
+    entries: number;
+    at: string;
+  }> = [];
+
+  const sortedShares = [...(Array.isArray(shareEvents) ? shareEvents : [])].sort((a, b) =>
+    String(a.created_at).localeCompare(String(b.created_at)),
+  );
+
+  const firstShare = sortedShares[0];
+  if (firstShare) {
+    entryHistory.push({
+      id: `share-${firstShare.id || firstShare.created_at}`,
+      type: "share",
+      title: "Entered the Lucky Draw",
+      detail:
+        firstShare.channel === "whatsapp"
+          ? "First referral share opened through WhatsApp."
+          : firstShare.action === "copy"
+            ? "First referral link copy recorded."
+            : "First referral share recorded.",
+      entries: 1,
+      at: firstShare.created_at,
+    });
+  }
+
+  for (const [friendEmail, item] of referredFriends.entries()) {
+    entryHistory.push({
+      id: `booking-${item.id || friendEmail}`,
+      type: "booking",
+      title: "Referred friend booked",
+      detail: `${maskEmail(friendEmail)} made an eligible Tripelor booking.`,
+      entries: 3,
+      at: item.created_at,
+    });
+  }
+
+  for (const [friendEmail, item] of completedFriends.entries()) {
+    entryHistory.push({
+      id: `completed-${item.id || friendEmail}`,
+      type: "completed",
+      title: "Referred stay completed",
+      detail: `${maskEmail(friendEmail)} completed their eligible Tripelor stay.`,
+      entries: 5,
+      at: item.rewarded_at || item.created_at,
+    });
+  }
+
+  entryHistory.sort((a, b) => String(b.at).localeCompare(String(a.at)));
 
   return Response.json({
     code,
@@ -86,6 +161,7 @@ export async function GET(req: Request) {
       shareActions: Array.isArray(shareEvents) ? shareEvents.length : 0,
       referredBookings: referredFriends.size,
       completedReferrals: completedFriends.size,
+      entryHistory,
       ended: referralPromotionEnded(),
     },
   });
