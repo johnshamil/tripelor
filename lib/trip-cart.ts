@@ -1,6 +1,7 @@
 import { fiveNight, threeNight } from "./island-packages";
 import { VAAVU_BLUE_ESCAPE } from "./vaavu-blue-escape";
 import { VAAVU_EXCURSIONS } from "./vaavu-excursions";
+import { BON_ABRI_PACKAGES, bonAbriCartId } from "./bon-abri-public";
 
 export type CartProduct = {
   id: string;
@@ -12,6 +13,7 @@ export type CartProduct = {
   inclusions: readonly string[];
   duration?: string;
   nights?: number;
+  validThrough?: string;
 };
 export type CartLine = { productId: string; quantity: number; date: string };
 export type QuotedLine = CartLine & { name: string; unitPrice: number; unit: CartProduct["unit"]; kind: CartProduct["kind"]; inclusions: readonly string[]; duration?: string; nights?: number; checkOut?: string; lineTotal: number };
@@ -22,6 +24,7 @@ export const CART_PRODUCTS: readonly CartProduct[] = [
   { id: "package:vaavu-blue-escape", name: VAAVU_BLUE_ESCAPE.name, price: VAAVU_BLUE_ESCAPE.price, unit: "person", kind: "package", href: VAAVU_BLUE_ESCAPE.href, inclusions: VAAVU_BLUE_ESCAPE.inclusions },
   ...VAAVU_EXCURSIONS.map(item => ({ id: `excursion:${item.slug}`, name: item.name, price: item.price, unit: "person" as const, kind: "excursion" as const, href: "/island-adventures#excursions", inclusions: item.highlights, duration: item.duration })),
   ...[...threeNight, ...fiveNight].map(item => ({ id: stayCartId(item.slug, item.nights), name: `${item.name} · ${item.nights} nights`, price: item.price, unit: "couple" as const, kind: "stay" as const, href: `/island-adventures?duration=${item.nights}`, inclusions: item.items, nights: item.nights })),
+  ...BON_ABRI_PACKAGES.map(item => ({ id: bonAbriCartId(item), name: `Bon Abri Maldives · ${item.name} · ${item.nights} nights`, price: item.perPerson * 2, unit: "couple" as const, kind: "stay" as const, href: `/island-adventures/bon-abri-maldives#${item.slug}`, inclusions: item.inclusions, nights: item.nights, validThrough: "2027-12-31" })),
 ];
 
 export function findCartProduct(id: string) { return CART_PRODUCTS.find(item => item.id === id); }
@@ -55,7 +58,9 @@ export function quoteCart(value: unknown, today = maldivesToday()): { items: Quo
     seen.add(product.id);
     if (!Number.isInteger(raw.quantity) || raw.quantity < 1 || raw.quantity > 100) throw new Error(`Choose a valid quantity for ${product.name}.`);
     if (!isDate(raw.date) || raw.date < today || raw.date > "9998-12-31") throw new Error(`Choose a date from today onwards for ${product.name}.`);
-    return { productId: product.id, quantity: raw.quantity, date: raw.date, name: product.name, unitPrice: product.price, unit: product.unit, kind: product.kind, inclusions: product.inclusions, duration: product.duration, nights: product.nights, checkOut: product.nights ? addNights(raw.date, product.nights) : undefined, lineTotal: product.price * raw.quantity };
+    const checkOut = product.nights ? addNights(raw.date, product.nights) : undefined;
+    if (product.validThrough && (checkOut || raw.date) > product.validThrough) throw new Error(`The published rate for ${product.name} is available only for travel through 2027. Please ask Tripelor for a new quote.`);
+    return { productId: product.id, quantity: raw.quantity, date: raw.date, name: product.name, unitPrice: product.price, unit: product.unit, kind: product.kind, inclusions: product.inclusions, duration: product.duration, nights: product.nights, checkOut, lineTotal: product.price * raw.quantity };
   });
   return { items, total: items.reduce((total, item) => total + item.lineTotal, 0) };
 }

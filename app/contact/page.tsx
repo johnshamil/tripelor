@@ -8,6 +8,12 @@ const [enquiryType,setEnquiryType]=useState("Guesthouse stay");
 const [message,setMessage]=useState("");
 useEffect(() => {
   const params = new URLSearchParams(window.location.search);
+  const bonAbri = params.get("bonAbri");
+  if (bonAbri === "rooms" || bonAbri === "excursions" || bonAbri === "transfers") {
+    setEnquiryType(bonAbri === "rooms" ? "Guesthouse stay" : bonAbri === "transfers" ? "Transfer" : "Activities / excursions");
+    setMessage(`I would like a quote for Bon Abri Maldives in N. Magoodhoo (${bonAbri}). My preferred dates, guests and requests are: `);
+    return;
+  }
   if (params.get("package") === VAAVU_BLUE_ESCAPE.slug) {
     setEnquiryType("Activities / excursions");
     setMessage(vaavuBlueEscapeEnquiry);
