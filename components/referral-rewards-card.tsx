@@ -157,7 +157,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                <p className="text-[10px] uppercase tracking-[.14em] text-gray-500">Referred bookings</p>
+                <p className="text-[10px] uppercase tracking-[.14em] text-gray-500">Referred friends</p>
                 <p className="mt-1 text-3xl font-black text-white">{promotion.referredBookings || 0}</p>
                 <p className="mt-1 text-[11px] text-gray-500">+3 entries each</p>
               </div>
@@ -170,7 +170,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
 
             <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-xs leading-6 text-gray-400">
               <strong className="text-white">How Lucky Draw entries work:</strong> your first recorded
-              Share or Copy action gives you 1 entry. Each eligible referred booking adds 3 entries,
+              Share or Copy action gives you 1 entry. Each unique referred friend with an eligible booking adds 3 entries,
               and each referred stay that is completed adds another 5 bonus entries. Repeatedly
               pressing Share or Copy does not create extra base entries.
             </div>
