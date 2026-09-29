@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import { requireUser } from "@/lib/auth-server";
-
-const PROMOTION_END = new Date("2026-12-30T18:59:59.999Z");
+import { REFERRAL_PROMOTION, referralPromotionEnded } from "@/lib/referral-promotion";
 
 function referralCodeFor(email: string) {
   return `TRP${crypto
@@ -25,7 +24,7 @@ export async function POST(request: Request) {
     const email = String(user.email || "").trim().toLowerCase();
     if (!email) return Response.json({ error: "Your account email is required." }, { status: 400 });
 
-    if (Date.now() > PROMOTION_END.getTime()) {
+    if (referralPromotionEnded()) {
       return Response.json(
         { error: "The 2026 referral lucky draw has ended.", promotionEnded: true },
         { status: 410 },
@@ -86,7 +85,7 @@ export async function POST(request: Request) {
     return Response.json({
       ok: true,
       code,
-      promotionEndsAt: PROMOTION_END.toISOString(),
+      promotionEndsAt: REFERRAL_PROMOTION.endsAt,
       message: "Your referral promotion activity has been recorded.",
     });
   } catch (error) {
