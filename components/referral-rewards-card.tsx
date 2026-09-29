@@ -356,7 +356,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
               className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 text-sm font-bold text-black disabled:opacity-50"
             >
               <MessageCircle className="h-4 w-4" />
-              Share Card on WhatsApp
+              Share Referral on WhatsApp
             </button>
             <button
               type="button"
@@ -365,7 +365,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
               className="btn-outline min-h-[46px] justify-center gap-2 disabled:opacity-50"
             >
               <Copy className="h-4 w-4" />
-              Copy Card Link
+              Copy Referral Link
             </button>
           </div>
         </div>
