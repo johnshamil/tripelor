@@ -124,6 +124,10 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
             </h2>
             <p className="mt-4 max-w-lg text-sm leading-7 text-white/65 sm:text-base">{copy.body}</p>
 
+            <div className="mt-5 rounded-2xl border border-[#ead7aa]/30 bg-[#ead7aa]/10 p-4 text-sm font-semibold leading-6 text-[#f3dfaa]">
+              🏝 {copy.promo}
+            </div>
+
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-2xl border border-[#ead7aa]/35 bg-[#ead7aa]/10 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,.03)]">
                 <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/50">{copy.friendReceives}</p>
