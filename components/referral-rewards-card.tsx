@@ -59,8 +59,17 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
       }
     };
 
+    const poll = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        refreshReferralData().catch(() => {});
+      }
+    }, 5000);
+
     document.addEventListener("visibilitychange", refreshWhenVisible);
-    return () => document.removeEventListener("visibilitychange", refreshWhenVisible);
+    return () => {
+      window.clearInterval(poll);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [email]);
 
