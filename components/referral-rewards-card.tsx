@@ -79,7 +79,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
 
   if (!data?.code) return null;
 
-  const discountUsd = Number(data.discountUsd) || 20;
+  const discountPercent = Number(data.discountPercent) || 20;
   const rewardPoints = Number(data.rewardPoints) || 100;
   const promotion = data.promotion || {};
   const totalEntries = Number(promotion.totalEntries || 0);
@@ -135,7 +135,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
     try {
       await navigator.share({
         title: "Tripelor Share & Win – Maldives Escape",
-        text: `Planning a Maldives trip? Use my Tripelor referral link and save USD ${discountUsd} on your first eligible booking.`,
+        text: `Planning a Maldives trip? Use my Tripelor referral link and save ${discountPercent}% on your first eligible booking.`,
         url: link,
       });
       await recordPromotionAction("share", "native_share");
@@ -147,7 +147,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
   async function shareWhatsApp() {
     const message = [
       "Planning a Maldives escape? 🏝️",
-      `Use my Tripelor referral link and save USD ${discountUsd} on your first eligible booking.`,
+      `Use my Tripelor referral link and save ${discountPercent}% on your first eligible booking.`,
       "",
       link,
     ].join("\n");
@@ -170,12 +170,12 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
         <div>
           <p className="text-xs uppercase tracking-[.28em] text-gold">Referral Rewards</p>
           <h2 className="mt-2 text-3xl font-bold">
-            Your Friend Saves ${discountUsd}. You Earn {rewardPoints} Points.
+            Your Friend Saves {discountPercent}%. You Earn {rewardPoints} Points.
           </h2>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-gray-400">
             Invite your friends and family to discover the Maldives with Tripelor.
             When they make an eligible booking using your referral link or code,
-            they receive USD {discountUsd} off. After they complete their stay,
+            they receive {discountPercent}% off. After they complete their stay,
             you receive {rewardPoints} Tripelor Points.
           </p>
         </div>
@@ -344,7 +344,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
                   Tripelor Share & Win
                 </p>
                 <p className="mt-3 text-2xl font-black leading-tight text-white">
-                  Your Friend Saves ${discountUsd}
+                  Your Friend Saves {discountPercent}%
                 </p>
                 <p className="mt-1 text-sm font-semibold text-gold">
                   You earn {rewardPoints} Tripelor Points after their completed stay.
@@ -373,7 +373,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
                   </div>
                 )}
                 <p className="mt-2 text-[10px] font-black uppercase tracking-[.12em]">
-                  Scan to save ${discountUsd}
+                  Scan to save {discountPercent}%
                 </p>
               </div>
             </div>
@@ -479,7 +479,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
             <p className="mt-3 font-semibold">Your friend books</p>
             <p className="mt-2 text-sm leading-6 text-gray-400">
               Your friend starts from your referral link or uses your referral code.
-              They receive USD {discountUsd} off an eligible Tripelor booking.
+              They receive {discountPercent}% off an eligible Tripelor booking.
             </p>
           </div>
 
@@ -533,7 +533,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
         <p className="text-sm font-semibold text-gold">Important to know</p>
         <p className="mt-2 text-xs leading-6 text-gray-400">
           For reliable referral tracking, ask your friend to begin their booking from
-          your personal referral link or use your referral code. The USD {discountUsd}
+          your personal referral link or use your referral code. The {discountPercent}%
           referral discount applies once per eligible booking. Tripelor Points are
           awarded only after the referred guest completes their stay. Lucky Draw
           participation is recorded when you use the Tripelor Share, WhatsApp, or Copy
