@@ -23,7 +23,7 @@ async function loadPromotionData() {
       { headers, cache: "no-store" },
     ),
     fetch(
-      `${url}/rest/v1/referrals?select=code,status,created_at,rewarded_at&order=created_at.desc&limit=5000`,
+      `${url}/rest/v1/referrals?select=code,status,referred_email,created_at,rewarded_at&order=created_at.desc&limit=5000`,
       { headers, cache: "no-store" },
     ),
     fetch(`${url}/auth/v1/admin/users?page=1&per_page=1000`, {
@@ -69,7 +69,14 @@ async function loadPromotionData() {
 
   const referralStats = new Map<
     string,
-    { rewarded: number; pending: number; qualified: number; cancelled: number }
+    {
+      rewarded: number;
+      pending: number;
+      qualified: number;
+      cancelled: number;
+      eligibleEmails: Set<string>;
+      rewardedEmails: Set<string>;
+    }
   >();
 
   for (const referral of Array.isArray(referrals) ? referrals : []) {
@@ -82,10 +89,20 @@ async function loadPromotionData() {
         pending: 0,
         qualified: 0,
         cancelled: 0,
+        eligibleEmails: new Set<string>(),
+        rewardedEmails: new Set<string>(),
       };
 
     const status = String(referral.status || "pending");
-    if (status in stats) stats[status as keyof typeof stats] += 1;
+    if (status === "rewarded") stats.rewarded += 1;
+    else if (status === "qualified") stats.qualified += 1;
+    else if (status === "cancelled") stats.cancelled += 1;
+    else stats.pending += 1;
+
+    const referredEmail = String(referral.referred_email || "").trim().toLowerCase();
+    if (referredEmail && status !== "cancelled") stats.eligibleEmails.add(referredEmail);
+    if (referredEmail && status === "rewarded") stats.rewardedEmails.add(referredEmail);
+
     referralStats.set(code, stats);
   }
 
@@ -129,19 +146,22 @@ async function loadPromotionData() {
         pending: 0,
         qualified: 0,
         cancelled: 0,
+        eligibleEmails: new Set<string>(),
+        rewardedEmails: new Set<string>(),
       };
 
-      const referredBookings = stats.pending + stats.qualified + stats.rewarded;
+      const referredBookings = stats.eligibleEmails.size;
+      const completedReferrals = stats.rewardedEmails.size;
       const entries = calculateReferralPromotionEntries({
         shareActions: participant.shareCount,
         referredBookings,
-        completedReferrals: stats.rewarded,
+        completedReferrals,
       });
 
       return {
         ...participant,
-        rewardedReferrals: stats.rewarded,
-        pendingReferrals: stats.pending + stats.qualified,
+        rewardedReferrals: completedReferrals,
+        pendingReferrals: Math.max(0, referredBookings - completedReferrals),
         cancelledReferrals: stats.cancelled,
         referredBookings,
         ...entries,
