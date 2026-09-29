@@ -301,7 +301,7 @@ export default function AdminPage() {
           <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
             <p className="text-xs font-semibold text-white">Lucky Draw entry rules</p>
             <p className="mt-2 text-xs leading-6 text-gray-500">
-              First recorded Share/Copy = 1 entry · Each eligible referred booking = +3 entries ·
+              First recorded Share/Copy = 1 entry · Each unique referred friend with an eligible booking = +3 entries ·
               Each completed referred stay = +5 bonus entries. Repeated Share/Copy actions do not
               create additional base entries.
             </p>
@@ -397,7 +397,7 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <p className="font-semibold">{participant.referredBookings || 0} booking(s)</p>
+                      <p className="font-semibold">{participant.referredBookings || 0} friend(s)</p>
                       <p className="mt-1 text-[10px] text-gray-500">
                         {participant.rewardedReferrals || 0} completed
                       </p>
