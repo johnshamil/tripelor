@@ -46,6 +46,7 @@ export default function AdminPage() {
   const [query, setQuery] = useState("");
   const [bookingFilter, setBookingFilter] = useState<BookingFilter>("all");
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("all");
+  const [winnerBusy, setWinnerBusy] = useState(false);
 
   async function load() {
     const [bookingResponse, userResponse, referralResponse] = await Promise.all([
@@ -107,6 +108,27 @@ export default function AdminPage() {
       setStatus(error instanceof Error ? error.message : "Unable to update booking.");
     } finally {
       setBusyId("");
+    }
+  }
+
+  async function selectReferralWinner() {
+    if (winnerBusy) return;
+    setWinnerBusy(true);
+    setStatus("");
+    try {
+      const response = await fetch("/api/admin/referral-promotion", {
+        method: "POST",
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Unable to select winner.");
+      setStatus(
+        `Referral Lucky Draw winner selected: ${result?.winner?.fullName || result?.winner?.email || "winner"}.`,
+      );
+      await load();
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Unable to select referral winner.");
+    } finally {
+      setWinnerBusy(false);
     }
   }
 
@@ -245,23 +267,27 @@ export default function AdminPage() {
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.22em] text-gold">
-              <Trophy className="h-4 w-4" /> Referral Lucky Draw
+              <Trophy className="h-4 w-4" /> Tripelor Share & Win
             </p>
             <h2 className="mt-2 text-2xl font-semibold md:text-3xl">
-              Who shared their referral code
+              Referral Lucky Draw control
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-400">
-              The prize is a 3-night stay at Uhoo’s Lavish Oasis in V. Felidhoo with
-              Half Board meals and a day visit to Thinadhoo. The promotion closes on
-              30 December 2026, and one winner can be selected after it ends.
+              Grand prize: 3 nights at Uhoo’s Lavish Oasis in V. Felidhoo with Half Board
+              meals and a day visit to Thinadhoo. The promotion closes on 30 December 2026.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:flex">
+          <div className="grid grid-cols-3 gap-2 text-center sm:flex sm:text-left">
             <SummaryPill
               label="Participants"
               value={referralPromotion?.promotion?.totalParticipants || 0}
               icon={Users}
+            />
+            <SummaryPill
+              label="Entries"
+              value={referralPromotion?.promotion?.totalEntries || 0}
+              icon={Trophy}
             />
             <SummaryPill
               label="Share actions"
@@ -271,58 +297,127 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-white/10 bg-black/20">
+        <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_auto]">
+          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+            <p className="text-xs font-semibold text-white">Lucky Draw entry rules</p>
+            <p className="mt-2 text-xs leading-6 text-gray-500">
+              First recorded Share/Copy = 1 entry · Each eligible referred booking = +3 entries ·
+              Each completed referred stay = +5 bonus entries. Repeated Share/Copy actions do not
+              create additional base entries.
+            </p>
+          </div>
+
+          <div className="flex min-w-[230px] items-center">
+            <button
+              type="button"
+              onClick={selectReferralWinner}
+              disabled={
+                winnerBusy ||
+                !referralPromotion?.promotion?.ended ||
+                Boolean(referralPromotion?.winner) ||
+                Number(referralPromotion?.promotion?.totalEntries || 0) <= 0
+              }
+              className="btn-gold min-h-[48px] w-full justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Trophy className="h-4 w-4" />
+              {referralPromotion?.winner
+                ? "Winner Selected"
+                : winnerBusy
+                  ? "Selecting…"
+                  : referralPromotion?.promotion?.ended
+                    ? "Select Winner"
+                    : "Select After 30 Dec"}
+            </button>
+          </div>
+        </div>
+
+        {referralPromotion?.winner && (
+          <div className="mt-5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
+            <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-emerald-300">
+              Selected Winner
+            </p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xl font-bold text-white">
+                  {referralPromotion.winner.fullName || referralPromotion.winner.email}
+                </p>
+                <p className="mt-1 text-sm text-white/60">{referralPromotion.winner.email}</p>
+                <p className="mt-1 font-mono text-sm text-gold">
+                  {referralPromotion.winner.referralCode}
+                </p>
+              </div>
+              <div className="text-sm text-emerald-200">
+                {referralPromotion.winner.entriesAtSelection} entries · selected{" "}
+                {formatReferralTime(referralPromotion.winner.selectedAt)}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-5 overflow-x-auto rounded-2xl border border-white/10 bg-black/20">
           {(referralPromotion?.participants || []).length === 0 ? (
             <div className="p-8 text-center">
               <Share2 className="mx-auto h-5 w-5 text-gold" />
-              <p className="mt-3 text-sm text-gray-400">No referral shares have been recorded yet.</p>
+              <p className="mt-3 text-sm text-gray-400">No referral entries have been recorded yet.</p>
               <p className="mt-1 text-xs text-gray-600">
                 Members appear here after using the Copy or Share buttons in their Tripelor account.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-white/10">
-              {(referralPromotion.participants || []).map((participant: any) => (
-                <div
-                  key={participant.userId || participant.email}
-                  className="grid gap-4 p-4 md:grid-cols-[1.35fr_.8fr_.7fr_1fr] md:items-center"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">
-                      {participant.fullName || "Tripelor Member"}
-                    </p>
-                    <p className="mt-1 truncate text-xs text-gray-500">{participant.email}</p>
-                  </div>
+            <div className="min-w-[940px]">
+              <div className="grid grid-cols-[1.3fr_.8fr_.55fr_.8fr_.8fr_1fr] gap-4 border-b border-white/10 bg-white/[.03] p-4 text-[9px] font-semibold uppercase tracking-[.12em] text-gray-600">
+                <span>Member</span>
+                <span>Referral code</span>
+                <span>Entries</span>
+                <span>Referrals</span>
+                <span>Share activity</span>
+                <span>Last activity</span>
+              </div>
 
-                  <div>
-                    <p className="text-[9px] uppercase tracking-[.12em] text-gray-600">Referral code</p>
-                    <p className="mt-1 font-mono text-sm font-bold text-gold">
-                      {participant.referralCode}
-                    </p>
-                  </div>
+              <div className="divide-y divide-white/10">
+                {(referralPromotion.participants || []).map((participant: any) => (
+                  <div
+                    key={participant.userId || participant.email}
+                    className="grid grid-cols-[1.3fr_.8fr_.55fr_.8fr_.8fr_1fr] gap-4 p-4 text-sm"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold">
+                        {participant.fullName || "Tripelor Member"}
+                      </p>
+                      <p className="mt-1 truncate text-xs text-gray-500">{participant.email}</p>
+                    </div>
 
-                  <div>
-                    <p className="text-[9px] uppercase tracking-[.12em] text-gray-600">Activity</p>
-                    <p className="mt-1 text-sm font-semibold">
-                      {participant.shareCount} action{participant.shareCount === 1 ? "" : "s"}
-                    </p>
-                    <p className="mt-1 text-[10px] text-gray-500">
-                      {participant.nativeShares} shared · {participant.linkCopies} copied
-                    </p>
-                  </div>
+                    <p className="font-mono font-bold text-gold">{participant.referralCode}</p>
 
-                  <div>
-                    <p className="text-[9px] uppercase tracking-[.12em] text-gray-600">Last activity</p>
-                    <p className="mt-1 text-xs text-gray-300">
+                    <div>
+                      <p className="text-xl font-black text-gold">{participant.totalEntries || 0}</p>
+                      <p className="mt-1 text-[10px] text-gray-600">
+                        1 + {participant.bookingEntries || 0} + {participant.completedBonusEntries || 0}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="font-semibold">{participant.referredBookings || 0} booking(s)</p>
+                      <p className="mt-1 text-[10px] text-gray-500">
+                        {participant.rewardedReferrals || 0} completed
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="font-semibold">
+                        {participant.shareCount} action{participant.shareCount === 1 ? "" : "s"}
+                      </p>
+                      <p className="mt-1 text-[10px] text-gray-500">
+                        {participant.nativeShares} shared · {participant.linkCopies} copied
+                      </p>
+                    </div>
+
+                    <div className="text-xs text-gray-300">
                       {formatReferralTime(participant.lastSharedAt)}
-                    </p>
-                    <p className="mt-1 text-[10px] text-gray-500">
-                      {participant.rewardedReferrals || 0} completed referral
-                      {(participant.rewardedReferrals || 0) === 1 ? "" : "s"}
-                    </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -330,6 +425,7 @@ export default function AdminPage() {
         <p className="mt-3 text-[11px] leading-5 text-gray-600">
           Tripelor records website Copy and Share actions while the member is signed in.
           It cannot see what a customer does inside WhatsApp, Instagram, or another app after leaving Tripelor.
+          Winner selection is weighted by eligible entries and saved permanently after the draw.
         </p>
       </section>
 
