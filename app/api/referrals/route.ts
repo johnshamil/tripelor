@@ -141,7 +141,7 @@ export async function GET(req: Request) {
     });
   }
 
-  for (const [friendEmail, item] of referredFriends.entries()) {
+  Array.from(referredFriends.entries()).forEach(([friendEmail, item]) => {
     entryHistory.push({
       id: `booking-${item.id || friendEmail}`,
       type: "booking",
@@ -150,9 +150,9 @@ export async function GET(req: Request) {
       entries: 3,
       at: item.created_at,
     });
-  }
+  });
 
-  for (const [friendEmail, item] of completedFriends.entries()) {
+  Array.from(completedFriends.entries()).forEach(([friendEmail, item]) => {
     entryHistory.push({
       id: `completed-${item.id || friendEmail}`,
       type: "completed",
@@ -161,7 +161,7 @@ export async function GET(req: Request) {
       entries: 5,
       at: item.rewarded_at || item.created_at,
     });
-  }
+  });
 
   entryHistory.sort((a, b) => String(b.at).localeCompare(String(a.at)));
 
