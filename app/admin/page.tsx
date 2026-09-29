@@ -251,7 +251,8 @@ export default function AdminPage() {
               Who shared their referral code
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-400">
-              The prize is a free 3-night Half Board stay. The promotion closes on
+              The prize is a 3-night stay at Uhoo’s Lavish Oasis in V. Felidhoo with
+              Half Board meals and a day visit to Thinadhoo. The promotion closes on
               30 December 2026, and one winner can be selected after it ends.
             </p>
           </div>
