@@ -41,7 +41,7 @@ export async function GET(req: Request) {
 
   const [referralResponse, shareResponse] = await Promise.all([
     fetch(
-      `${url}/rest/v1/referrals?select=status,reward_points,discount_usd,created_at,rewarded_at&code=eq.${encodeURIComponent(code)}&order=created_at.desc`,
+      `${url}/rest/v1/referrals?select=status,reward_points,discount_usd,referred_email,created_at,rewarded_at&code=eq.${encodeURIComponent(code)}&order=created_at.desc`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
     ),
     fetch(
@@ -56,14 +56,22 @@ export async function GET(req: Request) {
   const eligibleReferrals = (Array.isArray(refs) ? refs : []).filter(
     (item: any) => String(item.status || "") !== "cancelled",
   );
-  const completedReferrals = eligibleReferrals.filter(
-    (item: any) => String(item.status || "") === "rewarded",
-  ).length;
+  const referredFriends = new Set(
+    eligibleReferrals
+      .map((item: any) => String(item.referred_email || "").trim().toLowerCase())
+      .filter(Boolean),
+  );
+  const completedFriends = new Set(
+    eligibleReferrals
+      .filter((item: any) => String(item.status || "") === "rewarded")
+      .map((item: any) => String(item.referred_email || "").trim().toLowerCase())
+      .filter(Boolean),
+  );
 
   const entryBreakdown = calculateReferralPromotionEntries({
     shareActions: Array.isArray(shareEvents) ? shareEvents.length : 0,
-    referredBookings: eligibleReferrals.length,
-    completedReferrals,
+    referredBookings: referredFriends.size,
+    completedReferrals: completedFriends.size,
   });
 
   return Response.json({
@@ -76,8 +84,8 @@ export async function GET(req: Request) {
       ...entryBreakdown,
       shared: entryBreakdown.shareEntries > 0,
       shareActions: Array.isArray(shareEvents) ? shareEvents.length : 0,
-      referredBookings: eligibleReferrals.length,
-      completedReferrals,
+      referredBookings: referredFriends.size,
+      completedReferrals: completedFriends.size,
       ended: referralPromotionEnded(),
     },
   });
