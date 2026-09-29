@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { requireUser } from "@/lib/auth-server";
 import {
   calculateReferralPromotionEntries,
   REFERRAL_PROMOTION,
@@ -35,9 +36,24 @@ export async function GET(req: Request) {
     return Response.json({ error: "Referral service not configured" }, { status: 500 });
   }
 
+  let user;
+  try {
+    user = await requireUser();
+  } catch (error) {
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json({ error: "Please log in." }, { status: 401 });
+    }
+    throw error;
+  }
+
   const u = new URL(req.url);
   const email = (u.searchParams.get("email") || "").trim().toLowerCase();
+  const signedInEmail = String(user.email || "").trim().toLowerCase();
+
   if (!email) return Response.json({ error: "Email required" }, { status: 400 });
+  if (!signedInEmail || email !== signedInEmail) {
+    return Response.json({ error: "You can only view your own referral activity." }, { status: 403 });
+  }
 
   const code = codeFor(email);
 
