@@ -192,7 +192,7 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
                     <p className="text-[9px] font-semibold uppercase tracking-[.18em] text-white/30">
                       Referral Benefit
                     </p>
-                    <p className="mt-2 text-xl font-semibold text-[#ead7aa]">$20</p>
+                    <p className="mt-2 text-xl font-semibold text-[#ead7aa]">20%</p>
                     <p className="mt-1 text-xs text-white/45">Friend saving</p>
                   </div>
                   <div className="rounded-2xl border border-white/[.07] bg-white/[.025] p-4">
