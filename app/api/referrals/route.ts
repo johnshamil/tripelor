@@ -65,7 +65,7 @@ export async function GET(req: Request) {
 
   const [referralResponse, shareResponse] = await Promise.all([
     fetch(
-      `${url}/rest/v1/referrals?select=id,status,reward_points,discount_usd,referred_email,created_at,rewarded_at&code=eq.${encodeURIComponent(code)}&order=created_at.desc`,
+      `${url}/rest/v1/referrals?select=id,status,reward_points,discount_percent,referred_email,created_at,rewarded_at&code=eq.${encodeURIComponent(code)}&order=created_at.desc`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
     ),
     fetch(
@@ -167,7 +167,7 @@ export async function GET(req: Request) {
 
   return Response.json({
     code,
-    discountUsd: 20,
+    discountPercent: 20,
     rewardPoints: 100,
     referrals: refs,
     promotion: {
@@ -209,5 +209,5 @@ export async function POST(req: Request) {
     return Response.json({ valid: false, error: "Referral code not found." }, { status: 404 });
   }
 
-  return Response.json({ valid: true, code, discountUsd: 20, rewardPoints: 100 });
+  return Response.json({ valid: true, code, discountPercent: 20, rewardPoints: 100 });
 }
