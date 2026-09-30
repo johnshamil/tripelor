@@ -1,5 +1,6 @@
 import { CalendarDays, Clock3, Headphones, MapPin, Users } from "lucide-react";
 import ManualQuotationActions from "@/components/manual-quotation-actions";
+import TripelorMark from "@/components/tripelor-mark";
 
 export const dynamic = "force-dynamic";
 
@@ -175,10 +176,13 @@ export default async function ManualQuotationPage({ params }: { params: { token:
       <div className="quote-sheet mx-auto w-[min(100%-1rem,1120px)] overflow-hidden border border-[#cbbfa9] bg-white shadow-[0_30px_100px_rgba(30,35,38,.18)]">
         <section className="quote-header bg-[#06151c] px-6 py-7 text-white md:px-9 md:py-8">
           <div className="grid gap-5 md:grid-cols-[1fr_auto] md:items-start">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[.28em] text-[#d9bd7b]">Tripelor · Maldives Travel</p>
-              <h1 className="font-display mt-2 text-4xl leading-none md:text-5xl">Quotation</h1>
-              <p className="mt-3 text-sm text-white/60">Prepared for <strong className="text-white">{quote.customer_name}</strong></p>
+            <div className="flex items-start gap-4">
+              <TripelorMark className="h-14 w-14 shrink-0 text-[#ead7aa] md:h-16 md:w-16" />
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[.28em] text-[#d9bd7b]">Tripelor · Maldives Travel</p>
+                <h1 className="font-display mt-2 text-4xl leading-none md:text-5xl">Quotation</h1>
+                <p className="mt-3 text-sm text-white/60">Prepared for <strong className="text-white">{quote.customer_name}</strong></p>
+              </div>
             </div>
             <div className="grid gap-2 text-left md:text-right">
               <div>
