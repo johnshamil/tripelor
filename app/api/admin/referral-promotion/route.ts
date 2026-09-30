@@ -13,7 +13,9 @@ function supabaseConfig() {
   return { url, key };
 }
 
-async function loadPromotionData(\n  { requireReferralStats = false }: { requireReferralStats?: boolean } = {},\n) {
+async function loadPromotionData(
+  { requireReferralStats = false }: { requireReferralStats?: boolean } = {},
+) {
   const { url, key } = supabaseConfig();
   const headers = { apikey: key, Authorization: `Bearer ${key}` };
 
@@ -49,7 +51,9 @@ async function loadPromotionData(\n  { requireReferralStats = false }: { require
   const winnerRows = winnerText ? JSON.parse(winnerText) : [];
 
   if (!eventsResponse.ok) throw new Error(events?.message || "Unable to load referral shares.");
-  if (!referralsResponse.ok && requireReferralStats) {\n    throw new Error(referrals?.message || "Unable to load referral results.");\n  }
+  if (!referralsResponse.ok && requireReferralStats) {
+    throw new Error(referrals?.message || "Unable to load referral results.");
+  }
   // User names are optional enrichment. Share events are the source of truth for qualification.
   if (!winnerResponse.ok) {
     throw new Error(winnerRows?.message || "Unable to load referral winner.");
