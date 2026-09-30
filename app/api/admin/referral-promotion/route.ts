@@ -13,7 +13,7 @@ function supabaseConfig() {
   return { url, key };
 }
 
-async function loadPromotionData() {
+async function loadPromotionData(\n  { requireReferralStats = false }: { requireReferralStats?: boolean } = {},\n) {
   const { url, key } = supabaseConfig();
   const headers = { apikey: key, Authorization: `Bearer ${key}` };
 
@@ -49,7 +49,7 @@ async function loadPromotionData() {
   const winnerRows = winnerText ? JSON.parse(winnerText) : [];
 
   if (!eventsResponse.ok) throw new Error(events?.message || "Unable to load referral shares.");
-  if (!referralsResponse.ok) throw new Error(referrals?.message || "Unable to load referral results.");
+  if (!referralsResponse.ok && requireReferralStats) {\n    throw new Error(referrals?.message || "Unable to load referral results.");\n  }
   // User names are optional enrichment. Share events are the source of truth for qualification.
   if (!winnerResponse.ok) {
     throw new Error(winnerRows?.message || "Unable to load referral winner.");
@@ -238,7 +238,7 @@ export async function POST() {
       );
     }
 
-    const current = await loadPromotionData();
+    const current = await loadPromotionData({ requireReferralStats: true });
     if (current.winner) {
       return Response.json(
         { error: "A winner has already been selected for this promotion.", winner: current.winner },
