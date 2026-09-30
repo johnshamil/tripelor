@@ -101,6 +101,8 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
   const rewardPoints = Number(data.rewardPoints) || 100;
   const promotion = data.promotion || {};
   const totalEntries = Number(promotion.totalEntries || 0);
+  const campaignTotalEntries = Number(promotion.campaignTotalEntries || 0);
+  const campaignParticipants = Number(promotion.campaignParticipants || 0);
   const entryHistory = Array.isArray(promotion.entryHistory) ? promotion.entryHistory : [];
   const daysLeft = promotion.ended
     ? 0
@@ -266,10 +268,17 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
               </div>
             </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-2xl border border-gold/30 bg-gold/[.08] p-4">
+                <p className="text-[10px] uppercase tracking-[.14em] text-gold/70">All draw entries</p>
+                <p className="mt-1 text-3xl font-black text-gold">{campaignTotalEntries}</p>
+                <p className="mt-1 text-[11px] text-gray-500">
+                  {campaignParticipants} qualified participant{campaignParticipants === 1 ? "" : "s"} total
+                </p>
+              </div>
               <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
                 <p className="text-[10px] uppercase tracking-[.14em] text-gray-500">Your entries</p>
-                <p className="mt-1 text-3xl font-black text-gold">{totalEntries}</p>
+                <p className="mt-1 text-3xl font-black text-white">{totalEntries}</p>
                 <p className="mt-1 text-[11px] text-gray-500">
                   {promotion.shared ? "You’re in the draw." : "Share once to enter."}
                 </p>
