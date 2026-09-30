@@ -151,7 +151,7 @@ export async function GET(req: Request) {
     { referralCode: string; referredEmails: Set<string>; completedEmails: Set<string> }
   >();
 
-  for (const participant of campaignParticipants.values()) {
+  for (const participant of Array.from(campaignParticipants.values())) {
     if (participant.referralCode) participantByCode.set(participant.referralCode, participant);
   }
 
@@ -169,7 +169,7 @@ export async function GET(req: Request) {
   }
 
   let campaignTotalEntries = 0;
-  for (const participant of campaignParticipants.values()) {
+  for (const participant of Array.from(campaignParticipants.values())) {
     const totals = calculateReferralPromotionEntries({
       shareActions: 1,
       referredBookings: participant.referredEmails.size,
