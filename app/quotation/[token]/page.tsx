@@ -22,7 +22,6 @@ type QuoteRow = {
   reference: string;
   share_token: string;
   customer_name: string;
-  customer_email: string;
   property_name: string;
   room_name: string;
   meal_plan: string;
@@ -54,7 +53,7 @@ async function quotation(token: string): Promise<QuoteRow | null> {
   if (!/^[0-9a-f-]{36}$/i.test(token)) return null;
   const { url, key } = cfg();
   const response = await fetch(
-    `${url}/rest/v1/manual_quotations?share_token=eq.${encodeURIComponent(token)}&select=*&limit=1`,
+    `${url}/rest/v1/manual_quotations?share_token=eq.${encodeURIComponent(token)}&select=reference,share_token,customer_name,property_name,room_name,meal_plan,check_in,check_out,adults,children,rooms,items,subtotal,discount_amount,fees_amount,total,notes,terms,status,valid_until,created_at&limit=1`,
     {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
       cache: "no-store",
@@ -233,7 +232,6 @@ export default async function ManualQuotationPage({ params }: { params: { token:
               reference={quote.reference}
               customerName={quote.customer_name}
               total={Number(quote.total)}
-              customerEmail={quote.customer_email}
             />
           )}
 
