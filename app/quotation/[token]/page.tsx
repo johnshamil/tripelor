@@ -179,7 +179,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
             <div className="flex items-start gap-4">
               <TripelorMark className="h-14 w-14 shrink-0 text-[#ead7aa] md:h-16 md:w-16" />
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[.28em] text-[#d9bd7b]">Tripelor · Maldives Travel</p>
+                <p className="text-[10px] font-bold uppercase tracking-[.28em] text-[#d9bd7b]">TRIPELOR · MALDIVES TRAVEL</p>
                 <h1 className="font-display mt-2 text-4xl leading-none md:text-5xl">Quotation</h1>
                 <p className="mt-3 text-sm text-white/60">Prepared for <strong className="text-white">{quote.customer_name}</strong></p>
               </div>
