@@ -26,7 +26,7 @@ async function loadPromotionData() {
       `${url}/rest/v1/referrals?select=code,status,referred_email,created_at,rewarded_at&order=created_at.desc&limit=5000`,
       { headers, cache: "no-store" },
     ),
-    fetch(`${url}/auth/v1/admin/users?page=1&per_page=1000`, {
+    fetch(`${url}/auth/v1/admin/users?page=1&per_page=200`, {
       headers,
       cache: "no-store",
     }),
@@ -50,15 +50,13 @@ async function loadPromotionData() {
 
   if (!eventsResponse.ok) throw new Error(events?.message || "Unable to load referral shares.");
   if (!referralsResponse.ok) throw new Error(referrals?.message || "Unable to load referral results.");
-  if (!usersResponse.ok) {
-    throw new Error(usersData?.message || usersData?.msg || "Unable to load users.");
-  }
+  // User names are optional enrichment. Share events are the source of truth for qualification.
   if (!winnerResponse.ok) {
     throw new Error(winnerRows?.message || "Unable to load referral winner.");
   }
 
   const namesByEmail = new Map<string, string>();
-  for (const account of usersData.users || []) {
+  for (const account of usersResponse.ok && Array.isArray(usersData?.users) ? usersData.users : []) {
     const email = String(account.email || "").trim().toLowerCase();
     if (!email) continue;
     namesByEmail.set(
