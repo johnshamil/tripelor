@@ -421,9 +421,9 @@ export default function AdminQuotationBuilder() {
           <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.22em] text-gold">
             <FileText className="h-4 w-4" /> Tripelor Admin
           </p>
-          <h1 className="mt-2 text-3xl font-semibold md:text-5xl">Quotation Builder</h1>
+          <h1 className="mt-2 text-3xl font-semibold md:text-5xl">One-Page Quotation Builder</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">
-            Build a professional customer quotation with stay, transfer, excursions, discounts and final selling price.
+            Create the full customer quotation on one screen with a live total beside the form.
           </p>
         </div>
         <button type="button" onClick={resetForm} className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
@@ -479,104 +479,95 @@ export default function AdminQuotationBuilder() {
         </section>
       )}
 
-      <section className="mt-7 grid gap-7 xl:grid-cols-[1fr_360px] xl:items-start">
-        <div className="space-y-6">
-          <Panel title="Customer & travel">
-            <div className="grid gap-4 md:grid-cols-3">
-              <Label title="Customer name">
-                <input value={customerName} onChange={event => setCustomerName(event.target.value)} className={field} placeholder="Customer full name" />
-              </Label>
-              <Label title="Email">
-                <input type="email" value={customerEmail} onChange={event => setCustomerEmail(event.target.value)} className={field} placeholder="customer@email.com" />
-              </Label>
-              <Label title="WhatsApp / phone">
-                <input value={customerPhone} onChange={event => setCustomerPhone(event.target.value)} className={field} placeholder="+960..." />
-              </Label>
-              <Label title="Check-in">
-                <input type="date" value={checkIn} onChange={event => setCheckIn(event.target.value)} className={field} />
-              </Label>
-              <Label title="Check-out">
-                <input type="date" min={checkIn || undefined} value={checkOut} onChange={event => setCheckOut(event.target.value)} className={field} />
-              </Label>
-              <div className="grid grid-cols-3 gap-2">
-                <NumberField label="Adults" value={adults} min={1} max={20} onChange={setAdults} />
-                <NumberField label="Children" value={children} min={0} max={20} onChange={setChildren} />
-                <NumberField label="Rooms" value={rooms} min={1} max={20} onChange={setRooms} />
+      <section className="mt-7 rounded-2xl border border-white/10 bg-white/[.025] p-5 md:p-6">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+          <div className="grid gap-4 rounded-2xl border border-white/10 bg-white/[.02] p-4 lg:grid-cols-2 md:p-5">
+            <div>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold">Customer & Travel</h2>
+                <span className="text-[10px] uppercase tracking-[.18em] text-gold">01</span>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <Label title="Customer name">
+                  <input value={customerName} onChange={event => setCustomerName(event.target.value)} className={field} placeholder="Customer full name" />
+                </Label>
+                <Label title="Email">
+                  <input type="email" value={customerEmail} onChange={event => setCustomerEmail(event.target.value)} className={field} placeholder="customer@email.com" />
+                </Label>
+                <Label title="WhatsApp / phone">
+                  <input value={customerPhone} onChange={event => setCustomerPhone(event.target.value)} className={field} placeholder="+960..." />
+                </Label>
+                <Label title="Check-in">
+                  <input type="date" value={checkIn} onChange={event => setCheckIn(event.target.value)} className={field} />
+                </Label>
+                <Label title="Check-out">
+                  <input type="date" min={checkIn || undefined} value={checkOut} onChange={event => setCheckOut(event.target.value)} className={field} />
+                </Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <NumberField label="Adults" value={adults} min={1} max={20} onChange={setAdults} />
+                  <NumberField label="Children" value={children} min={0} max={20} onChange={setChildren} />
+                  <NumberField label="Rooms" value={rooms} min={1} max={20} onChange={setRooms} />
+                </div>
               </div>
             </div>
-          </Panel>
 
-          <Panel title="Accommodation">
-            <div className="grid gap-4 md:grid-cols-3">
-              <Label title="Property">
-                <select value={propertyName} onChange={event => selectProperty(event.target.value)} className={field}>
-                  <option value="">Manual / no property</option>
-                  {properties.map(item => <option key={item.slug} value={item.name}>{item.name}</option>)}
-                </select>
-              </Label>
-              <Label title="Room">
-                <select value={roomName} onChange={event => setRoomName(event.target.value)} className={field} disabled={!property}>
-                  <option value="">Select room</option>
-                  {roomOptions.map(room => <option key={room.name} value={room.name}>{room.name}</option>)}
-                </select>
-              </Label>
-              <Label title="Meal plan">
-                <select value={mealPlan} onChange={event => setMealPlan(event.target.value)} className={field} disabled={!roomName}>
-                  <option value="">Select meal plan</option>
-                  {mealOptions.map(meal => <option key={meal} value={meal}>{meal}</option>)}
-                </select>
-              </Label>
-            </div>
-
-            <div className="mt-5 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
-              <Label title="Accommodation selling total · USD">
-                <input type="number" min={0} step="0.01" value={accommodationTotal} onChange={event => setAccommodationTotal(Math.max(0, Number(event.target.value) || 0))} className={field} />
-              </Label>
-              <button
-                type="button"
-                onClick={() => setAccommodationTotal(suggestedStayTotal)}
-                disabled={!suggestedStayTotal}
-                className="btn-outline min-h-12 px-4 text-xs disabled:opacity-40"
-              >
-                Use Published Rate · {usd(suggestedStayTotal)}
-              </button>
-            </div>
-            <p className="mt-3 text-xs text-gray-500">
-              {nights > 0 ? `${nights} night${nights === 1 ? "" : "s"} · ${rooms} room${rooms === 1 ? "" : "s"}` : "Choose dates to calculate the published accommodation selling rate."}
-            </p>
-          </Panel>
-
-          <Panel title="Transfer">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <NumberField label="Speedboat seats" value={transferSeats} min={0} max={30} onChange={setTransferSeats} />
-              <Label title="Price per seat · USD">
-                <input type="number" min={0} step="0.01" value={transferUnitPrice} onChange={event => setTransferUnitPrice(Math.max(0, Number(event.target.value) || 0))} className={field} />
-              </Label>
-              <div className="rounded-xl border border-white/10 bg-white/[.03] p-4">
-                <p className="text-[9px] uppercase tracking-[.14em] text-gray-500">Transfer total</p>
-                <p className="mt-2 text-xl font-semibold text-gold">{usd(transferTotal)}</p>
+            <div className="border-t border-white/10 pt-6">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold">Stay & Transfer</h2>
+                <span className="text-[10px] uppercase tracking-[.18em] text-gold">02</span>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <Label title="Property">
+                  <select value={propertyName} onChange={event => selectProperty(event.target.value)} className={field}>
+                    <option value="">Manual / no property</option>
+                    {properties.map(item => <option key={item.slug} value={item.name}>{item.name}</option>)}
+                  </select>
+                </Label>
+                <Label title="Room">
+                  <select value={roomName} onChange={event => setRoomName(event.target.value)} className={field} disabled={!property}>
+                    <option value="">Select room</option>
+                    {roomOptions.map(room => <option key={room.name} value={room.name}>{room.name}</option>)}
+                  </select>
+                </Label>
+                <Label title="Meal plan">
+                  <select value={mealPlan} onChange={event => setMealPlan(event.target.value)} className={field} disabled={!roomName}>
+                    <option value="">Select meal plan</option>
+                    {mealOptions.map(meal => <option key={meal} value={meal}>{meal}</option>)}
+                  </select>
+                </Label>
+                <Label title="Accommodation total · USD">
+                  <input type="number" min={0} step="0.01" value={accommodationTotal} onChange={event => setAccommodationTotal(Math.max(0, Number(event.target.value) || 0))} className={field} />
+                </Label>
+                <NumberField label="Speedboat seats" value={transferSeats} min={0} max={30} onChange={setTransferSeats} />
+                <Label title="Transfer per seat · USD">
+                  <input type="number" min={0} step="0.01" value={transferUnitPrice} onChange={event => setTransferUnitPrice(Math.max(0, Number(event.target.value) || 0))} className={field} />
+                </Label>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-xs text-gray-400">
+                <span>{nights > 0 ? `${nights} night${nights === 1 ? "" : "s"} · ${rooms} room${rooms === 1 ? "" : "s"}` : "Choose dates to calculate the stay rate."}</span>
+                <button type="button" onClick={() => setAccommodationTotal(suggestedStayTotal)} disabled={!suggestedStayTotal} className="text-gold disabled:opacity-40">
+                  Use published rate · {usd(suggestedStayTotal)}
+                </button>
+                <span>Transfer total · {usd(transferTotal)}</span>
               </div>
             </div>
-          </Panel>
 
-          <Panel title="Excursions & other items">
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => addExtra("excursion")} className="btn-outline min-h-[42px] gap-2 px-4 text-xs">
-                <Plus className="h-4 w-4" /> Add Excursion
-              </button>
-              <button type="button" onClick={() => addExtra("other")} className="btn-outline min-h-[42px] gap-2 px-4 text-xs">
-                <Plus className="h-4 w-4" /> Add Other
-              </button>
-            </div>
-
-            <div className="mt-5 space-y-4">
-              {extras.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-white/10 p-5 text-sm text-gray-500">
-                  No additional items yet.
-                </p>
-              ) : extras.map(item => (
-                <div key={item.id} className="rounded-xl border border-white/10 bg-black/20 p-4">
-                  <div className="grid gap-3 lg:grid-cols-[120px_1fr_1fr_90px_130px_auto] lg:items-end">
+            <div className="border-t border-white/10 pt-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold">Excursions & Other Items</h2>
+                  <p className="mt-1 text-xs text-gray-500">Add only what should appear on this quotation.</p>
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => addExtra("excursion")} className="btn-outline min-h-[40px] gap-2 px-3 text-xs"><Plus className="h-4 w-4" /> Excursion</button>
+                  <button type="button" onClick={() => addExtra("other")} className="btn-outline min-h-[40px] gap-2 px-3 text-xs"><Plus className="h-4 w-4" /> Other</button>
+                </div>
+              </div>
+              <div className="mt-4 space-y-3">
+                {extras.length === 0 ? (
+                  <p className="rounded-xl border border-dashed border-white/10 px-4 py-4 text-sm text-gray-500">No additional items.</p>
+                ) : extras.map(item => (
+                  <div key={item.id} className="grid gap-3 rounded-xl border border-white/10 bg-black/20 p-3 lg:grid-cols-[110px_1fr_1fr_80px_120px_auto] lg:items-end">
                     <Label title="Type">
                       <select value={item.category} onChange={event => updateExtra(item.id, { category: event.target.value as ExtraItem["category"] })} className={field}>
                         <option value="excursion">Excursion</option>
@@ -584,86 +575,87 @@ export default function AdminQuotationBuilder() {
                       </select>
                     </Label>
                     <Label title="Description">
-                      <input value={item.label} onChange={event => updateExtra(item.id, { label: event.target.value })} className={field} placeholder="e.g. Turtle & Shark Snorkeling" />
+                      <input value={item.label} onChange={event => updateExtra(item.id, { label: event.target.value })} className={field} placeholder="Item name" />
                     </Label>
                     <Label title="Details">
-                      <input value={item.details} onChange={event => updateExtra(item.id, { details: event.target.value })} className={field} placeholder="Optional inclusions / duration" />
+                      <input value={item.details} onChange={event => updateExtra(item.id, { details: event.target.value })} className={field} placeholder="Optional details" />
                     </Label>
                     <Label title="Qty">
                       <input type="number" min={1} max={100} value={item.quantity} onChange={event => updateExtra(item.id, { quantity: Math.max(1, Number(event.target.value) || 1) })} className={field} />
                     </Label>
-                    <Label title="Unit price · USD">
+                    <Label title="Unit price">
                       <input type="number" min={0} step="0.01" value={item.unitPrice} onChange={event => updateExtra(item.id, { unitPrice: Math.max(0, Number(event.target.value) || 0) })} className={field} />
                     </Label>
                     <button type="button" onClick={() => removeExtra(item.id)} className="flex h-12 w-12 items-center justify-center rounded-xl border border-red-500/20 text-red-300 hover:bg-red-500/10" aria-label="Remove item">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </Panel>
 
-          <Panel title="Adjustments & conditions">
-            <div className="grid gap-4 md:grid-cols-3">
-              <Label title="Discount · USD">
-                <input type="number" min={0} step="0.01" value={discountAmount} onChange={event => setDiscountAmount(Math.max(0, Number(event.target.value) || 0))} className={field} />
-              </Label>
-              <Label title="Taxes / additional fees · USD">
-                <input type="number" min={0} step="0.01" value={feesAmount} onChange={event => setFeesAmount(Math.max(0, Number(event.target.value) || 0))} className={field} />
-              </Label>
-              <Label title="Validity">
-                <select value={validHours} onChange={event => setValidHours(Number(event.target.value))} className={field}>
-                  <option value={24}>24 hours</option>
-                  <option value={48}>48 hours</option>
-                  <option value={72}>72 hours</option>
-                  <option value={168}>7 days</option>
-                </select>
-              </Label>
+            <div className="border-t border-white/10 pt-6">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold">Price & Conditions</h2>
+                <span className="text-[10px] uppercase tracking-[.18em] text-gold">04</span>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <Label title="Discount · USD">
+                  <input type="number" min={0} step="0.01" value={discountAmount} onChange={event => setDiscountAmount(Math.max(0, Number(event.target.value) || 0))} className={field} />
+                </Label>
+                <Label title="Taxes / fees · USD">
+                  <input type="number" min={0} step="0.01" value={feesAmount} onChange={event => setFeesAmount(Math.max(0, Number(event.target.value) || 0))} className={field} />
+                </Label>
+                <Label title="Validity">
+                  <select value={validHours} onChange={event => setValidHours(Number(event.target.value))} className={field}>
+                    <option value={24}>24 hours</option>
+                    <option value={48}>48 hours</option>
+                    <option value={72}>72 hours</option>
+                    <option value={168}>7 days</option>
+                  </select>
+                </Label>
+              </div>
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                <Label title="Customer notes">
+                  <textarea rows={3} value={notes} onChange={event => setNotes(event.target.value)} className={field} placeholder="Special inclusions or notes..." />
+                </Label>
+                <Label title="Quotation conditions">
+                  <textarea rows={3} value={terms} onChange={event => setTerms(event.target.value)} className={field} />
+                </Label>
+              </div>
             </div>
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <Label title="Customer notes">
-                <textarea rows={5} value={notes} onChange={event => setNotes(event.target.value)} className={field} placeholder="Honeymoon setup, arrival notes, special inclusions..." />
-              </Label>
-              <Label title="Quotation conditions">
-                <textarea rows={5} value={terms} onChange={event => setTerms(event.target.value)} className={field} />
-              </Label>
+          </div>
+
+          <aside className="rounded-2xl border border-gold/30 bg-[radial-gradient(circle_at_top_right,rgba(217,189,123,.12),transparent_30%),rgba(0,0,0,.18)] p-5 xl:sticky xl:top-24">
+            <p className="text-[10px] font-semibold uppercase tracking-[.2em] text-gold">Live quotation summary</p>
+            <h2 className="font-display mt-3 text-3xl">{customerName || "Customer quotation"}</h2>
+
+            <div className="mt-5 space-y-2 text-sm text-gray-400">
+              {propertyName && <Summary label="Property" value={propertyName} />}
+              {roomName && <Summary label="Room" value={roomName} />}
+              {mealPlan && <Summary label="Meal" value={mealPlan} />}
+              {nights > 0 && <Summary label="Stay" value={`${nights} nights · ${rooms} room${rooms === 1 ? "" : "s"}`} />}
+              <Summary label="Guests" value={`${adults} adult${adults === 1 ? "" : "s"} · ${children} child${children === 1 ? "" : "ren"}`} />
             </div>
-          </Panel>
+
+            <div className="mt-5 space-y-2 border-y border-white/10 py-4 text-sm">
+              {accommodationTotal > 0 && <Summary label="Accommodation" value={usd(accommodationTotal)} />}
+              {transferTotal > 0 && <Summary label="Transfer" value={usd(transferTotal)} />}
+              {extraTotal > 0 && <Summary label="Excursions / other" value={usd(extraTotal)} />}
+              <Summary label="Subtotal" value={usd(subtotal)} />
+              {discountAmount > 0 && <Summary label="Discount" value={`− ${usd(discountAmount)}`} accent />}
+              {feesAmount > 0 && <Summary label="Taxes / fees" value={usd(feesAmount)} />}
+            </div>
+
+            <p className="mt-5 text-[10px] uppercase tracking-[.18em] text-gray-500">Final selling price</p>
+            <p className="font-display mt-2 text-5xl text-gold">{usd(finalTotal)}</p>
+
+            <button type="button" onClick={generate} disabled={saving} className="btn-gold mt-6 w-full justify-center gap-2 disabled:opacity-50">
+              <FileText className="h-4 w-4" /> {saving ? "Generating..." : "Generate Quotation"}
+            </button>
+            <p className="mt-3 text-xs leading-5 text-gray-500">One form, one page, one shareable quotation link.</p>
+          </aside>
         </div>
-
-        <aside className="rounded-2xl border border-gold/30 bg-[radial-gradient(circle_at_top_right,rgba(217,189,123,.12),transparent_30%),rgba(255,255,255,.025)] p-5 xl:sticky xl:top-24 md:p-6">
-          <p className="text-[10px] font-semibold uppercase tracking-[.2em] text-gold">Quotation summary</p>
-          <h2 className="font-display mt-3 text-3xl">{customerName || "Customer quotation"}</h2>
-
-          <div className="mt-5 space-y-3 text-sm text-gray-400">
-            {propertyName && <Summary label="Property" value={propertyName} />}
-            {roomName && <Summary label="Room" value={roomName} />}
-            {mealPlan && <Summary label="Meal" value={mealPlan} />}
-            {nights > 0 && <Summary label="Stay" value={`${nights} nights · ${rooms} room${rooms === 1 ? "" : "s"}`} />}
-            <Summary label="Guests" value={`${adults} adult${adults === 1 ? "" : "s"} · ${children} child${children === 1 ? "" : "ren"}`} />
-          </div>
-
-          <div className="mt-6 space-y-3 border-y border-white/10 py-5 text-sm">
-            {accommodationTotal > 0 && <Summary label="Accommodation" value={usd(accommodationTotal)} />}
-            {transferTotal > 0 && <Summary label="Transfer" value={usd(transferTotal)} />}
-            {extraTotal > 0 && <Summary label="Excursions / other" value={usd(extraTotal)} />}
-            <Summary label="Subtotal" value={usd(subtotal)} />
-            {discountAmount > 0 && <Summary label="Discount" value={`− ${usd(discountAmount)}`} accent />}
-            {feesAmount > 0 && <Summary label="Taxes / fees" value={usd(feesAmount)} />}
-          </div>
-
-          <p className="mt-6 text-[10px] uppercase tracking-[.18em] text-gray-500">Final selling price</p>
-          <p className="font-display mt-2 text-5xl text-gold">{usd(finalTotal)}</p>
-
-          <button type="button" onClick={generate} disabled={saving} className="btn-gold mt-6 w-full justify-center gap-2 disabled:opacity-50">
-            <FileText className="h-4 w-4" /> {saving ? "Generating..." : "Generate Quotation"}
-          </button>
-
-          <p className="mt-4 text-xs leading-6 text-gray-500">
-            The quotation creates a private share link. It is not a confirmed booking and does not hold inventory.
-          </p>
-        </aside>
       </section>
 
       <section className="mt-12">
@@ -730,7 +722,7 @@ export default function AdminQuotationBuilder() {
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/[.025] p-5 md:p-6">
+    <section className="rounded-xl border border-white/10 bg-black/15 p-4">
       <h2 className="text-lg font-semibold">{title}</h2>
       <div className="mt-5">{children}</div>
     </section>
