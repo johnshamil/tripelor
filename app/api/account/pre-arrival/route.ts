@@ -24,6 +24,18 @@ function cleanText(value: unknown, max = 1200) {
   return String(value || "").trim().slice(0, max);
 }
 
+const allowedInterests = new Set([
+  "Manta snorkeling",
+  "Shark snorkeling",
+  "Shipwreck visit",
+  "Sandbank escape",
+  "Dolphin cruise",
+  "Night fishing",
+  "Professional island photography",
+  "Cinematic trip videography",
+  "Drone photography & videography",
+]);
+
 export async function GET(request: Request) {
   try {
     const user = await requireUser();
@@ -59,7 +71,13 @@ export async function POST(request: Request) {
     if (!reservation) return Response.json({error: "Booking not found."}, {status: 404});
 
     const interests = Array.isArray(body?.interests)
-      ? body.interests.map((item: unknown) => cleanText(item, 80)).filter(Boolean).slice(0, 12)
+      ? Array.from(
+          new Set<string>(
+            body.interests
+              .map((item: unknown) => cleanText(item, 80))
+              .filter((item: string) => allowedInterests.has(item)),
+          ),
+        ).slice(0, allowedInterests.size)
       : [];
 
     const payload = {
