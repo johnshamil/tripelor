@@ -10,6 +10,7 @@ import {
   CircleDollarSign,
   Clock3,
   CreditCard,
+  FileText,
   Search,
   LockKeyhole,
   Share2,
@@ -232,6 +233,9 @@ export default function AdminPage() {
             <Link href="/admin/properties" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
               <Building2 className="h-4 w-4" /> Properties
             </Link>
+            <Link href="/admin/quotations" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
+              <FileText className="h-4 w-4" /> Quotations
+            </Link>
             <Link href="/admin/transfers" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
               <Ship className="h-4 w-4" /> Transfers
             </Link>
@@ -437,6 +441,7 @@ export default function AdminPage() {
         </p>
       </section>
 
+      <Link href="/admin/quotations" className="mt-6 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/35 bg-gold/[.07] p-5"><span className="flex items-start gap-3"><FileText className="mt-1 h-5 w-5 shrink-0 text-gold" /><span><strong>Quotation Builder</strong><span className="mt-1 block text-sm text-gray-400">Create customer quotations with stays, transfers, excursions, discounts and shareable links.</span></span></span><span className="text-gold">Create quote →</span></Link>
       <Link href="/admin/secret-deal-leads" className="mt-4 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/30 bg-gold/[.06] p-5"><span><strong>Secret Deal Leads</strong><span className="mt-1 block text-sm text-gray-400">Visitors who unlocked private offers by travel month, budget and holiday style.</span></span><span className="text-gold">Open leads →</span></Link>
       <Link href="/admin/matchmaker-leads" className="mt-6 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/30 bg-gold/[.04] p-5"><span><strong>Maldives Matchmaker Leads</strong><span className="mt-1 block text-sm text-gray-400">Follow up new visitors who shared their dates, budget, style and contact details.</span></span><span className="text-gold">Open leads →</span></Link>
       <Link href="/admin/trip-requests" className="mt-6 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 p-5"><span><strong>Trip Planning Requests</strong><span className="mt-1 block text-sm text-gray-400">Review guests’ trip plans, preferred dates and contact details.</span></span><span className="text-gold">Open →</span></Link>
