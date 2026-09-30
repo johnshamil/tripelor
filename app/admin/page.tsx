@@ -37,6 +37,7 @@ const bookingStatusOrder: Record<string, number> = {
 export default function AdminPage() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [customerCounts, setCustomerCounts] = useState({ customers: 0, confirmedCustomers: 0, signedInCustomers: 0, registeredAccounts: 0 });
   const [referralPromotion, setReferralPromotion] = useState<any>({
     promotion: null,
     participants: [],
@@ -55,15 +56,55 @@ export default function AdminPage() {
       fetch("/api/admin/users", { cache: "no-store" }),
       fetch("/api/admin/referral-promotion", { cache: "no-store" }),
     ]);
-    const bookingResult = await bookingResponse.json();
-    const userResult = await userResponse.json();
-    const referralResult = await referralResponse.json();
-    if (!bookingResponse.ok) throw new Error(bookingResult.error || "Unable to load bookings.");
-    if (!userResponse.ok) throw new Error(userResult.error || "Unable to load users.");
-    if (!referralResponse.ok) throw new Error(referralResult.error || "Unable to load referral promotion.");
-    setBookings(bookingResult.bookings || []);
-    setUsers(userResult.users || []);
-    setReferralPromotion(referralResult || { promotion: null, participants: [] });
+
+    const [bookingResult, userResult, referralResult] = await Promise.all([
+      bookingResponse.json().catch(() => ({})),
+      userResponse.json().catch(() => ({})),
+      referralResponse.json().catch(() => ({})),
+    ]);
+
+    const errors: string[] = [];
+
+    if (bookingResponse.ok) {
+      setBookings(bookingResult.bookings || []);
+    } else {
+      errors.push(bookingResult.error || "Unable to load bookings.");
+    }
+
+    if (userResponse.ok) {
+      const customerUsers = Array.isArray(userResult.customers)
+        ? userResult.customers
+        : Array.isArray(userResult.users)
+          ? userResult.users.filter((account: any) => !account.isAdmin)
+          : [];
+
+      setUsers(customerUsers);
+      setCustomerCounts({
+        customers: Number(userResult?.counts?.customers ?? customerUsers.length),
+        confirmedCustomers: Number(
+          userResult?.counts?.confirmedCustomers ??
+            customerUsers.filter((account: any) => Boolean(account.confirmedAt)).length,
+        ),
+        signedInCustomers: Number(
+          userResult?.counts?.signedInCustomers ??
+            customerUsers.filter((account: any) => Boolean(account.lastSignInAt)).length,
+        ),
+        registeredAccounts: Number(
+          userResult?.counts?.registeredAccounts ??
+            (Array.isArray(userResult.users) ? userResult.users.length : customerUsers.length),
+        ),
+      });
+    } else {
+      errors.push(userResult.error || "Unable to load customers.");
+    }
+
+    if (referralResponse.ok) {
+      setReferralPromotion(referralResult || { promotion: null, participants: [] });
+    } else {
+      errors.push(referralResult.error || "Unable to load referral promotion.");
+    }
+
+    if (errors.length) setStatus(errors.join(" · "));
   }
 
   useEffect(() => {
@@ -556,28 +597,55 @@ export default function AdminPage() {
       <AdminPreArrival />
 
       <section className="mt-9 rounded-2xl border border-white/10 bg-white/[.02] p-5 md:p-6">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <Users className="h-5 w-5 text-gold" />
             <div>
               <h2 className="text-lg font-semibold">Customers</h2>
-              <p className="text-xs text-gray-500">{users.length} registered accounts</p>
-            </div>
-          </div>
-          <Link href="/account" className="text-xs font-semibold text-gold">My account →</Link>
-        </div>
-
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-          {users.slice(0, 8).map((user: any) => (
-            <div key={user.id} className="rounded-xl bg-white/[.035] p-4">
-              <p className="truncate text-sm font-semibold">{user.fullName || "Tripelor Customer"}</p>
-              <p className="mt-1 truncate text-xs text-gray-500">{user.email}</p>
-              <p className="mt-2 text-[10px] uppercase tracking-[.1em] text-gold">
-                {user.isAdmin ? "Admin" : user.confirmedAt ? "Confirmed" : "Unconfirmed"}
+              <p className="text-xs text-gray-500">
+                {customerCounts.customers} customer account{customerCounts.customers === 1 ? "" : "s"}
               </p>
             </div>
-          ))}
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 text-center text-xs sm:min-w-[340px]">
+            <div className="rounded-xl border border-white/10 bg-white/[.03] px-3 py-2">
+              <p className="text-[9px] uppercase tracking-[.12em] text-gray-500">Customers</p>
+              <p className="mt-1 text-lg font-semibold text-gold">{customerCounts.customers}</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/[.03] px-3 py-2">
+              <p className="text-[9px] uppercase tracking-[.12em] text-gray-500">Confirmed</p>
+              <p className="mt-1 text-lg font-semibold text-emerald-300">{customerCounts.confirmedCustomers}</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/[.03] px-3 py-2">
+              <p className="text-[9px] uppercase tracking-[.12em] text-gray-500">Signed in</p>
+              <p className="mt-1 text-lg font-semibold text-sky-300">{customerCounts.signedInCustomers}</p>
+            </div>
+          </div>
         </div>
+
+        {users.length === 0 ? (
+          <div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-5 text-center text-sm text-gray-500">
+            No customer accounts were returned. If this remains at zero, check the customer API warning shown above.
+          </div>
+        ) : (
+          <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            {users.slice(0, 12).map((user: any) => (
+              <div key={user.id} className="rounded-xl bg-white/[.035] p-4">
+                <p className="truncate text-sm font-semibold">{user.fullName || "Tripelor Customer"}</p>
+                <p className="mt-1 truncate text-xs text-gray-500">{user.email}</p>
+                <div className="mt-3 flex flex-wrap gap-2 text-[9px] uppercase tracking-[.08em]">
+                  <span className={user.confirmedAt ? "text-emerald-300" : "text-amber-300"}>
+                    {user.confirmedAt ? "Confirmed" : "Unconfirmed"}
+                  </span>
+                  <span className={user.lastSignInAt ? "text-sky-300" : "text-gray-600"}>
+                    {user.lastSignInAt ? "Signed in" : "Never signed in"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );
