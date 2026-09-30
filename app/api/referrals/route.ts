@@ -63,19 +63,30 @@ export async function GET(req: Request) {
     body: JSON.stringify({ code, owner_email: email }),
   });
 
-  const [referralResponse, shareResponse] = await Promise.all([
-    fetch(
-      `${url}/rest/v1/referrals?select=id,status,reward_points,discount_percent,referred_email,created_at,rewarded_at&code=eq.${encodeURIComponent(code)}&order=created_at.desc`,
-      { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
-    ),
-    fetch(
-      `${url}/rest/v1/referral_share_events?select=id,action,channel,created_at&owner_email=eq.${encodeURIComponent(email)}&created_at=lte.${encodeURIComponent(REFERRAL_PROMOTION.endsAt)}&order=created_at.desc&limit=2000`,
-      { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
-    ),
-  ]);
+  const [referralResponse, shareResponse, campaignShareResponse, campaignReferralResponse] =
+    await Promise.all([
+      fetch(
+        `${url}/rest/v1/referrals?select=id,status,reward_points,discount_percent,referred_email,created_at,rewarded_at&code=eq.${encodeURIComponent(code)}&order=created_at.desc`,
+        { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
+      ),
+      fetch(
+        `${url}/rest/v1/referral_share_events?select=id,action,channel,created_at&owner_email=eq.${encodeURIComponent(email)}&created_at=lte.${encodeURIComponent(REFERRAL_PROMOTION.endsAt)}&order=created_at.desc&limit=2000`,
+        { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
+      ),
+      fetch(
+        `${url}/rest/v1/referral_share_events?select=owner_email,referral_code,created_at&created_at=lte.${encodeURIComponent(REFERRAL_PROMOTION.endsAt)}&order=created_at.desc&limit=5000`,
+        { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
+      ),
+      fetch(
+        `${url}/rest/v1/referrals?select=code,status,referred_email,created_at,rewarded_at&order=created_at.desc&limit=5000`,
+        { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
+      ),
+    ]);
 
   const refs = referralResponse.ok ? await referralResponse.json() : [];
   const shareEvents = shareResponse.ok ? await shareResponse.json() : [];
+  const campaignShareEvents = campaignShareResponse.ok ? await campaignShareResponse.json() : [];
+  const campaignReferrals = campaignReferralResponse.ok ? await campaignReferralResponse.json() : [];
 
   const eligibleReferrals = (Array.isArray(refs) ? refs : []).filter(
     (item: any) => String(item.status || "") !== "cancelled",
@@ -110,6 +121,62 @@ export async function GET(req: Request) {
     referredBookings: referredFriends.size,
     completedReferrals: completedFriends.size,
   });
+
+  const campaignParticipants = new Map<
+    string,
+    {
+      referralCode: string;
+      referredEmails: Set<string>;
+      completedEmails: Set<string>;
+    }
+  >();
+
+  for (const event of Array.isArray(campaignShareEvents) ? campaignShareEvents : []) {
+    const ownerEmail = String(event.owner_email || "").trim().toLowerCase();
+    const referralCode = String(event.referral_code || "").trim().toUpperCase();
+    const participantKey = ownerEmail || referralCode;
+    if (!participantKey) continue;
+
+    if (!campaignParticipants.has(participantKey)) {
+      campaignParticipants.set(participantKey, {
+        referralCode,
+        referredEmails: new Set<string>(),
+        completedEmails: new Set<string>(),
+      });
+    }
+  }
+
+  const participantByCode = new Map<
+    string,
+    { referralCode: string; referredEmails: Set<string>; completedEmails: Set<string> }
+  >();
+
+  for (const participant of campaignParticipants.values()) {
+    if (participant.referralCode) participantByCode.set(participant.referralCode, participant);
+  }
+
+  for (const referral of Array.isArray(campaignReferrals) ? campaignReferrals : []) {
+    const referralCode = String(referral.code || "").trim().toUpperCase();
+    const participant = participantByCode.get(referralCode);
+    if (!participant) continue;
+
+    const referredEmail = String(referral.referred_email || "").trim().toLowerCase();
+    const status = String(referral.status || "");
+    if (!referredEmail || status === "cancelled") continue;
+
+    participant.referredEmails.add(referredEmail);
+    if (status === "rewarded") participant.completedEmails.add(referredEmail);
+  }
+
+  let campaignTotalEntries = 0;
+  for (const participant of campaignParticipants.values()) {
+    const totals = calculateReferralPromotionEntries({
+      shareActions: 1,
+      referredBookings: participant.referredEmails.size,
+      completedReferrals: participant.completedEmails.size,
+    });
+    campaignTotalEntries += totals.totalEntries;
+  }
 
   const entryHistory: Array<{
     id: string;
@@ -180,6 +247,8 @@ export async function GET(req: Request) {
       shareActions: Array.isArray(shareEvents) ? shareEvents.length : 0,
       referredBookings: referredFriends.size,
       completedReferrals: completedFriends.size,
+      campaignTotalEntries,
+      campaignParticipants: campaignParticipants.size,
       entryHistory,
       ended: referralPromotionEnded(),
     },
