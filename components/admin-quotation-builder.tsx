@@ -421,9 +421,9 @@ export default function AdminQuotationBuilder() {
           <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.22em] text-gold">
             <FileText className="h-4 w-4" /> Tripelor Admin
           </p>
-          <h1 className="mt-2 text-3xl font-semibold md:text-5xl">Quotation Builder</h1>
+          <h1 className="mt-2 text-3xl font-semibold md:text-5xl">One-Page Quotation Builder</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">
-            Build a professional customer quotation with stay, transfer, excursions, discounts and final selling price.
+            Create the full customer quotation on one screen with a live total beside the form.
           </p>
         </div>
         <button type="button" onClick={resetForm} className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
@@ -481,7 +481,7 @@ export default function AdminQuotationBuilder() {
 
       <section className="mt-7 rounded-2xl border border-white/10 bg-white/[.025] p-5 md:p-6">
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-          <div className="space-y-6">
+          <div className="grid gap-4 rounded-2xl border border-white/10 bg-white/[.02] p-4 lg:grid-cols-2 md:p-5">
             <div>
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-lg font-semibold">Customer & Travel</h2>
@@ -722,7 +722,7 @@ export default function AdminQuotationBuilder() {
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/[.025] p-5 md:p-6">
+    <section className="rounded-xl border border-white/10 bg-black/15 p-4">
       <h2 className="text-lg font-semibold">{title}</h2>
       <div className="mt-5">{children}</div>
     </section>
