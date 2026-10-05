@@ -233,7 +233,7 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
                     <p className="text-[9px] font-black uppercase tracking-[.30em] text-[#d9bd7b]">
                       Grand Prize
                     </p>
-                    <p className="font-display mt-3 text-7xl leading-none text-[#f2dfae]">03</p>
+                    <p className="font-display mt-3 text-7xl leading-none text-[#f2dfae]">05</p>
                     <p className="mt-1 text-xs font-bold uppercase tracking-[.22em] text-white/45">
                       Nights
                     </p>
