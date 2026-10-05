@@ -225,7 +225,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
               Share your referral code for a chance to win a Maldives escape.
             </h3>
             <p className="mt-3 text-sm leading-7 text-gray-300">
-              One lucky winner will receive a <strong>3-night stay at Uhoo’s Lavish Oasis,
+              One lucky winner will receive a <strong>5-night stay at Uhoo’s Lavish Oasis,
               V. Felidhoo</strong> with <strong>Half Board meals</strong> and a
               <strong> day visit to Thinadhoo</strong>. Promotion ends on {PROMOTION_END_LABEL}.
             </p>
@@ -343,7 +343,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
           <div className="flex min-w-[210px] flex-col items-center justify-center rounded-2xl border border-gold/25 bg-black/30 p-5 text-center">
             <Trophy className="h-9 w-9 text-gold" />
             <p className="mt-3 text-xs uppercase tracking-[.16em] text-gray-500">Grand Prize</p>
-            <p className="mt-1 text-xl font-black text-gold">3 Nights</p>
+            <p className="mt-1 text-xl font-black text-gold">5 Nights</p>
             <p className="mt-1 text-sm font-semibold text-white/90">Uhoo’s Lavish Oasis</p>
             <p className="mt-1 text-xs text-white/60">V. Felidhoo</p>
             <div className="mt-4 w-full border-t border-white/10 pt-4 text-sm font-semibold text-white/80">
@@ -411,7 +411,7 @@ export default function ReferralRewardsCard({ email }: { email: string }) {
             <div className="mt-5 border-t border-white/10 pt-4">
               <p className="text-xs font-semibold text-gold">Win a Maldives Escape</p>
               <p className="mt-1 text-[11px] leading-5 text-white/55">
-                3 nights at Uhoo’s Lavish Oasis, V. Felidhoo · Half Board · Thinadhoo Day Visit
+                5 nights at Uhoo’s Lavish Oasis, V. Felidhoo · Half Board · Thinadhoo Day Visit
               </p>
             </div>
           </div>
