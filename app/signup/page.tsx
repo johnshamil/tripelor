@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, LockKeyhole, UserPlus } from "lucide-react";
 import TripelorMark from "@/components/tripelor-mark";
+import GoogleSignInButton from "@/components/google-signin-button";
 
 function safeNextPath(value: string | null) {
   return value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\") ? value : "";
@@ -84,7 +85,14 @@ export default function SignupPage() {
             <h2 className="font-display mt-3 text-4xl md:text-5xl">Join Tripelor. Unlock member benefits.</h2>
             <p className="mt-4 text-sm leading-7 text-[#687377]">Create your free travel account to unlock private offers, save your plans, earn Tripelor Points and keep your Maldives requests together.</p>
 
-            <form onSubmit={submit} className="mt-8 grid gap-5">
+            {!nextPath.startsWith("/partner") && (
+              <div className="mt-8">
+                <GoogleSignInButton nextPath={nextPath} label="Sign up with Google" />
+                <p className="my-5 text-center text-xs uppercase tracking-[.18em] text-[#899194]">or create an account with email</p>
+              </div>
+            )}
+
+            <form onSubmit={submit} className={`${nextPath.startsWith("/partner") ? "mt-8 " : ""}grid gap-5`}>
               <label className="premium-label">
                 <span>Full name</span>
                 <input required value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Your full name" autoComplete="name" className="premium-control" />

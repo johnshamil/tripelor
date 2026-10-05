@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, Eye, EyeOff, LockKeyhole, LogIn, ShieldCheck, Sparkles } from "lucide-react";
 import TripelorMark from "@/components/tripelor-mark";
+import GoogleSignInButton from "@/components/google-signin-button";
 
 function safeNextPath(value: string | null) {
   return value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\") ? value : "";
@@ -34,13 +35,17 @@ export default function LoginPage() {
     const queryParams = new URLSearchParams(query.replace(/^\?/, ""));
     const type = hashParams.get("type") || queryParams.get("type");
     const hasRecoveryToken = Boolean(
-      hashParams.get("access_token") || queryParams.get("access_token") || queryParams.get("token_hash") || queryParams.get("code"),
+      hashParams.get("access_token") || queryParams.get("access_token") || queryParams.get("token_hash"),
     );
     if (type === "recovery" || hasRecoveryToken) {
       window.location.replace(`/reset-password${query}${hash}`);
       return;
     }
     setNextPath(safeNextPath(queryParams.get("next")));
+    const googleResult = queryParams.get("google");
+    if (googleResult === "cancelled") setStatus("Google sign-in was cancelled. You can try again or use your email.");
+    if (googleResult === "failed") setStatus("Google sign-in could not be completed. Please try again.");
+    if (googleResult === "unavailable") setStatus("Google sign-in is temporarily unavailable. Please use your email.");
   }, []);
 
   async function submit(event: React.FormEvent) {
@@ -114,7 +119,14 @@ export default function LoginPage() {
               {partnerAccess ? "Sign in with the partner email Tripelor has assigned to your property." : "Sign in so your request, preferences and concierge support remain connected to your Tripelor account."}
             </p>
 
-            <form onSubmit={submit} className="mt-8 grid gap-5">
+            {!partnerAccess && (
+              <div className="mt-8">
+                <GoogleSignInButton nextPath={nextPath} label="Continue with Google" />
+                <p className="my-5 text-center text-xs uppercase tracking-[.18em] text-[#899194]">or sign in with email</p>
+              </div>
+            )}
+
+            <form onSubmit={submit} className={`${partnerAccess ? "mt-8 " : ""}grid gap-5`}>
               <label className="premium-label">
                 <span>Email address</span>
                 <input
