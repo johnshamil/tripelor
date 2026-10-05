@@ -2,7 +2,7 @@ export const REFERRAL_PROMOTION = {
   slug: "share-and-win-2026",
   title: "Tripelor Share & Win – Maldives Escape",
   prize:
-    "3-night stay at Uhoo’s Lavish Oasis, V. Felidhoo with Half Board meals and a day visit to Thinadhoo",
+    "5-night stay at Uhoo’s Lavish Oasis, V. Felidhoo with Half Board meals and a day visit to Thinadhoo",
   endsAt: "2026-12-30T18:59:59.999Z",
   baseShareEntries: 1,
   referredBookingEntries: 3,
