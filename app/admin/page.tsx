@@ -318,7 +318,7 @@ export default function AdminPage() {
               Qualified Referral Participants
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-400">
-              Grand prize: 3 nights at Uhoo’s Lavish Oasis in V. Felidhoo with Half Board
+              Grand prize: 5 nights at Uhoo’s Lavish Oasis in V. Felidhoo with Half Board
               meals and a day visit to Thinadhoo. The promotion closes on 30 December 2026.
             </p>
           </div>
