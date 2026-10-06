@@ -31,6 +31,7 @@ type QuoteRow = {
   adults: number;
   children: number;
   rooms: number;
+  currency: "USD" | "MVR";
   items: QuoteItem[];
   subtotal: number;
   discount_amount: number;
@@ -54,7 +55,7 @@ async function quotation(token: string): Promise<QuoteRow | null> {
   if (!/^[0-9a-f-]{36}$/i.test(token)) return null;
   const { url, key } = cfg();
   const response = await fetch(
-    `${url}/rest/v1/manual_quotations?share_token=eq.${encodeURIComponent(token)}&select=reference,share_token,customer_name,property_name,room_name,meal_plan,check_in,check_out,adults,children,rooms,items,subtotal,discount_amount,fees_amount,total,notes,terms,status,valid_until,created_at&limit=1`,
+    `${url}/rest/v1/manual_quotations?share_token=eq.${encodeURIComponent(token)}&select=reference,share_token,customer_name,property_name,room_name,meal_plan,check_in,check_out,adults,children,rooms,currency,items,subtotal,discount_amount,fees_amount,total,notes,terms,status,valid_until,created_at&limit=1`,
     {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
       cache: "no-store",
@@ -65,8 +66,8 @@ async function quotation(token: string): Promise<QuoteRow | null> {
   return rows?.[0] || null;
 }
 
-function usd(value: number) {
-  return `USD ${Number(value || 0).toLocaleString("en-US", {
+function money(value: number, currency: "USD" | "MVR") {
+  return `${currency} ${Number(value || 0).toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
@@ -112,6 +113,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
 
   const expired = Date.now() > new Date(quote.valid_until).getTime();
   const cancelled = quote.status === "cancelled";
+  const currency = quote.currency === "MVR" ? "MVR" : "USD";
   const guests = `${quote.adults} adult${quote.adults === 1 ? "" : "s"} · ${quote.children} child${quote.children === 1 ? "" : "ren"} · ${quote.rooms} room${quote.rooms === 1 ? "" : "s"}`;
 
   return (
@@ -141,13 +143,12 @@ export default async function ManualQuotationPage({ params }: { params: { token:
           body.manual-quote-print-mode .quote-sheet {
             width: 194mm !important;
             min-height: 277mm !important;
-            max-height: 277mm !important;
+            height: auto !important;
             margin: 0 auto !important;
-            overflow: hidden !important;
+            overflow: visible !important;
             box-shadow: none !important;
             border: 0 !important;
-            break-inside: avoid !important;
-            page-break-inside: avoid !important;
+            break-inside: auto !important;
           }
           body.manual-quote-print-mode .quote-screen-actions {
             display: none !important;
@@ -206,7 +207,18 @@ export default async function ManualQuotationPage({ params }: { params: { token:
         </section>
 
         <section className="quote-body px-6 py-6 md:px-9 md:py-7">
-          <div className="grid grid-cols-2 gap-3 border-b border-[#ded5c5] pb-5 md:grid-cols-4">
+          <div className="grid gap-4 border-b border-[#ded5c5] pb-5 text-xs sm:grid-cols-2">
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#8d7037]">Bill to</p>
+              <p className="mt-2 font-semibold text-[#26353b]">{quote.customer_name}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#8d7037]">Bill from</p>
+              <p className="mt-2 font-semibold text-[#26353b]">Tripelor{quote.property_name ? ` · ${quote.property_name}` : ""}</p>
+              <p className="mt-1 text-[#58656c]">Maldives · bookings@tripelor.com · +960 9429403</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 border-b border-[#ded5c5] py-5 md:grid-cols-4">
             <QuickInfo icon={CalendarDays} label="Check-in" value={date(quote.check_in)} />
             <QuickInfo icon={CalendarDays} label="Check-out" value={date(quote.check_out)} />
             <QuickInfo icon={Users} label="Travellers" value={guests} />
@@ -224,7 +236,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
 
           <div className="mt-5 overflow-hidden border border-[#ded5c5]">
             <table className="quote-items w-full border-collapse text-left text-xs">
-              <thead className="bg-[#071922] text-white">
+              <thead className="bg-[#071922] text-[#ead7aa]">
                 <tr>
                   <th className="px-3 py-2.5 font-semibold">Item</th>
                   <th className="w-[76px] px-3 py-2.5 text-center font-semibold">Qty</th>
@@ -241,8 +253,8 @@ export default async function ManualQuotationPage({ params }: { params: { token:
                       {item.details && <p className="quote-small mt-1 text-[10px] leading-4 text-[#7a8589]">{item.details}</p>}
                     </td>
                     <td className="px-3 py-3 text-center text-[#58656c]">{item.quantity}</td>
-                    <td className="px-3 py-3 text-right text-[#58656c]">{usd(item.unitPrice)}</td>
-                    <td className="px-3 py-3 text-right font-semibold text-[#8d7037]">{usd(item.lineTotal)}</td>
+                    <td className="px-3 py-3 text-right text-[#58656c]">{money(item.unitPrice, currency)}</td>
+                    <td className="px-3 py-3 text-right font-semibold text-[#8d7037]">{money(item.lineTotal, currency)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -263,18 +275,26 @@ export default async function ManualQuotationPage({ params }: { params: { token:
                   <p className="quote-small mt-1 whitespace-pre-line text-[10px] leading-4 text-[#6b777c]">{quote.terms}</p>
                 </div>
               )}
+              {currency === "MVR" && (
+                <div className="border-t border-[#ded5c5] pt-3">
+                  <p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#8d7037]">Bank details · confirmed bookings</p>
+                  <p className="quote-small mt-1 text-[10px] leading-4 text-[#58656c]">Maldives Islamic Bank · Nexus Gaming Pvt Ltd</p>
+                  <p className="mt-1 font-semibold tracking-wide text-[#26353b]">Account number: 7770000269824</p>
+                  <p className="quote-small mt-1 text-[10px] leading-4 text-[#6b777c]">Please wait for Tripelor to confirm availability and the final amount before payment.</p>
+                </div>
+              )}
             </div>
 
             <aside className="bg-[#071922] p-5 text-white">
               <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#d9bd7b]">Quotation total</p>
-              <p className="font-display mt-2 text-4xl text-[#ead7aa]">{usd(quote.total)}</p>
+              <p className="font-display mt-2 text-4xl text-[#ead7aa]">{money(quote.total, currency)}</p>
               <div className="mt-4 space-y-2 border-y border-white/10 py-4 text-xs">
-                <p className="flex justify-between gap-3 text-white/55"><span>Subtotal</span><strong className="text-white">{usd(quote.subtotal)}</strong></p>
+                <p className="flex justify-between gap-3 text-white/55"><span>Subtotal</span><strong className="text-white">{money(quote.subtotal, currency)}</strong></p>
                 {Number(quote.discount_amount) > 0 && (
-                  <p className="flex justify-between gap-3 text-white/55"><span>Discount</span><strong className="text-emerald-300">− {usd(quote.discount_amount)}</strong></p>
+                  <p className="flex justify-between gap-3 text-white/55"><span>Discount</span><strong className="text-emerald-300">− {money(quote.discount_amount, currency)}</strong></p>
                 )}
                 {Number(quote.fees_amount) > 0 && (
-                  <p className="flex justify-between gap-3 text-white/55"><span>Taxes / fees</span><strong className="text-white">{usd(quote.fees_amount)}</strong></p>
+                  <p className="flex justify-between gap-3 text-white/55"><span>Taxes / fees</span><strong className="text-white">{money(quote.fees_amount, currency)}</strong></p>
                 )}
               </div>
               <p className="quote-small mt-4 text-[10px] leading-4 text-white/40">
@@ -299,6 +319,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
             reference={quote.reference}
             customerName={quote.customer_name}
             total={Number(quote.total)}
+            currency={currency}
           />
         </div>
       )}

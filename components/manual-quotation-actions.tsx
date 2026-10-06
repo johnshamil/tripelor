@@ -7,18 +7,20 @@ export default function ManualQuotationActions({
   reference,
   customerName,
   total,
+  currency,
   customerEmail,
 }: {
   reference: string;
   customerName: string;
   total: number;
+  currency: "USD" | "MVR";
   customerEmail?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
   async function share() {
     const url = window.location.href;
-    const text = `Tripelor quotation ${reference} for ${customerName} · USD ${total.toFixed(2)}`;
+    const text = `Tripelor quotation ${reference} for ${customerName} · ${currency} ${total.toFixed(2)}`;
     try {
       if (navigator.share) {
         await navigator.share({ title: `Tripelor Quotation ${reference}`, text, url });
@@ -45,7 +47,7 @@ export default function ManualQuotationActions({
   }
 
   const message = encodeURIComponent(
-    `Hello, please find your Tripelor quotation ${reference} for USD ${total.toFixed(2)}: ${typeof window !== "undefined" ? window.location.href : ""}`,
+    `Hello, please find your Tripelor quotation ${reference} for ${currency} ${total.toFixed(2)}: ${typeof window !== "undefined" ? window.location.href : ""}`,
   );
 
   return (
