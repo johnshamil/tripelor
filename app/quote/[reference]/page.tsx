@@ -2,12 +2,14 @@ import Link from "next/link";
 import { CalendarDays, CheckCircle2, Clock3, Headphones, MapPin, Sparkles } from "lucide-react";
 import { cookies } from "next/headers";
 import TripQuoteActions from "@/components/trip-quote-actions";
+import TripelorMark from "@/components/tripelor-mark";
 import { professionalLocale } from "@/lib/professional-translations";
 import { decodeQuoteLines, quoteFromLines, quoteIssuedAt, quoteStatus, validQuoteReference, QUOTE_VALID_HOURS } from "@/lib/trip-quote";
 import type { CartLine } from "@/lib/trip-cart";
 import { localizeQuotedLine } from "@/lib/quote-display";
 import { verifyQuoteSignature, type QuoteExtras } from "@/lib/trip-quote-server";
 import { speedboatTransferTotal } from "@/lib/transfer-pricing";
+import { MVR_PER_USD, quoteAmount, quoteMoney, type QuoteCurrency } from "@/lib/quote-currency";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +35,8 @@ export default function QuotePage({
     transferSeats?: string;
     request?: string;
     customize?: string;
+    currency?: string;
+    fxRate?: string;
     sig?: string;
   };
 }) {
@@ -57,6 +61,10 @@ export default function QuotePage({
         couple: "coppia",
         perPerson: "a persona",
         perCouple: "per coppia",
+        rooms: "camere",
+        roomUnit: "camera",
+        perRoom: "per camera / 2 ospiti",
+        eachRoom: "Per ogni camera selezionata",
         advisor: "Il tuo Travel Advisor Tripelor",
         advisorBody: "Vuoi cambiare una data, aggiungere un trasferimento o rendere il viaggio ancora più speciale? Il nostro team alle Maldive può adattare questa proposta per te.",
         whatsapp: "Parla con Tripelor su WhatsApp",
@@ -93,6 +101,10 @@ export default function QuotePage({
           couple: "пара",
           perPerson: "с человека",
           perCouple: "за пару",
+          rooms: "номера",
+          roomUnit: "номер",
+          perRoom: "за номер / 2 гостей",
+          eachRoom: "Для каждого выбранного номера",
           advisor: "Ваш Travel Advisor Tripelor",
           advisorBody: "Хотите изменить даты, добавить трансфер или сделать поездку особенной? Наша команда на Мальдивах поможет адаптировать предложение.",
           whatsapp: "Написать Tripelor в WhatsApp",
@@ -128,6 +140,10 @@ export default function QuotePage({
           couple: "couple",
           perPerson: "per person",
           perCouple: "per couple",
+          rooms: "rooms",
+          roomUnit: "room",
+          perRoom: "per room / 2 guests",
+          eachRoom: "For each selected room",
           advisor: "Your Tripelor Travel Advisor",
           advisorBody: "Want to change a date, add a transfer or make the trip more special? Our Maldives team can tailor this proposal for you.",
           whatsapp: "Chat with Tripelor on WhatsApp",
@@ -166,7 +182,15 @@ export default function QuotePage({
     const customizeHref = typeof searchParams?.customize === "string" && searchParams.customize.startsWith("/build-your-trip") && searchParams.customize.length <= 500
       ? searchParams.customize
       : "";
-    extras = { room, meal, transferSeats, requestHref, customizeHref };
+    let currency: QuoteCurrency | undefined;
+    let fxRate: number | undefined;
+    if (searchParams?.currency !== undefined) {
+      if (searchParams.currency !== "USD" && searchParams.currency !== "MVR") throw new Error("Invalid quote currency.");
+      currency = searchParams.currency;
+      fxRate = Number(searchParams.fxRate);
+      if (!Number.isFinite(fxRate) || fxRate < 1 || fxRate > 100) throw new Error("Invalid quote exchange rate.");
+    }
+    extras = { room, meal, transferSeats, requestHref, customizeHref, ...(currency ? { currency, fxRate } : {}) };
 
     if (!searchParams?.sig || !verifyQuoteSignature(searchParams.sig, params.reference, issued, lines, extras)) {
       throw new Error("Invalid quote signature.");
@@ -213,11 +237,19 @@ export default function QuotePage({
   const requestHref = extras.requestHref || undefined;
   const customizeHref = extras.customizeHref || undefined;
   const proposalTotal = quote.total + transferTotal;
+  const currency = extras.currency || "USD";
+  const fxRate = extras.fxRate || MVR_PER_USD;
+  const conversionNote = locale === "it"
+    ? `Convertito da ${quoteMoney(proposalTotal, "USD")} al tasso di 1 USD = MVR ${fxRate.toFixed(2)}. Tripelor confermerà la valuta e l'importo finale del pagamento.`
+    : locale === "ru"
+      ? `Пересчитано из ${quoteMoney(proposalTotal, "USD")} по курсу 1 USD = MVR ${fxRate.toFixed(2)}. Tripelor подтвердит валюту и окончательную сумму оплаты.`
+      : `Converted from ${quoteMoney(proposalTotal, "USD")} at 1 USD = MVR ${fxRate.toFixed(2)}. Tripelor will confirm payment currency and final amount.`;
 
   return (
     <main className="quote-page bg-[#f1ebdf] text-[#071922]">
       <style>{`
         @media print {
+          @page { size: A4; margin: 11mm; }
           body.quote-print-mode header,
           body.quote-print-mode footer,
           body.quote-print-mode .no-print { display: none !important; }
@@ -225,17 +257,20 @@ export default function QuotePage({
           body.quote-print-mode .quote-page { background: white !important; }
           body.quote-print-mode .quote-print-card { box-shadow: none !important; border-color: #cfc4af !important; }
           body.quote-print-mode .quote-dark { color: #071922 !important; background: white !important; }
+          body.quote-print-mode .quote-dark * { color: #071922 !important; }
+          body.quote-print-mode .quote-hero-art { display: none !important; }
+          body.quote-print-mode .quote-page section .container { padding-top: 16px !important; padding-bottom: 16px !important; }
+          body.quote-print-mode .quote-page article,
+          body.quote-print-mode .quote-page aside { break-inside: avoid; padding: 18px !important; }
+          body.quote-print-mode .quote-page h1 { font-size: 32px !important; }
+          body.quote-print-mode .quote-page h2 { font-size: 24px !important; }
         }
       `}</style>
 
       <section className="quote-dark relative overflow-hidden bg-[#06151c] text-white">
-        <img
-          src="/properties/rivethi-beach-hotel/1719713475.jpeg"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-25"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#031016] via-[#031016]/92 to-[#031016]/60" />
-        <div className="container relative py-16 md:py-24">
+        <div className="quote-hero-art absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(217,189,123,.16),transparent_42%),linear-gradient(115deg,#031016,#0b2630)]" />
+        <div className="container relative py-12 md:py-16">
+          <div className="mb-9 flex items-center gap-3 text-[#ead7aa]"><TripelorMark className="h-10 w-10" /><span className="font-display text-xl tracking-[.15em]">TRIPELOR</span></div>
           <p className="eyebrow">{copy.eyebrow}</p>
           <h1 className="font-display mt-4 max-w-4xl text-5xl leading-tight md:text-7xl">{copy.title}</h1>
           <p className="mt-5 max-w-2xl text-base leading-8 text-white/65">{copy.subtitle}</p>
@@ -261,10 +296,10 @@ export default function QuotePage({
         <div className="grid gap-8 lg:grid-cols-[1.25fr_.75fr] lg:items-start">
           <div className="space-y-5">
             {displayItems.map((item, index) => {
-              const quantityLabel = item.unit === "couple"
+              const quantityLabel = item.kind === "stay" ? item.quantity === 1 ? copy.roomUnit : copy.rooms : item.unit === "couple"
                 ? item.quantity === 1 ? copy.couple : copy.couples
                 : item.quantity === 1 ? copy.guest : copy.guests;
-              const unitLabel = item.unit === "couple" ? copy.perCouple : copy.perPerson;
+              const unitLabel = item.kind === "stay" ? copy.perRoom : item.unit === "couple" ? copy.perCouple : copy.perPerson;
               return (
                 <article key={item.productId} className="quote-print-card border border-[#d0c5b0] bg-[#fffdf8] p-6 shadow-sm md:p-8">
                   <div className="flex flex-wrap items-start justify-between gap-4">
@@ -275,8 +310,8 @@ export default function QuotePage({
                       <h2 className="font-display mt-2 text-3xl">{item.name}</h2>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-[#687377]">USD {item.unitPrice.toLocaleString("en-US")} {unitLabel}</p>
-                      <p className="mt-1 text-2xl font-semibold text-[#8d7037]">USD {item.lineTotal.toLocaleString("en-US")}</p>
+                      <p className="text-sm text-[#687377]">{quoteMoney(item.unitPrice, currency, fxRate)} {unitLabel}</p>
+                      <p className="mt-1 text-2xl font-semibold text-[#8d7037]">{quoteMoney(item.lineTotal, currency, fxRate)}</p>
                     </div>
                   </div>
 
@@ -291,7 +326,7 @@ export default function QuotePage({
                   </div>
 
                   <div className="mt-5">
-                    <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#899194]">{copy.included}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#899194]">{item.kind === "stay" && item.quantity > 1 ? copy.eachRoom : copy.included}</p>
                     <div className="mt-3 grid gap-2 sm:grid-cols-2">
                       {item.inclusions.map(inclusion => (
                         <p key={inclusion} className="flex items-start gap-2 text-sm leading-6 text-[#58656c]">
@@ -310,20 +345,24 @@ export default function QuotePage({
               <div className="mb-6 border-b border-white/10 pb-6">
                 <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#d9bd7b]">{copy.tripDetails}</p>
                 <div className="mt-4 space-y-3 text-sm text-white/65">
-                  {room && <p className="flex justify-between gap-4"><span>{copy.room}</span><strong className="text-right text-white">{room}</strong></p>}
+                  {room && <p className="flex justify-between gap-4"><span>{room.includes(", ") ? copy.rooms : copy.room}</span><strong className="text-right text-white">{room}</strong></p>}
                   {meal && <p className="flex justify-between gap-4"><span>{copy.meal}</span><strong className="text-right text-white">{meal}</strong></p>}
-                  {transferSeats > 0 && <p className="flex justify-between gap-4"><span>{copy.transfer}</span><strong className="text-right text-white">{transferSeats} {copy.speedboatSeats} · USD {transferTotal.toLocaleString("en-US")}</strong></p>}
+                  {transferSeats > 0 && <p className="flex justify-between gap-4"><span>{copy.transfer}</span><strong className="text-right text-white">{transferSeats} {copy.speedboatSeats} · {quoteMoney(transferTotal, currency, fxRate)}</strong></p>}
                 </div>
               </div>
             )}
             <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#d9bd7b]">{copy.estimate}</p>
-            <p className="font-display mt-3 text-5xl text-[#ead7aa]">USD {proposalTotal.toLocaleString("en-US")}</p>
+            <p className="font-display mt-3 text-4xl text-[#ead7aa] md:text-5xl">{quoteMoney(proposalTotal, currency, fxRate)}</p>
+            {currency === "MVR" && <p className="mt-2 text-xs leading-5 text-white/60">{conversionNote}</p>}
             <p className="mt-4 text-sm leading-6 text-white/50">{copy.validFor}</p>
 
             <TripQuoteActions
               reference={params.reference}
               lines={lines}
-              total={proposalTotal}
+              total={quoteAmount(proposalTotal, currency, fxRate)}
+              currency={currency}
+              room={room}
+              transferSeats={transferSeats}
               requestHref={requestHref}
               customizeHref={customizeHref}
             />

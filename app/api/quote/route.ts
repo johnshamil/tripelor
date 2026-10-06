@@ -1,8 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { quoteCart, type CartLine } from "@/lib/trip-cart";
+import { quoteCart, stayCartId, type CartLine } from "@/lib/trip-cart";
 import { buildQuoteHref, createQuoteReference, QUOTE_VALID_MS } from "@/lib/trip-quote";
 import { signQuote, type QuoteExtras } from "@/lib/trip-quote-server";
 import { speedboatTransferTotal } from "@/lib/transfer-pricing";
+import { MVR_PER_USD, quoteAmount } from "@/lib/quote-currency";
+import { fiveNight, threeNight } from "@/lib/island-packages";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +25,8 @@ function cleanExtras(body: any): QuoteExtras {
     transferSeats,
     requestHref: requestHref.startsWith("/booking?") ? requestHref : "",
     customizeHref: customizeHref.startsWith("/build-your-trip") ? customizeHref : "",
+    currency: body?.currency === "MVR" ? "MVR" : "USD",
+    fxRate: MVR_PER_USD,
   };
 }
 
@@ -47,6 +51,17 @@ export async function POST(request: Request) {
       date: item.date,
     }));
     const extras = cleanExtras(body);
+    if (extras.room) {
+      const selectedRooms = extras.room.split(", ");
+      const allowedRooms = ["ROOM 101", "ROOM 102"];
+      const builderProducts = [...threeNight, ...fiveNight].map(item => stayCartId(item.slug, item.nights));
+      if (lines.length !== 1 || !builderProducts.includes(lines[0].productId) ||
+          selectedRooms.length !== lines[0].quantity || new Set(selectedRooms).size !== selectedRooms.length ||
+          selectedRooms.some(room => !allowedRooms.includes(room)) ||
+          (extras.transferSeats !== 0 && extras.transferSeats !== selectedRooms.length * 2)) {
+        return Response.json({ error: "Please review your room selection and transfer seats." }, { status: 400 });
+      }
+    }
     const issued = Date.now();
     const reference = createQuoteReference(new Date(issued), randomUUID().replace(/-/g, "").slice(0, 6));
     const baseHref = buildQuoteHref(reference, lines, issued);
@@ -57,6 +72,8 @@ export async function POST(request: Request) {
     if (extras.transferSeats) url.searchParams.set("transferSeats", String(extras.transferSeats));
     if (extras.requestHref) url.searchParams.set("request", extras.requestHref);
     if (extras.customizeHref) url.searchParams.set("customize", extras.customizeHref);
+    url.searchParams.set("currency", extras.currency || "USD");
+    url.searchParams.set("fxRate", String(extras.fxRate));
 
     const signature = signQuote(reference, issued, lines, extras);
     url.searchParams.set("sig", signature);
@@ -64,7 +81,8 @@ export async function POST(request: Request) {
     return Response.json({
       reference,
       url: `${url.pathname}${url.search}`,
-      total: quoted.total + speedboatTransferTotal(extras.transferSeats),
+      total: quoteAmount(quoted.total + speedboatTransferTotal(extras.transferSeats), extras.currency || "USD", extras.fxRate),
+      currency: extras.currency,
       expiresAt: new Date(issued + QUOTE_VALID_MS).toISOString(),
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {

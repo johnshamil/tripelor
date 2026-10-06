@@ -5,17 +5,24 @@ import { ArrowRight, Copy, Download, Mail, MessageCircle, Share2, SlidersHorizon
 import { CART_STORAGE_KEY, type CartLine } from "@/lib/trip-cart";
 import { PLAN_START_STORAGE_KEY, resolveTripStart } from "@/lib/trip-itinerary";
 import { useSiteLanguage } from "@/components/use-site-language";
+import type { QuoteCurrency } from "@/lib/quote-currency";
 
 export default function TripQuoteActions({
   reference,
   lines,
   total,
+  currency,
+  room,
+  transferSeats,
   requestHref,
   customizeHref,
 }: {
   reference: string;
   lines: CartLine[];
   total: number;
+  currency: QuoteCurrency;
+  room?: string;
+  transferSeats?: number;
   requestHref?: string;
   customizeHref?: string;
 }) {
@@ -32,7 +39,7 @@ export default function TripQuoteActions({
         customize: "Personalizza il viaggio",
         request: "Richiedi questo viaggio",
         subject: `Proposta Tripelor ${reference}`,
-        message: `Ecco la mia proposta Tripelor ${reference} — totale stimato USD ${total.toLocaleString("en-US")}.`,
+        message: `Ecco la mia proposta Tripelor ${reference} — totale stimato ${currency} ${total.toLocaleString("en-US", { minimumFractionDigits: currency === "MVR" ? 2 : 0 })}.`,
       }
     : locale === "ru"
       ? {
@@ -45,7 +52,7 @@ export default function TripQuoteActions({
           customize: "Изменить поездку",
           request: "Запросить эту поездку",
           subject: `Предложение Tripelor ${reference}`,
-          message: `Моё предложение Tripelor ${reference} — ориентировочная сумма USD ${total.toLocaleString("en-US")}.`,
+          message: `Моё предложение Tripelor ${reference} — ориентировочная сумма ${currency} ${total.toLocaleString("en-US", { minimumFractionDigits: currency === "MVR" ? 2 : 0 })}.`,
         }
       : {
           share: "Share Trip",
@@ -57,7 +64,7 @@ export default function TripQuoteActions({
           customize: "Customize Trip",
           request: "Request This Trip",
           subject: `Tripelor quote ${reference}`,
-          message: `Here is my Tripelor quote ${reference} — estimated total USD ${total.toLocaleString("en-US")}.`,
+          message: `Here is my Tripelor quote ${reference} — estimated total ${currency} ${total.toLocaleString("en-US", { minimumFractionDigits: currency === "MVR" ? 2 : 0 })}.`,
         };
 
   function currentUrl() {
@@ -114,7 +121,11 @@ export default function TripQuoteActions({
       return;
     }
     savePlan();
-    window.location.href = `/my-trip?view=plan&quote=${encodeURIComponent(reference)}#request-trip`;
+    const params = new URLSearchParams({ view: "plan", quote: reference });
+    if (room) params.set("rooms", room);
+    if (transferSeats) params.set("transferSeats", String(transferSeats));
+    if (currency === "MVR") params.set("quoteCurrency", currency);
+    window.location.href = `/my-trip?${params.toString()}#request-trip`;
   }
 
   function printPdf() {

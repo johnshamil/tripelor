@@ -8,6 +8,7 @@ import TripExperienceCatalog from "@/components/trip-experience-catalog";
 import TripDayPlanner from "@/components/trip-day-planner";
 import { findCartProduct, quoteCart } from "@/lib/trip-cart";
 import { useSiteLanguage } from "@/components/use-site-language";
+import { MVR_PER_USD, type QuoteCurrency } from "@/lib/quote-currency";
 
 const field = "mt-2 min-h-12 w-full rounded-xl border border-white/20 bg-[#041117] px-4 py-3 text-white focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold [color-scheme:dark]";
 const usd = (value: number) => `USD ${value.toLocaleString("en-US")}`;
@@ -25,6 +26,7 @@ export default function CartCheckout() {
         loaded: "Proposta caricata",
         pending: "Creazione proposta…",
         failed: "Non siamo riusciti a creare la proposta. Riprova.",
+        currency: "Valuta della proposta",
       }
     : locale === "ru"
       ? {
@@ -34,6 +36,7 @@ export default function CartCheckout() {
           loaded: "Предложение загружено",
           pending: "Создаём предложение…",
           failed: "Не удалось создать предложение. Попробуйте ещё раз.",
+          currency: "Валюта предложения",
         }
       : {
           create: "Create My Quote",
@@ -42,6 +45,7 @@ export default function CartCheckout() {
           loaded: "Quote loaded",
           pending: "Creating quote…",
           failed: "We could not create the quote. Please try again.",
+          currency: "Quotation currency",
         };
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [name, setName] = useState("");
@@ -53,6 +57,8 @@ export default function CartCheckout() {
   const [view, setView] = useState<"explore" | "plan">("explore");
   const [loadedQuote, setLoadedQuote] = useState("");
   const [quoteCreating, setQuoteCreating] = useState(false);
+  const [quoteCurrency, setQuoteCurrency] = useState<QuoteCurrency>("USD");
+  const [quotePreferences, setQuotePreferences] = useState(false);
   const viewNavigation = useRef<HTMLDivElement>(null);
   const receiptHeading = useRef<HTMLHeadingElement>(null);
   const attempt = useRef<{ signature: string; key: string } | null>(null);
@@ -77,6 +83,20 @@ export default function CartCheckout() {
     const quote = params.get("quote") || "";
     if (params.get("view") === "plan" || quote) setView("plan");
     if (quote) setLoadedQuote(quote);
+    const rooms = (params.get("rooms") || "").slice(0, 100);
+    const seats = Number(params.get("transferSeats") || 0);
+    const validSeats = Number.isInteger(seats) && seats > 0 && seats <= 20 ? seats : 0;
+    const mvr = params.get("quoteCurrency") === "MVR";
+    if (mvr) setQuoteCurrency("MVR");
+    if (rooms || validSeats || mvr) {
+      const details = [
+        rooms ? `Preferred rooms: ${rooms}` : "",
+        validSeats ? `Airport speedboat: ${validSeats} seats requested; please confirm the transfer fare.` : "",
+        mvr ? "Please confirm the final amount and payment currency in MVR." : "",
+      ].filter(Boolean).join("\n");
+      setNotes(current => current || details);
+      setQuotePreferences(true);
+    }
   }, []);
 
   async function createQuote() {
@@ -88,7 +108,7 @@ export default function CartCheckout() {
       const response = await fetch("/api/quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: lines }),
+        body: JSON.stringify({ items: lines, currency: quoteCurrency }),
         signal: AbortSignal.timeout(15000),
       });
       const data = await response.json();
@@ -172,9 +192,18 @@ export default function CartCheckout() {
         <p className="mt-4 text-sm leading-6 text-gray-300">Tell us when you’d like to travel. We’ll help bring your chosen experiences together.</p>
         <div className="mt-6 border-y border-gold/20 py-5"><span className="text-xs uppercase tracking-[.18em] text-gray-300">Your trip estimate</span><strong className="font-display mt-2 block text-4xl text-gold">{usd(total)}</strong><p className="mt-2 text-xs leading-5 text-gray-400">Based on your selected guests and stays. Any separate transfers and final inclusions will be confirmed with you.</p></div>
         {loadedQuote && <p className="mt-4 rounded-xl border border-gold/25 bg-gold/5 p-3 text-xs text-gold">{quoteCopy.loaded} · {loadedQuote}</p>}
+        {quotePreferences && <p className="mt-4 rounded-xl border border-gold/25 bg-gold/5 p-3 text-xs leading-5 text-gray-200">Any room, transfer or MVR preferences from your quote are copied into the request notes below. The trip plan estimate is in USD and excludes transfers; Tripelor will confirm the final total.</p>}
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[.035] p-4">
           <p className="flex items-center gap-2 text-sm font-semibold text-white"><FileText className="h-4 w-4 text-gold" /> {quoteCopy.creating}</p>
           <p className="mt-2 text-xs leading-5 text-gray-400">{quoteCopy.helper}</p>
+          <label className="mt-4 block text-xs font-semibold text-gray-200">
+            {quoteCopy.currency}
+            <select value={quoteCurrency} onChange={event => setQuoteCurrency(event.target.value as QuoteCurrency)} className="mt-2 min-h-11 w-full rounded-xl border border-white/20 bg-[#041117] px-3 text-sm text-white">
+              <option value="USD">USD · US dollars</option>
+              <option value="MVR">MVR · Maldivian rufiyaa</option>
+            </select>
+          </label>
+          {quoteCurrency === "MVR" && <p className="mt-2 text-xs leading-5 text-gray-400">Quote conversion: 1 USD = MVR {MVR_PER_USD.toFixed(2)}. Final payment details are confirmed by Tripelor.</p>}
           <button type="button" onClick={createQuote} disabled={pending || quoteCreating} className="btn-outline mt-4 min-h-12 w-full gap-2 disabled:opacity-60">
             <FileText className="h-4 w-4" /> {quoteCreating ? quoteCopy.pending : quoteCopy.create}
           </button>
