@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { CartLine } from "@/lib/trip-cart";
+import type { QuoteCurrency } from "@/lib/quote-currency";
 
 export type QuoteExtras = {
   room: string;
@@ -7,6 +8,8 @@ export type QuoteExtras = {
   transferSeats: number;
   requestHref: string;
   customizeHref: string;
+  currency?: QuoteCurrency;
+  fxRate?: number;
 };
 
 function signingSecret() {
@@ -30,6 +33,7 @@ function canonicalQuote(
     transferSeats: extras.transferSeats,
     requestHref: extras.requestHref,
     customizeHref: extras.customizeHref,
+    ...(extras.currency ? { currency: extras.currency, fxRate: extras.fxRate } : {}),
   });
 }
 

@@ -23,8 +23,10 @@ import {
 } from "lucide-react";
 import SaveTripButton from "@/components/save-trip-button";
 import { fiveNight, threeNight } from "@/lib/island-packages";
-import { stayCartId } from "@/lib/trip-cart";
+import { CART_STORAGE_KEY, maldivesToday, stayCartId } from "@/lib/trip-cart";
+import { PLAN_START_STORAGE_KEY } from "@/lib/trip-itinerary";
 import { DEFAULT_SPEEDBOAT_SEAT_PRICE_USD, speedboatTransferTotal } from "@/lib/transfer-pricing";
+import { MVR_PER_USD, quoteMoney, type QuoteCurrency } from "@/lib/quote-currency";
 
 type Mood = "relax" | "romance" | "adventure" | "ocean";
 type Dining = "flexible" | "Half Board" | "Full Board";
@@ -192,8 +194,9 @@ export default function BuildYourTripPage() {
   const [mood, setMood] = useState<Mood>("relax");
   const [dining, setDining] = useState<Dining>("flexible");
   const [budget, setBudget] = useState<Budget>("signature");
-  const [room, setRoom] = useState("ROOM 101");
+  const [rooms, setRooms] = useState<string[]>(["ROOM 101"]);
   const [includeTransfer, setIncludeTransfer] = useState(true);
+  const [currency, setCurrency] = useState<QuoteCurrency>("USD");
   const [quoteError, setQuoteError] = useState("");
   const [quoteCreating, setQuoteCreating] = useState(false);
 
@@ -203,9 +206,11 @@ export default function BuildYourTripPage() {
       .sort((a, b) => packageScore(b, mood, dining, budget) - packageScore(a, mood, dining, budget))[0];
   }, [nights, mood, dining, budget]);
 
-  const transferSeats = includeTransfer ? 2 : 0;
+  const roomSummary = rooms.join(", ");
+  const transferSeats = includeTransfer ? rooms.length * 2 : 0;
   const transferTotal = speedboatTransferTotal(transferSeats);
-  const total = recommendation.price + transferTotal;
+  const packageTotal = recommendation.price * rooms.length;
+  const total = packageTotal + transferTotal;
   const checkOut = addDays(arrival, nights);
   const selectedMood = moodOptions.find((option) => option.value === mood)?.title || "your preferences";
   const bookingHref = useMemo(() => {
@@ -214,7 +219,7 @@ export default function BuildYourTripPage() {
       mealPlan: recommendation.meal,
       nights: String(recommendation.nights),
       property: "Uhoo's Lavish Oasis",
-      roomType: room,
+      roomType: rooms[0],
       speedboatSeats: String(transferSeats),
       speedboatTotal: String(transferTotal),
       planTotal: String(total),
@@ -224,9 +229,45 @@ export default function BuildYourTripPage() {
       params.set("checkOut", checkOut);
     }
     return `/booking?${params.toString()}`;
-  }, [recommendation, room, transferSeats, transferTotal, total, arrival, checkOut]);
+  }, [recommendation, rooms, transferSeats, transferTotal, total, arrival, checkOut]);
 
   const steps = ["Your dates", "Travel style", "Preferences", "Finishing touches"];
+
+  function toggleRoom(value: string) {
+    setRooms(current => current.includes(value)
+      ? current.length === 1 ? current : current.filter(selected => selected !== value)
+      : [...current, value].sort());
+  }
+
+  function sourcePackageId() {
+    const item = [...threeNight, ...fiveNight].find(pkg => pkg.nights === nights && pkg.name === recommendation.name);
+    return item ? stayCartId(item.slug, nights) : "";
+  }
+
+  function continueToBooking() {
+    if (rooms.length === 1 && currency === "USD") {
+      window.location.href = bookingHref;
+      return;
+    }
+    if (!arrival) {
+      setQuoteError("Choose an arrival date to continue with your room request.");
+      return;
+    }
+    const productId = sourcePackageId();
+    if (!productId) {
+      setQuoteError("We could not open this package. Please try another option.");
+      return;
+    }
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify([{ productId, quantity: rooms.length, date: arrival }]));
+      localStorage.setItem(PLAN_START_STORAGE_KEY, arrival);
+    } catch {
+      setQuoteError("Your browser could not save this plan. Please enable site storage and try again.");
+      return;
+    }
+    const params = new URLSearchParams({ view: "plan", rooms: roomSummary, transferSeats: String(transferSeats), quoteCurrency: currency });
+    window.location.href = `/my-trip?${params.toString()}#request-trip`;
+  }
 
   function nextStep() {
     if (step < steps.length - 1) setStep((current) => current + 1);
@@ -240,14 +281,12 @@ export default function BuildYourTripPage() {
       setQuoteError("Choose an approximate arrival date first so we can save your 48-hour quote.");
       return;
     }
-    const sourcePackage = [...threeNight, ...fiveNight].find(
-      (pkg) => pkg.nights === nights && pkg.name === recommendation.name,
-    );
-    if (!sourcePackage) {
+    const productId = sourcePackageId();
+    if (!productId) {
       setQuoteError("We could not prepare this quote. Please adjust your preferences and try again.");
       return;
     }
-    const line = { productId: stayCartId(sourcePackage.slug, nights), quantity: 1, date: arrival };
+    const line = { productId, quantity: rooms.length, date: arrival };
     setQuoteCreating(true);
     try {
       const response = await fetch("/api/quote", {
@@ -255,10 +294,11 @@ export default function BuildYourTripPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: [line],
-          room,
+          room: roomSummary,
           meal: recommendation.meal,
           transferSeats,
-          requestHref: bookingHref,
+          currency,
+          requestHref: rooms.length === 1 && currency === "USD" ? bookingHref : "",
           customizeHref: "/build-your-trip",
         }),
         signal: AbortSignal.timeout(15000),
@@ -278,7 +318,7 @@ export default function BuildYourTripPage() {
 
   function editPlan() {
     setComplete(false);
-    setStep(0);
+    setStep(3);
     setQuoteError("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -332,7 +372,7 @@ export default function BuildYourTripPage() {
                         <input
                           type="date"
                           value={arrival}
-                          min={new Date().toISOString().split("T")[0]}
+                          min={maldivesToday()}
                           onChange={(event) => setArrival(event.target.value)}
                           className="premium-control [color-scheme:light]"
                         />
@@ -402,7 +442,7 @@ export default function BuildYourTripPage() {
                       </div>
                     </div>
                     <div className="mt-8">
-                      <p className="premium-label"><span><Wallet className="h-4 w-4 text-[#9c7d3d]" /> Package budget for two</span></p>
+                      <p className="premium-label"><span><Wallet className="h-4 w-4 text-[#9c7d3d]" /> Package budget for two, per room</span></p>
                       <div className="mt-2 grid gap-3 md:grid-cols-3">
                         {budgetOptions.map((option) => (
                           <ChoiceButton
@@ -420,29 +460,38 @@ export default function BuildYourTripPage() {
 
                 {step === 3 && (
                   <div>
-                    <p className="max-w-2xl leading-7 text-[#58656c]">Add the finishing touches. These choices will be carried into your booking request automatically.</p>
+                    <p className="max-w-2xl leading-7 text-[#58656c]">Choose one or both rooms, add transfers, and select the currency for your shareable quotation.</p>
                     <div className="mt-8 grid gap-6 md:grid-cols-2">
                       <div>
-                        <p className="premium-label"><span><BedDouble className="h-4 w-4 text-[#9c7d3d]" /> Preferred room</span></p>
+                        <p className="premium-label"><span><BedDouble className="h-4 w-4 text-[#9c7d3d]" /> Rooms ({rooms.length} selected)</span></p>
                         <div className="mt-2 grid grid-cols-2 gap-3">
                           {["ROOM 101", "ROOM 102"].map((value) => (
                             <ChoiceButton
                               key={value}
-                              active={room === value}
-                              onClick={() => setRoom(value)}
+                              active={rooms.includes(value)}
+                              onClick={() => toggleRoom(value)}
                               title={value}
-                              text="Uhoo's Lavish Oasis"
+                              text={rooms.includes(value) ? "Selected · 2 guests" : "Add this room"}
                             />
                           ))}
                         </div>
+                        <p className="mt-2 text-xs text-[#687377]">Select both for 2 rooms and up to 4 adults.</p>
                       </div>
                       <div>
                         <p className="premium-label"><span><Ship className="h-4 w-4 text-[#9c7d3d]" /> Airport speedboat</span></p>
                         <div className="mt-2 grid grid-cols-2 gap-3">
-                          <ChoiceButton active={includeTransfer} onClick={() => setIncludeTransfer(true)} title="Arrange it" text={`2 seats · USD ${DEFAULT_SPEEDBOAT_SEAT_PRICE_USD * 2}`} />
+                          <ChoiceButton active={includeTransfer} onClick={() => setIncludeTransfer(true)} title="Arrange it" text={`${rooms.length * 2} seats · ${quoteMoney(DEFAULT_SPEEDBOAT_SEAT_PRICE_USD * rooms.length * 2, currency)}`} />
                           <ChoiceButton active={!includeTransfer} onClick={() => setIncludeTransfer(false)} title="Not now" text="Decide with concierge" />
                         </div>
                       </div>
+                    </div>
+                    <div className="mt-7 border-t border-[#ded5c5] pt-6">
+                      <p className="premium-label"><span><Wallet className="h-4 w-4 text-[#9c7d3d]" /> Quotation currency</span></p>
+                      <div className="mt-2 grid max-w-md grid-cols-2 gap-3">
+                        <ChoiceButton active={currency === "USD"} onClick={() => setCurrency("USD")} title="USD" text="US dollars" />
+                        <ChoiceButton active={currency === "MVR"} onClick={() => setCurrency("MVR")} title="MVR" text="Maldivian rufiyaa" />
+                      </div>
+                      {currency === "MVR" && <p className="mt-2 text-xs text-[#687377]">Calculated at 1 USD = MVR {MVR_PER_USD.toFixed(2)}. Final payment details are confirmed by Tripelor.</p>}
                     </div>
                     <div className="mt-7 flex gap-3 border border-[#c9b88f] bg-[#f3ead9] p-5 text-sm leading-6 text-[#58656c]">
                       <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#8d7037]" />
@@ -473,7 +522,8 @@ export default function BuildYourTripPage() {
                 <SummaryLine icon={CalendarDays} label="Journey" value={`${nights} nights · ${formatDate(arrival)}`} />
                 <SummaryLine icon={Heart} label="Feeling" value={selectedMood} />
                 <SummaryLine icon={Utensils} label="Dining" value={dining === "flexible" ? "Best match" : dining} />
-                <SummaryLine icon={BedDouble} label="Stay" value={`Uhoo's · ${room}`} />
+                <SummaryLine icon={BedDouble} label={`${rooms.length} ${rooms.length === 1 ? "room" : "rooms"}`} value={`Uhoo's · ${roomSummary}`} />
+                <SummaryLine icon={Wallet} label="Estimate" value={quoteMoney(total, currency)} />
               </div>
               <div className="mt-6 border-t border-[#d0c5b0] pt-5">
                 <p className="text-xs leading-6 text-[#687377]">Your answers are used only to create this recommendation. Nothing is charged or reserved at this stage.</p>
@@ -505,10 +555,10 @@ export default function BuildYourTripPage() {
                 </p>
 
                 <div className="mt-7 grid gap-px overflow-hidden border border-[#d8cdb8] bg-[#d8cdb8] sm:grid-cols-2">
-                  <ResultDetail label="Stay" value={`Uhoo's Lavish Oasis · ${room}`} />
+                  <ResultDetail label="Stay" value={`Uhoo's Lavish Oasis · ${roomSummary}`} />
                   <ResultDetail label="Journey" value={`${formatDate(arrival)} · ${nights} nights`} />
                   <ResultDetail label="Dining" value={recommendation.meal} />
-                  <ResultDetail label="Transfer" value={includeTransfer ? "2 speedboat seats requested" : "Arrange later"} />
+                  <ResultDetail label="Transfer" value={includeTransfer ? `${transferSeats} speedboat seats requested` : "Arrange later"} />
                 </div>
 
                 <div className="mt-7">
@@ -522,29 +572,49 @@ export default function BuildYourTripPage() {
                   </div>
                 </div>
 
+                <div className="mt-7 border border-[#d8cdb8] bg-[#f8f4ec] p-5">
+                  <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#8d7037]">Adjust your quotation</p>
+                  <div className="mt-4 grid gap-5 sm:grid-cols-2">
+                    <div>
+                      <p className="text-xs font-semibold text-[#58656c]">Rooms · choose one or both</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {["ROOM 101", "ROOM 102"].map(value => <button key={value} type="button" aria-pressed={rooms.includes(value)} onClick={() => toggleRoom(value)} className={`min-h-11 border px-3 text-xs font-semibold ${rooms.includes(value) ? "border-[#9c7d3d] bg-[#f3ead9] text-[#715723]" : "border-[#d0c5b0] bg-white text-[#58656c]"}`}>{rooms.includes(value) ? "✓ " : "+ "}{value}</button>)}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-[#58656c]">Show prices in</p>
+                      <div className="mt-2 flex gap-2">
+                        {(["USD", "MVR"] as QuoteCurrency[]).map(value => <button key={value} type="button" aria-pressed={currency === value} onClick={() => setCurrency(value)} className={`min-h-11 border px-5 text-xs font-semibold ${currency === value ? "border-[#9c7d3d] bg-[#f3ead9] text-[#715723]" : "border-[#d0c5b0] bg-white text-[#58656c]"}`}>{value}</button>)}
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => setIncludeTransfer(current => !current)} aria-pressed={includeTransfer} className="mt-4 min-h-11 text-left text-xs font-semibold text-[#715723] underline underline-offset-4">{includeTransfer ? `✓ Airport speedboat for ${transferSeats} guests · remove` : "+ Add airport speedboat transfer"}</button>
+                </div>
+
                 <div className="mt-7 border-y border-[#d8cdb8] py-6">
-                  <div className="flex justify-between gap-4 text-sm text-[#687377]"><span>Package for two</span><span>USD {recommendation.price}</span></div>
-                  <div className="mt-2 flex justify-between gap-4 text-sm text-[#687377]"><span>Speedboat transfer</span><span>USD {transferTotal}</span></div>
+                  <div className="flex justify-between gap-4 text-sm text-[#687377]"><span>{rooms.length} {rooms.length === 1 ? "room" : "rooms"} × package for two</span><span>{quoteMoney(packageTotal, currency)}</span></div>
+                  <div className="mt-2 flex justify-between gap-4 text-sm text-[#687377]"><span>{transferSeats} speedboat seats</span><span>{quoteMoney(transferTotal, currency)}</span></div>
                   <div className="mt-5 flex items-end justify-between gap-4">
                     <span className="text-xs font-bold uppercase tracking-[.16em] text-[#778184]">Estimated total</span>
-                    <strong className="font-display text-4xl text-[#8d7037]">USD {total}</strong>
+                    <strong className="font-display text-4xl text-[#8d7037]">{quoteMoney(total, currency)}</strong>
                   </div>
+                  {currency === "MVR" && <p className="mt-2 text-xs text-[#778184]">USD {total.toLocaleString("en-US")} × {MVR_PER_USD.toFixed(2)}. Final payment currency is confirmed before booking.</p>}
                 </div>
 
                 <div className="mt-7 grid gap-3">
-                  <Link href={bookingHref} className="btn-gold w-full">Continue to Private Booking <ArrowRight className="h-4 w-4" /></Link>
+                  <button type="button" onClick={continueToBooking} className="btn-gold w-full">Review Booking Request <ArrowRight className="h-4 w-4" /></button>
                   <button type="button" onClick={createQuote} disabled={quoteCreating} className="btn-outline w-full border-[#9c7d3d] text-[#7c622e] disabled:opacity-60">
                     <FileText className="h-4 w-4" /> {quoteCreating ? "Creating Quote…" : "Create My 48-Hour Quote"}
                   </button>
                   {quoteError && <p className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-700">{quoteError}</p>}
-                  <SaveTripButton
+                  {rooms.length === 1 && currency === "USD" && <SaveTripButton
                     itemType="package"
-                    itemKey={`${recommendation.name}-${nights}-${room}-${transferSeats}`}
+                    itemKey={`${recommendation.name}-${nights}-${rooms[0]}-${transferSeats}`}
                     title={recommendation.name}
-                    subtitle={`${nights} nights · ${room} · USD ${total}`}
+                    subtitle={`${nights} nights · ${roomSummary} · ${quoteMoney(total, currency)}`}
                     href={bookingHref}
-                  />
-                  <button type="button" onClick={editPlan} className="btn-outline border-[#9c7d3d] text-[#7c622e]">Adjust My Preferences</button>
+                  />}
+                  <button type="button" onClick={editPlan} className="btn-outline border-[#9c7d3d] text-[#7c622e]">Back to Trip Preferences</button>
                 </div>
                 <p className="mt-5 text-center text-xs leading-5 text-[#778184]">No automatic charge. Final availability and inclusions are confirmed before payment.</p>
               </div>
