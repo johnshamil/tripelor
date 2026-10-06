@@ -21,6 +21,7 @@ import { useEffect, useMemo, useState } from "react";
 import { propertyRateForDate, type PublicProperty } from "@/lib/property-model";
 import { DEFAULT_SPEEDBOAT_SEAT_PRICE_USD } from "@/lib/transfer-pricing";
 import { MVR_PER_USD, quoteAmount, type QuoteCurrency } from "@/lib/quote-currency";
+import { QUOTATION_BANK_ACCOUNTS } from "@/lib/quotation-bank-details";
 
 type ExtraItem = {
   id: string;
@@ -690,7 +691,14 @@ export default function AdminQuotationBuilder() {
 
           <p className="mt-6 text-[10px] uppercase tracking-[.18em] text-gray-500">Final selling price</p>
           <p className="font-display mt-2 text-5xl text-gold">{money(finalTotal, currency)}</p>
-          {currency === "MVR" && <p className="mt-3 text-xs leading-5 text-gray-400">The MVR quotation includes Maldives Islamic Bank transfer details for confirmed bookings. Account number: 7770000269824.</p>}
+          {currency === "MVR" && (
+            <div className="mt-3 space-y-1 text-xs leading-5 text-gray-400">
+              <p>Bank details for confirmed bookings:</p>
+              {QUOTATION_BANK_ACCOUNTS.map(account => (
+                <p key={account.bank}>{account.bank}: <span className="break-all text-gray-200">{account.accountNumber}</span></p>
+              ))}
+            </div>
+          )}
 
           <button type="button" onClick={generate} disabled={saving} className="btn-gold mt-6 w-full justify-center gap-2 disabled:opacity-50">
             <FileText className="h-4 w-4" /> {saving ? "Generating..." : "Generate Quotation"}
