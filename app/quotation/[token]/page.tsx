@@ -1,6 +1,7 @@
 import { CalendarDays, Clock3, Headphones, MapPin, Users } from "lucide-react";
 import ManualQuotationActions from "@/components/manual-quotation-actions";
 import TripelorMark from "@/components/tripelor-mark";
+import { QUOTATION_BANK_ACCOUNTS } from "@/lib/quotation-bank-details";
 
 export const dynamic = "force-dynamic";
 
@@ -278,8 +279,14 @@ export default async function ManualQuotationPage({ params }: { params: { token:
               {currency === "MVR" && (
                 <div className="border-t border-[#ded5c5] pt-3">
                   <p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#8d7037]">Bank details · confirmed bookings</p>
-                  <p className="quote-small mt-1 text-[10px] leading-4 text-[#58656c]">Maldives Islamic Bank · Nexus Gaming Pvt Ltd</p>
-                  <p className="mt-1 font-semibold tracking-wide text-[#26353b]">Account number: 7770000269824</p>
+                  <div className="mt-2 space-y-2">
+                    {QUOTATION_BANK_ACCOUNTS.map(account => (
+                      <div key={account.bank}>
+                        <p className="quote-small text-[10px] leading-4 text-[#58656c]">{account.bank}</p>
+                        <p className="break-all font-semibold tracking-wide text-[#26353b]">Account number: {account.accountNumber}</p>
+                      </div>
+                    ))}
+                  </div>
                   <p className="quote-small mt-1 text-[10px] leading-4 text-[#6b777c]">Please wait for Tripelor to confirm availability and the final amount before payment.</p>
                 </div>
               )}

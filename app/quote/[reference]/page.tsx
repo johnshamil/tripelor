@@ -10,14 +10,9 @@ import { localizeQuotedLine } from "@/lib/quote-display";
 import { verifyQuoteSignature, type QuoteExtras } from "@/lib/trip-quote-server";
 import { DEFAULT_SPEEDBOAT_SEAT_PRICE_USD, speedboatTransferTotal } from "@/lib/transfer-pricing";
 import { MVR_PER_USD, quoteAmount, quoteMoney, type QuoteCurrency } from "@/lib/quote-currency";
+import { QUOTATION_BANK_ACCOUNTS } from "@/lib/quotation-bank-details";
 
 export const dynamic = "force-dynamic";
-
-const UHOO_BANK = {
-  name: "Maldives Islamic Bank",
-  beneficiary: "Nexus Gaming Pvt Ltd",
-  number: "7770000269824",
-};
 
 function dateLabel(value: string, locale: "en" | "it" | "ru", withTime = false) {
   const language = locale === "it" ? "it-IT" : locale === "ru" ? "ru-RU" : "en-GB";
@@ -449,11 +444,14 @@ export default function QuotePage({
           {showBankDetails && (
             <div className="quote-section mx-6 border-t border-[#e1d8c9] py-6 text-sm sm:mx-9 md:mx-12">
               <h2 className="text-xs font-bold uppercase tracking-[.14em] text-[#987432]">{copy.bankDetails}</h2>
-              <dl className="mt-4 grid gap-x-6 gap-y-3 sm:grid-cols-3">
-                <div><dt className="text-xs text-[#687377]">{copy.bankName}</dt><dd className="mt-1 font-semibold">{UHOO_BANK.name}</dd></div>
-                <div><dt className="text-xs text-[#687377]">{copy.beneficiary}</dt><dd className="mt-1 font-semibold">{UHOO_BANK.beneficiary}</dd></div>
-                <div><dt className="text-xs text-[#687377]">{copy.accountNumber}</dt><dd className="mt-1 font-semibold tracking-wide">{UHOO_BANK.number}</dd></div>
-              </dl>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                {QUOTATION_BANK_ACCOUNTS.map(account => (
+                  <dl key={account.bank} className="min-w-0 border border-[#e1d8c9] bg-white p-4">
+                    <div><dt className="text-xs text-[#687377]">{copy.bankName}</dt><dd className="mt-1 font-semibold">{account.bank}</dd></div>
+                    <div className="mt-3"><dt className="text-xs text-[#687377]">{copy.accountNumber}</dt><dd className="mt-1 break-all font-semibold tracking-wide">{account.accountNumber}</dd></div>
+                  </dl>
+                ))}
+              </div>
               <p className="mt-4 text-xs leading-5 text-[#506066]">{copy.paymentNote}</p>
             </div>
           )}
