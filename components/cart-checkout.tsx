@@ -108,7 +108,7 @@ export default function CartCheckout() {
       const response = await fetch("/api/quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: lines, currency: quoteCurrency }),
+        body: JSON.stringify({ items: lines, currency: quoteCurrency, clientName: name, clientEmail: user?.email || "", clientPhone: phone }),
         signal: AbortSignal.timeout(15000),
       });
       const data = await response.json();

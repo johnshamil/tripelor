@@ -12,6 +12,10 @@ function cleanString(value: unknown, max: number) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
 }
 
+function cleanContact(value: unknown, max: number) {
+  return cleanString(value, max).replace(/[\x00-\x1f\x7f]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
 function cleanExtras(body: any): QuoteExtras {
   const transferSeatsRaw = Number(body?.transferSeats || 0);
   const transferSeats = Number.isInteger(transferSeatsRaw) && transferSeatsRaw >= 0 && transferSeatsRaw <= 20
@@ -27,6 +31,9 @@ function cleanExtras(body: any): QuoteExtras {
     customizeHref: customizeHref.startsWith("/build-your-trip") ? customizeHref : "",
     currency: body?.currency === "MVR" ? "MVR" : "USD",
     fxRate: MVR_PER_USD,
+    clientName: cleanContact(body?.clientName, 120),
+    clientEmail: cleanContact(body?.clientEmail, 180),
+    clientPhone: cleanContact(body?.clientPhone, 50),
   };
 }
 
@@ -74,6 +81,9 @@ export async function POST(request: Request) {
     if (extras.customizeHref) url.searchParams.set("customize", extras.customizeHref);
     url.searchParams.set("currency", extras.currency || "USD");
     url.searchParams.set("fxRate", String(extras.fxRate));
+    if (extras.clientName) url.searchParams.set("clientName", extras.clientName);
+    if (extras.clientEmail) url.searchParams.set("clientEmail", extras.clientEmail);
+    if (extras.clientPhone) url.searchParams.set("clientPhone", extras.clientPhone);
 
     const signature = signQuote(reference, issued, lines, extras);
     url.searchParams.set("sig", signature);

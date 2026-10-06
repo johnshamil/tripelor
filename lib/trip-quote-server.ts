@@ -10,6 +10,9 @@ export type QuoteExtras = {
   customizeHref: string;
   currency?: QuoteCurrency;
   fxRate?: number;
+  clientName?: string;
+  clientEmail?: string;
+  clientPhone?: string;
 };
 
 function signingSecret() {
@@ -34,6 +37,9 @@ function canonicalQuote(
     requestHref: extras.requestHref,
     customizeHref: extras.customizeHref,
     ...(extras.currency ? { currency: extras.currency, fxRate: extras.fxRate } : {}),
+    ...(extras.clientName ? { clientName: extras.clientName } : {}),
+    ...(extras.clientEmail ? { clientEmail: extras.clientEmail } : {}),
+    ...(extras.clientPhone ? { clientPhone: extras.clientPhone } : {}),
   });
 }
 

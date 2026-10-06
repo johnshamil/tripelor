@@ -197,6 +197,9 @@ export default function BuildYourTripPage() {
   const [rooms, setRooms] = useState<string[]>(["ROOM 101"]);
   const [includeTransfer, setIncludeTransfer] = useState(true);
   const [currency, setCurrency] = useState<QuoteCurrency>("USD");
+  const [clientName, setClientName] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
   const [quoteError, setQuoteError] = useState("");
   const [quoteCreating, setQuoteCreating] = useState(false);
 
@@ -298,6 +301,9 @@ export default function BuildYourTripPage() {
           meal: recommendation.meal,
           transferSeats,
           currency,
+          clientName,
+          clientEmail,
+          clientPhone,
           requestHref: rooms.length === 1 && currency === "USD" ? bookingHref : "",
           customizeHref: "/build-your-trip",
         }),
@@ -589,6 +595,22 @@ export default function BuildYourTripPage() {
                     </div>
                   </div>
                   <button type="button" onClick={() => setIncludeTransfer(current => !current)} aria-pressed={includeTransfer} className="mt-4 min-h-11 text-left text-xs font-semibold text-[#715723] underline underline-offset-4">{includeTransfer ? `✓ Airport speedboat for ${transferSeats} guests · remove` : "+ Add airport speedboat transfer"}</button>
+                </div>
+
+                <div className="mt-5 border border-[#d8cdb8] bg-white p-5">
+                  <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#8d7037]">Prepared for · optional</p>
+                  <p className="mt-2 text-xs leading-5 text-[#687377]">Add your customer’s details to the quotation before sharing or printing it.</p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <label className="text-xs font-semibold text-[#58656c]">Customer name
+                      <input type="text" autoComplete="name" maxLength={120} value={clientName} onChange={event => setClientName(event.target.value)} placeholder="Name or company" className="mt-2 min-h-11 w-full border border-[#d0c5b0] bg-white px-3 text-sm text-[#071922]" />
+                    </label>
+                    <label className="text-xs font-semibold text-[#58656c]">Email
+                      <input type="email" autoComplete="email" maxLength={180} value={clientEmail} onChange={event => setClientEmail(event.target.value)} placeholder="name@example.com" className="mt-2 min-h-11 w-full border border-[#d0c5b0] bg-white px-3 text-sm text-[#071922]" />
+                    </label>
+                    <label className="text-xs font-semibold text-[#58656c] sm:col-span-2">Phone / WhatsApp
+                      <input type="tel" autoComplete="tel" maxLength={50} value={clientPhone} onChange={event => setClientPhone(event.target.value)} placeholder="+960…" className="mt-2 min-h-11 w-full border border-[#d0c5b0] bg-white px-3 text-sm text-[#071922]" />
+                    </label>
+                  </div>
                 </div>
 
                 <div className="mt-7 border-y border-[#d8cdb8] py-6">
