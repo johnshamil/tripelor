@@ -141,9 +141,13 @@ export async function POST(request: Request) {
     const discountAmount = cleanMoney(body?.discountAmount);
     const feesAmount = cleanMoney(body?.feesAmount);
     const validHours = cleanInteger(body?.validHours, 1, 720, 48);
+    const currency = body?.currency;
     const items = cleanItems(body?.items);
 
     if (!customerName) return Response.json({ error: "Customer name is required." }, { status: 400 });
+    if (currency !== "USD" && currency !== "MVR") {
+      return Response.json({ error: "Choose USD or MVR for this quotation." }, { status: 400 });
+    }
     if (customerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
       return Response.json({ error: "Enter a valid customer email." }, { status: 400 });
     }
@@ -172,7 +176,7 @@ export async function POST(request: Request) {
       adults,
       children,
       rooms,
-      currency: "USD",
+      currency,
       items,
       subtotal,
       discount_amount: discountAmount,

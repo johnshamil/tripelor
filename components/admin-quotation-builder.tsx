@@ -20,6 +20,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { propertyRateForDate, type PublicProperty } from "@/lib/property-model";
 import { DEFAULT_SPEEDBOAT_SEAT_PRICE_USD } from "@/lib/transfer-pricing";
+import { MVR_PER_USD, quoteAmount, type QuoteCurrency } from "@/lib/quote-currency";
 
 type ExtraItem = {
   id: string;
@@ -45,6 +46,7 @@ type SavedQuotation = {
   adults: number;
   children: number;
   rooms: number;
+  currency: QuoteCurrency;
   subtotal: number;
   discount_amount: number;
   fees_amount: number;
@@ -57,11 +59,15 @@ type SavedQuotation = {
 const field =
   "mt-2 min-h-12 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-gold/60";
 
-function usd(value: number) {
-  return `USD ${Number(value || 0).toLocaleString("en-US", {
+function money(value: number, currency: QuoteCurrency) {
+  return `${currency} ${Number(value || 0).toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
+}
+
+function roundMoney(value: number) {
+  return Math.round(value * 100) / 100;
 }
 
 function nightsBetween(checkIn: string, checkOut: string) {
@@ -100,10 +106,11 @@ export default function AdminQuotationBuilder() {
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [rooms, setRooms] = useState(1);
+  const [currency, setCurrency] = useState<QuoteCurrency>("USD");
   const [propertyName, setPropertyName] = useState("");
   const [roomName, setRoomName] = useState("");
   const [mealPlan, setMealPlan] = useState("");
-  const [accommodationTotal, setAccommodationTotal] = useState(0);
+  const [accommodationPerRoom, setAccommodationPerRoom] = useState(0);
   const [transferSeats, setTransferSeats] = useState(0);
   const [transferUnitPrice, setTransferUnitPrice] = useState(DEFAULT_SPEEDBOAT_SEAT_PRICE_USD);
   const [extras, setExtras] = useState<ExtraItem[]>([]);
@@ -170,15 +177,14 @@ export default function AdminQuotationBuilder() {
 
   const nights = nightsBetween(checkIn, checkOut);
 
-  const suggestedStayTotal = useMemo(() => {
+  const suggestedStayPerRoom = useMemo(() => {
     if (!property || !roomName || !mealPlan || nights <= 0) return 0;
-    return Math.round(
+    return roundMoney(quoteAmount(
       stayDates(checkIn, checkOut).reduce(
-        (sum, date) => sum + propertyRateForDate(property, roomName, mealPlan, date) * rooms,
+        (sum, date) => sum + propertyRateForDate(property, roomName, mealPlan, date),
         0,
-      ) * 100,
-    ) / 100;
-  }, [property, roomName, mealPlan, checkIn, checkOut, rooms, nights]);
+      ), currency));
+  }, [property, roomName, mealPlan, checkIn, checkOut, nights, currency]);
 
   useEffect(() => {
     if (!property) {
@@ -198,7 +204,8 @@ export default function AdminQuotationBuilder() {
     if (!mealOptions.includes(mealPlan)) setMealPlan(mealOptions[0] || "");
   }, [mealOptions, mealPlan]);
 
-  const transferTotal = Math.round(transferSeats * transferUnitPrice * 100) / 100;
+  const accommodationTotal = roundMoney(accommodationPerRoom * rooms);
+  const transferTotal = roundMoney(transferSeats * transferUnitPrice);
   const extraTotal = extras.reduce(
     (sum, item) => sum + Math.max(0, Number(item.quantity) || 0) * Math.max(0, Number(item.unitPrice) || 0),
     0,
@@ -206,13 +213,30 @@ export default function AdminQuotationBuilder() {
   const subtotal = Math.round((accommodationTotal + transferTotal + extraTotal) * 100) / 100;
   const finalTotal = Math.max(0, Math.round((subtotal - discountAmount + feesAmount) * 100) / 100);
 
+  function changeCurrency(next: QuoteCurrency) {
+    if (next === currency) return;
+    const factor = next === "MVR" ? MVR_PER_USD : 1 / MVR_PER_USD;
+    setAccommodationPerRoom(value => roundMoney(value * factor));
+    setTransferUnitPrice(value => roundMoney(value * factor));
+    setExtras(current => current.map(item => ({ ...item, unitPrice: roundMoney(item.unitPrice * factor) })));
+    setDiscountAmount(value => roundMoney(value * factor));
+    setFeesAmount(value => roundMoney(value * factor));
+    setCurrency(next);
+  }
+
+  function changeRooms(next: number) {
+    setAdults(current => current === rooms * 2 ? Math.min(20, next * 2) : current);
+    setTransferSeats(current => current === rooms * 2 ? Math.min(30, next * 2) : current);
+    setRooms(next);
+  }
+
   function selectProperty(value: string) {
     setPropertyName(value);
     const selected = properties.find(item => item.name === value);
     const firstRoom = selected?.rooms[0];
     setRoomName(firstRoom?.name || "");
     setMealPlan(firstRoom?.mealPlan || "");
-    setAccommodationTotal(0);
+    setAccommodationPerRoom(0);
   }
 
   function addExtra(category: ExtraItem["category"]) {
@@ -252,15 +276,15 @@ export default function AdminQuotationBuilder() {
         nights ? `${nights} night${nights === 1 ? "" : "s"}` : "",
         roomName,
         mealPlan,
-        rooms > 1 ? `${rooms} rooms` : "",
+        "per room",
       ].filter(Boolean).join(" · ");
       items.push({
         id: "stay",
         category: "stay",
         label: propertyName || "Accommodation",
         details: stayDetails,
-        quantity: 1,
-        unitPrice: accommodationTotal,
+        quantity: rooms,
+        unitPrice: accommodationPerRoom,
       });
     }
 
@@ -269,7 +293,7 @@ export default function AdminQuotationBuilder() {
         id: "transfer",
         category: "transfer",
         label: "Speedboat Transfer",
-        details: `${transferSeats} seat${transferSeats === 1 ? "" : "s"} · USD ${transferUnitPrice.toFixed(2)} per seat`,
+        details: `${transferSeats} seat${transferSeats === 1 ? "" : "s"} · ${money(transferUnitPrice, currency)} per seat`,
         quantity: transferSeats,
         unitPrice: transferUnitPrice,
       });
@@ -327,6 +351,7 @@ export default function AdminQuotationBuilder() {
           adults,
           children,
           rooms,
+          currency,
           items,
           discountAmount,
           feesAmount,
@@ -379,10 +404,11 @@ export default function AdminQuotationBuilder() {
     setAdults(2);
     setChildren(0);
     setRooms(1);
+    setCurrency("USD");
     setPropertyName("");
     setRoomName("");
     setMealPlan("");
-    setAccommodationTotal(0);
+    setAccommodationPerRoom(0);
     setTransferSeats(0);
     setTransferUnitPrice(DEFAULT_SPEEDBOAT_SEAT_PRICE_USD);
     setExtras([]);
@@ -446,7 +472,7 @@ export default function AdminQuotationBuilder() {
               </p>
               <p className="font-display mt-2 text-3xl text-white">{created.reference}</p>
               <p className="mt-2 text-sm text-gray-400">
-                {created.customer_name} · {usd(created.total)}
+                {created.customer_name} · {money(created.total, created.currency || "USD")}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -482,6 +508,15 @@ export default function AdminQuotationBuilder() {
       <section className="mt-7 grid gap-7 xl:grid-cols-[1fr_360px] xl:items-start">
         <div className="space-y-6">
           <Panel title="Customer & travel">
+            <div className="mb-5 rounded-xl border border-gold/25 bg-gold/[.06] p-4">
+              <label className="block max-w-xs text-sm font-medium text-gray-200">Quotation currency
+                <select value={currency} onChange={event => changeCurrency(event.target.value as QuoteCurrency)} className={field}>
+                  <option value="USD">USD · US dollars</option>
+                  <option value="MVR">MVR · Maldivian rufiyaa</option>
+                </select>
+              </label>
+              <p className="mt-2 text-xs leading-5 text-gray-400">Existing amounts convert when you switch currency at 1 USD = MVR {MVR_PER_USD.toFixed(2)}. You can edit every selling price afterward.</p>
+            </div>
             <div className="grid gap-4 md:grid-cols-3">
               <Label title="Customer name">
                 <input value={customerName} onChange={event => setCustomerName(event.target.value)} className={field} placeholder="Customer full name" />
@@ -501,7 +536,7 @@ export default function AdminQuotationBuilder() {
               <div className="grid grid-cols-3 gap-2">
                 <NumberField label="Adults" value={adults} min={1} max={20} onChange={setAdults} />
                 <NumberField label="Children" value={children} min={0} max={20} onChange={setChildren} />
-                <NumberField label="Rooms" value={rooms} min={1} max={20} onChange={setRooms} />
+                <NumberField label="Rooms" value={rooms} min={1} max={20} onChange={changeRooms} />
               </div>
             </div>
           </Panel>
@@ -529,32 +564,32 @@ export default function AdminQuotationBuilder() {
             </div>
 
             <div className="mt-5 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
-              <Label title="Accommodation selling total · USD">
-                <input type="number" min={0} step="0.01" value={accommodationTotal} onChange={event => setAccommodationTotal(Math.max(0, Number(event.target.value) || 0))} className={field} />
+              <Label title={`Selling price per room for the stay · ${currency}`}>
+                <input type="number" min={0} step="0.01" value={accommodationPerRoom} onChange={event => setAccommodationPerRoom(Math.max(0, Number(event.target.value) || 0))} className={field} />
               </Label>
               <button
                 type="button"
-                onClick={() => setAccommodationTotal(suggestedStayTotal)}
-                disabled={!suggestedStayTotal}
+                onClick={() => setAccommodationPerRoom(suggestedStayPerRoom)}
+                disabled={!suggestedStayPerRoom}
                 className="btn-outline min-h-12 px-4 text-xs disabled:opacity-40"
               >
-                Use Published Rate · {usd(suggestedStayTotal)}
+                Use Published Rate · {money(suggestedStayPerRoom, currency)} / room
               </button>
             </div>
             <p className="mt-3 text-xs text-gray-500">
-              {nights > 0 ? `${nights} night${nights === 1 ? "" : "s"} · ${rooms} room${rooms === 1 ? "" : "s"}` : "Choose dates to calculate the published accommodation selling rate."}
+              {nights > 0 ? `${nights} night${nights === 1 ? "" : "s"} · ${rooms} room${rooms === 1 ? "" : "s"} × ${money(accommodationPerRoom, currency)} = ${money(accommodationTotal, currency)}` : "Choose dates to calculate the published price per room."}
             </p>
           </Panel>
 
           <Panel title="Transfer">
             <div className="grid gap-4 sm:grid-cols-3">
               <NumberField label="Speedboat seats" value={transferSeats} min={0} max={30} onChange={setTransferSeats} />
-              <Label title="Price per seat · USD">
+              <Label title={`Price per seat · ${currency}`}>
                 <input type="number" min={0} step="0.01" value={transferUnitPrice} onChange={event => setTransferUnitPrice(Math.max(0, Number(event.target.value) || 0))} className={field} />
               </Label>
               <div className="rounded-xl border border-white/10 bg-white/[.03] p-4">
                 <p className="text-[9px] uppercase tracking-[.14em] text-gray-500">Transfer total</p>
-                <p className="mt-2 text-xl font-semibold text-gold">{usd(transferTotal)}</p>
+                <p className="mt-2 text-xl font-semibold text-gold">{money(transferTotal, currency)}</p>
               </div>
             </div>
           </Panel>
@@ -592,7 +627,7 @@ export default function AdminQuotationBuilder() {
                     <Label title="Qty">
                       <input type="number" min={1} max={100} value={item.quantity} onChange={event => updateExtra(item.id, { quantity: Math.max(1, Number(event.target.value) || 1) })} className={field} />
                     </Label>
-                    <Label title="Unit price · USD">
+                    <Label title={`Unit price · ${currency}`}>
                       <input type="number" min={0} step="0.01" value={item.unitPrice} onChange={event => updateExtra(item.id, { unitPrice: Math.max(0, Number(event.target.value) || 0) })} className={field} />
                     </Label>
                     <button type="button" onClick={() => removeExtra(item.id)} className="flex h-12 w-12 items-center justify-center rounded-xl border border-red-500/20 text-red-300 hover:bg-red-500/10" aria-label="Remove item">
@@ -606,10 +641,10 @@ export default function AdminQuotationBuilder() {
 
           <Panel title="Adjustments & conditions">
             <div className="grid gap-4 md:grid-cols-3">
-              <Label title="Discount · USD">
+              <Label title={`Discount · ${currency}`}>
                 <input type="number" min={0} step="0.01" value={discountAmount} onChange={event => setDiscountAmount(Math.max(0, Number(event.target.value) || 0))} className={field} />
               </Label>
-              <Label title="Taxes / additional fees · USD">
+              <Label title={`Taxes / additional fees · ${currency}`}>
                 <input type="number" min={0} step="0.01" value={feesAmount} onChange={event => setFeesAmount(Math.max(0, Number(event.target.value) || 0))} className={field} />
               </Label>
               <Label title="Validity">
@@ -645,16 +680,17 @@ export default function AdminQuotationBuilder() {
           </div>
 
           <div className="mt-6 space-y-3 border-y border-white/10 py-5 text-sm">
-            {accommodationTotal > 0 && <Summary label="Accommodation" value={usd(accommodationTotal)} />}
-            {transferTotal > 0 && <Summary label="Transfer" value={usd(transferTotal)} />}
-            {extraTotal > 0 && <Summary label="Excursions / other" value={usd(extraTotal)} />}
-            <Summary label="Subtotal" value={usd(subtotal)} />
-            {discountAmount > 0 && <Summary label="Discount" value={`− ${usd(discountAmount)}`} accent />}
-            {feesAmount > 0 && <Summary label="Taxes / fees" value={usd(feesAmount)} />}
+            {accommodationTotal > 0 && <Summary label={`${rooms} room${rooms === 1 ? "" : "s"}`} value={money(accommodationTotal, currency)} />}
+            {transferTotal > 0 && <Summary label="Transfer" value={money(transferTotal, currency)} />}
+            {extraTotal > 0 && <Summary label="Excursions / other" value={money(extraTotal, currency)} />}
+            <Summary label="Subtotal" value={money(subtotal, currency)} />
+            {discountAmount > 0 && <Summary label="Discount" value={`− ${money(discountAmount, currency)}`} accent />}
+            {feesAmount > 0 && <Summary label="Taxes / fees" value={money(feesAmount, currency)} />}
           </div>
 
           <p className="mt-6 text-[10px] uppercase tracking-[.18em] text-gray-500">Final selling price</p>
-          <p className="font-display mt-2 text-5xl text-gold">{usd(finalTotal)}</p>
+          <p className="font-display mt-2 text-5xl text-gold">{money(finalTotal, currency)}</p>
+          {currency === "MVR" && <p className="mt-3 text-xs leading-5 text-gray-400">The MVR quotation includes Maldives Islamic Bank transfer details for confirmed bookings. Account number: 7770000269824.</p>}
 
           <button type="button" onClick={generate} disabled={saving} className="btn-gold mt-6 w-full justify-center gap-2 disabled:opacity-50">
             <FileText className="h-4 w-4" /> {saving ? "Generating..." : "Generate Quotation"}
@@ -696,7 +732,7 @@ export default function AdminQuotationBuilder() {
                     {[quote.property_name, quote.room_name, quote.meal_plan].filter(Boolean).join(" · ") || "Custom quotation"}
                   </p>
                   <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-400">
-                    <span>{usd(quote.total)}</span>
+                    <span>{money(quote.total, quote.currency || "USD")}</span>
                     {quote.check_in && quote.check_out && <span>{quote.check_in} → {quote.check_out}</span>}
                     <span>Valid until {new Date(quote.valid_until).toLocaleString()}</span>
                   </div>
