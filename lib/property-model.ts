@@ -1,5 +1,29 @@
 export const legacyPropertySlugs = ["uhoos-lavish-oasis", "masfalhi-view-inn", "rivethi-beach-hotel"] as const;
 
+// Only these bundled hotel images may be saved without a storage upload.
+const curatedPropertyPhotos = new Set([
+  "/properties/dhoani-maldives-boutique/exterior.webp",
+  "/properties/dhoani-maldives-boutique/bedroom-window.webp",
+  "/properties/dhoani-maldives-boutique/bedroom.webp",
+  "/properties/dhoani-maldives-boutique/lounge.webp",
+  "/properties/dhoani-maldives-boutique/bathroom-shower.webp",
+  "/properties/dhoani-maldives-boutique/bathroom-sink.webp",
+  "/properties/dhoani-maldives-boutique/garden-seating.webp",
+  "/properties/dhoani-maldives-boutique/breakfast.webp",
+  "/properties/dhoani-maldives-guesthouse/exterior.webp",
+  "/properties/dhoani-maldives-guesthouse/balcony-bedroom.webp",
+  "/properties/dhoani-maldives-guesthouse/courtyard.webp",
+  "/properties/dhoani-maldives-guesthouse/outdoor-seating.webp",
+  "/properties/dhoani-maldives-guesthouse/dining.webp",
+  "/properties/dhoani-maldives-guesthouse/lounge.webp",
+  "/properties/dhoani-maldives-guesthouse/bedroom.webp",
+  "/properties/dhoani-maldives-ostrov/exterior.webp",
+  "/properties/dhoani-maldives-ostrov/balcony-bedroom.webp",
+  "/properties/dhoani-maldives-ostrov/bedroom.webp",
+  "/properties/dhoani-maldives-ostrov/bedroom-wide.webp",
+  "/properties/dhoani-maldives-ostrov/exterior-front.webp",
+]);
+
 export function isLegacyPhotoPath(value: string) {
   return value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/api/") && !value.includes("..");
 }
@@ -173,7 +197,7 @@ export function validateProperty(input: any) {
     if(!Array.isArray(list) || list.length > max) throw new Error(`Use up to ${max} photographs in each section.`);
     return list.map((p: unknown) => {
       const s=text(p,200);
-      if(!/^[0-9a-f-]{36}\.(jpg|png|webp)$/.test(s) && !isTrustedRemotePhotoUrl(s) && !(allowLegacy && isLegacyPhotoPath(s))) throw new Error("Use uploaded photographs or an approved hotel image URL.");
+      if(!/^[0-9a-f-]{36}\.(jpg|png|webp)$/.test(s) && !isTrustedRemotePhotoUrl(s) && !curatedPropertyPhotos.has(s) && !(allowLegacy && isLegacyPhotoPath(s))) throw new Error("Use uploaded photographs or an approved hotel image URL.");
       return s;
     });
   };
