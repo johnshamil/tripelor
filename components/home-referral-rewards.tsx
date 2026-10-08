@@ -12,7 +12,8 @@ import {
   Utensils,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { translations, type ProfessionalLocale } from "@/lib/professional-translations";
 
 type Member = {
@@ -27,6 +28,17 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
   const [member, setMember] = useState<Member | null>(null);
   const [open, setOpen] = useState(false);
   const [qualified, setQualified] = useState(false);
+  const dialogRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  const close = useCallback(() => {
+    setOpen(false);
+    try {
+      sessionStorage.setItem(SESSION_KEY, "1");
+    } catch {
+      // Ignore storage restrictions.
+    }
+  }, []);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -72,14 +84,45 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
     };
   }, []);
 
-  function close() {
-    setOpen(false);
-    try {
-      sessionStorage.setItem(SESSION_KEY, "1");
-    } catch {
-      // Ignore storage restrictions.
+  useEffect(() => {
+    if (!open) return;
+
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus({ preventScroll: true });
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        close();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const controls = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex="0"]',
+      );
+      if (!controls?.length) return;
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      const outsideDialog = !dialogRef.current?.contains(document.activeElement);
+      if (event.shiftKey && (document.activeElement === first || outsideDialog)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || outsideDialog)) {
+        event.preventDefault();
+        first.focus();
+      }
     }
-  }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+    };
+  }, [open, close]);
 
   const href = member ? "/account#referral-rewards" : "/signup?next=%2Faccount%23referral-rewards";
   const cta = member ? copy.openShareWin : copy.joinShareWin;
@@ -122,19 +165,21 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
         </div>
       </section>
 
-      {open && (
+      {/* Keep the welcome dialog outside the animated page's containing block. */}
+      {open && createPortal(
         <div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-[#010406]/90 p-3 backdrop-blur-md sm:items-center sm:p-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#010406]/60 p-3 sm:p-6"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) close();
           }}
         >
           <section
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="share-win-home-title"
-            className="relative w-full max-w-3xl overflow-hidden rounded-[2.25rem] border border-[#d9bd7b]/45 bg-[#061118] text-white shadow-[0_40px_140px_rgba(0,0,0,.82),0_0_70px_rgba(217,189,123,.10)]"
+            className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl overflow-x-hidden overflow-y-auto overscroll-contain rounded-[2.25rem] border border-[#d9bd7b]/45 bg-[#061118] text-white shadow-[0_40px_140px_rgba(0,0,0,.82),0_0_70px_rgba(217,189,123,.10)] sm:max-h-[calc(100dvh-3rem)]"
           >
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_5%,rgba(217,189,123,.18),transparent_30%),radial-gradient(circle_at_10%_95%,rgba(68,126,142,.10),transparent_32%)]" />
             <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[#ead7aa] to-transparent" />
@@ -142,6 +187,7 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full border border-[#d9bd7b]/10" />
 
             <button
+              ref={closeButtonRef}
               type="button"
               onClick={close}
               className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white/50 backdrop-blur transition hover:border-[#d9bd7b]/35 hover:text-white"
@@ -289,7 +335,8 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
               </aside>
             </div>
           </section>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
