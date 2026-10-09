@@ -127,71 +127,221 @@ export default async function ManualQuotationPage({ params }: { params: { token:
         @media print {
           html, body {
             background: white !important;
-          }
-          body.manual-quote-print-mode header,
-          body.manual-quote-print-mode footer,
-          body.manual-quote-print-mode .no-print {
-            display: none !important;
-          }
-          body.manual-quote-print-mode {
+            height: auto !important;
+            min-height: 0 !important;
             margin: 0 !important;
             padding: 0 !important;
           }
-          body.manual-quote-print-mode .manual-quote-page {
+          header, footer, .no-print,
+          .mobile-booking-bar, .floating-plan,
+          a[href^="https://wa.me/"] {
+            display: none !important;
+          }
+          body > main, .route-transition, .manual-quote-page {
+            margin: 0 !important;
             padding: 0 !important;
+            min-height: 0 !important;
             background: white !important;
           }
-          body.manual-quote-print-mode .quote-sheet {
-            width: 194mm !important;
-            min-height: 277mm !important;
+          .route-transition {
+            animation: none !important;
+            transform: none !important;
+            filter: none !important;
+            opacity: 1 !important;
+          }
+          .manual-quote-page .quote-sheet {
+            width: 100% !important;
+            max-width: none !important;
+            min-height: 0 !important;
             height: auto !important;
-            margin: 0 auto !important;
+            margin: 0 !important;
             overflow: visible !important;
             box-shadow: none !important;
             border: 0 !important;
-            break-inside: auto !important;
+            color: #26353b !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
           }
-          body.manual-quote-print-mode .quote-screen-actions {
+          .quote-screen-actions {
             display: none !important;
           }
-          body.manual-quote-print-mode .quote-header {
-            padding: 7mm 8mm 5mm !important;
+          .quote-header {
+            padding: 0 0 4mm !important;
+            background: white !important;
+            border-bottom: 2px solid #b39458;
+            break-inside: avoid;
           }
-          body.manual-quote-print-mode .quote-body {
-            padding: 5mm 8mm 5mm !important;
+          .quote-header * {
+            color: #26353b !important;
           }
-          body.manual-quote-print-mode .quote-items {
-            font-size: 9.5px !important;
+          .quote-header-layout {
+            grid-template-columns: minmax(0, 1fr) auto !important;
+            align-items: start !important;
+            gap: 5mm !important;
           }
-          body.manual-quote-print-mode .quote-items td,
-          body.manual-quote-print-mode .quote-items th {
-            padding-top: 5px !important;
-            padding-bottom: 5px !important;
+          .quote-logo {
+            width: 44px !important;
+            height: 44px !important;
+            color: #8d7037 !important;
           }
-          body.manual-quote-print-mode .quote-small {
+          .quote-brand {
+            color: #8d7037 !important;
             font-size: 9px !important;
+          }
+          .quote-header h1 {
+            margin-top: 5px !important;
+            font-size: 32px !important;
+          }
+          .quote-prepared-for {
+            margin-top: 6px !important;
+            font-size: 11px !important;
+          }
+          .quote-reference {
+            text-align: right !important;
+            gap: 5px !important;
+          }
+          .quote-reference-number {
+            font-size: 17px !important;
+          }
+          .quote-reference-dates {
+            font-size: 9px !important;
+            line-height: 1.5 !important;
+          }
+          .quote-status-notice {
+            margin-top: 3mm !important;
+            padding: 2mm !important;
+            border: 1px solid #b39458 !important;
+          }
+          .quote-body {
+            padding: 4mm 0 0 !important;
+          }
+          .quote-parties {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 5mm !important;
+            padding-bottom: 3mm !important;
+            break-inside: avoid;
+          }
+          .quote-parties p {
+            margin-top: 3px !important;
+          }
+          .quote-travel {
+            grid-template-columns: 1fr 1fr 1.3fr 1.5fr !important;
+            gap: 3mm !important;
+            padding: 3mm 0 !important;
+            break-inside: avoid;
+          }
+          .quote-travel .quote-info-value {
+            overflow: visible !important;
+            white-space: normal !important;
+            font-size: 11px !important;
+          }
+          .quote-stay-details {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 4px 5mm !important;
+            margin-top: 3mm !important;
+            padding: 2mm 3mm !important;
+            border: 1px solid #ded5c5;
+            break-inside: avoid;
+          }
+          .quote-items-wrap {
+            margin-top: 3mm !important;
+            overflow: visible !important;
+          }
+          .quote-items {
+            font-size: 10.5px !important;
+          }
+          .quote-items thead {
+            display: table-header-group;
+            background: #f7f2e9 !important;
+            color: #26353b !important;
+          }
+          .quote-items tr {
+            break-inside: avoid;
+          }
+          .quote-items td, .quote-items th {
+            padding: 6px 8px !important;
+          }
+          .quote-items th:nth-child(2) { width: 14mm !important; }
+          .quote-items th:nth-child(3) { width: 28mm !important; }
+          .quote-items th:nth-child(4) { width: 32mm !important; }
+          .quote-items td:nth-child(n+3) {
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+          }
+          .quote-summary {
+            grid-template-columns: minmax(0, 1fr) 62mm !important;
+            align-items: start;
+            margin-top: 4mm !important;
+            gap: 5mm !important;
+          }
+          .quote-notes > div {
+            margin-top: 2mm !important;
+            break-inside: avoid;
+          }
+          .quote-notes > div:first-child { margin-top: 0 !important; }
+          .quote-bank-accounts {
+            margin-top: 5px !important;
+          }
+          .quote-bank-account-number {
+            font-size: 11px !important;
+            letter-spacing: 0 !important;
+          }
+          .quote-total {
+            padding: 3mm !important;
+            background: #f7f2e9 !important;
+            border: 1px solid #b39458;
+            break-inside: avoid;
+          }
+          .quote-total * {
+            color: #26353b !important;
+          }
+          .quote-total-amount {
+            margin-top: 5px !important;
+            font-size: 27px !important;
+            line-height: 1.15 !important;
+            overflow-wrap: anywhere;
+          }
+          .quote-total-breakdown {
+            margin-top: 2mm !important;
+            padding: 2mm 0 !important;
+            border-color: #ded5c5 !important;
+            font-size: 10px !important;
+          }
+          .quote-total .quote-small { margin-top: 2mm !important; }
+          .quote-small {
+            font-size: 10px !important;
             line-height: 1.35 !important;
           }
+          .quote-footer {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+            gap: 5mm !important;
+            margin-top: 4mm !important;
+            padding-top: 3mm !important;
+            font-size: 9px !important;
+            line-height: 1.4 !important;
+            break-inside: avoid;
+          }
+          .quote-footer > p { text-align: right !important; }
         }
       `}</style>
 
       <div className="quote-sheet mx-auto w-[min(100%-1rem,1120px)] overflow-hidden border border-[#cbbfa9] bg-white shadow-[0_30px_100px_rgba(30,35,38,.18)]">
         <section className="quote-header bg-[#06151c] px-6 py-7 text-white md:px-9 md:py-8">
-          <div className="grid gap-5 md:grid-cols-[1fr_auto] md:items-start">
+          <div className="quote-header-layout grid gap-5 md:grid-cols-[1fr_auto] md:items-start">
             <div className="flex items-start gap-4">
-              <TripelorMark className="h-14 w-14 shrink-0 text-[#ead7aa] md:h-16 md:w-16" />
+              <TripelorMark className="quote-logo h-14 w-14 shrink-0 text-[#ead7aa] md:h-16 md:w-16" />
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[.28em] text-[#d9bd7b]">Tripelor · Maldives Travel</p>
+                <p className="quote-brand text-[10px] font-bold uppercase tracking-[.28em] text-[#d9bd7b]">Tripelor · Maldives Travel</p>
                 <h1 className="font-display mt-2 text-4xl leading-none md:text-5xl">Quotation</h1>
-                <p className="mt-3 text-sm text-white/60">Prepared for <strong className="text-white">{quote.customer_name}</strong></p>
+                <p className="quote-prepared-for mt-3 text-sm text-white/60">Prepared for <strong className="text-white">{quote.customer_name}</strong></p>
               </div>
             </div>
-            <div className="grid gap-2 text-left md:text-right">
+            <div className="quote-reference grid gap-2 text-left md:text-right">
               <div>
                 <p className="text-[9px] uppercase tracking-[.16em] text-white/35">Reference</p>
-                <p className="mt-1 font-display text-2xl text-[#ead7aa]">{quote.reference}</p>
+                <p className="quote-reference-number mt-1 font-display text-2xl text-[#ead7aa]">{quote.reference}</p>
               </div>
-              <div className="text-xs leading-5 text-white/45">
+              <div className="quote-reference-dates text-xs leading-5 text-white/45">
                 <p>Created: {dateTime(quote.created_at)}</p>
                 <p>Valid until: {dateTime(quote.valid_until)}</p>
               </div>
@@ -199,7 +349,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
           </div>
 
           {(expired || cancelled) && (
-            <div className="mt-5 border border-amber-300/30 bg-amber-300/10 px-4 py-3 text-xs text-amber-100">
+            <div className="quote-status-notice mt-5 border border-amber-300/30 bg-amber-300/10 px-4 py-3 text-xs text-amber-100">
               {cancelled
                 ? "This quotation has been cancelled by Tripelor."
                 : "This quotation has expired. Contact Tripelor for an updated price and availability check."}
@@ -208,7 +358,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
         </section>
 
         <section className="quote-body px-6 py-6 md:px-9 md:py-7">
-          <div className="grid gap-4 border-b border-[#ded5c5] pb-5 text-xs sm:grid-cols-2">
+          <div className="quote-parties grid gap-4 border-b border-[#ded5c5] pb-5 text-xs sm:grid-cols-2">
             <div>
               <p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#8d7037]">Bill to</p>
               <p className="mt-2 font-semibold text-[#26353b]">{quote.customer_name}</p>
@@ -219,7 +369,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
               <p className="mt-1 text-[#58656c]">Maldives · bookings@tripelor.com · +960 9429403</p>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3 border-b border-[#ded5c5] py-5 md:grid-cols-4">
+          <div className="quote-travel grid grid-cols-2 gap-3 border-b border-[#ded5c5] py-5 md:grid-cols-4">
             <QuickInfo icon={CalendarDays} label="Check-in" value={date(quote.check_in)} />
             <QuickInfo icon={CalendarDays} label="Check-out" value={date(quote.check_out)} />
             <QuickInfo icon={Users} label="Travellers" value={guests} />
@@ -227,7 +377,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
           </div>
 
           {(quote.meal_plan || quote.property_name) && (
-            <div className="mt-4 grid gap-3 rounded-lg bg-[#f7f2e9] px-4 py-3 text-xs text-[#58656c] sm:grid-cols-2">
+            <div className="quote-stay-details mt-4 grid gap-3 rounded-lg bg-[#f7f2e9] px-4 py-3 text-xs text-[#58656c] sm:grid-cols-2">
               {quote.property_name && <p><strong className="text-[#39484e]">Property:</strong> {quote.property_name}</p>}
               {quote.room_name && <p><strong className="text-[#39484e]">Room:</strong> {quote.room_name}</p>}
               {quote.meal_plan && <p><strong className="text-[#39484e]">Meal plan:</strong> {quote.meal_plan}</p>}
@@ -235,7 +385,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
             </div>
           )}
 
-          <div className="mt-5 overflow-hidden border border-[#ded5c5]">
+          <div className="quote-items-wrap mt-5 overflow-hidden border border-[#ded5c5]">
             <table className="quote-items w-full border-collapse text-left text-xs">
               <thead className="bg-[#071922] text-[#ead7aa]">
                 <tr>
@@ -262,8 +412,8 @@ export default async function ManualQuotationPage({ params }: { params: { token:
             </table>
           </div>
 
-          <div className="mt-5 grid gap-5 md:grid-cols-[1fr_290px]">
-            <div className="space-y-3">
+          <div className="quote-summary mt-5 grid gap-5 md:grid-cols-[1fr_290px]">
+            <div className="quote-notes space-y-3">
               {quote.notes && (
                 <div>
                   <p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#8d7037]">Notes</p>
@@ -279,11 +429,11 @@ export default async function ManualQuotationPage({ params }: { params: { token:
               {currency === "MVR" && (
                 <div className="border-t border-[#ded5c5] pt-3">
                   <p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#8d7037]">Bank details · confirmed bookings</p>
-                  <div className="mt-2 space-y-2">
+                  <div className="quote-bank-accounts mt-2 space-y-2">
                     {QUOTATION_BANK_ACCOUNTS.map(account => (
                       <div key={account.bank}>
                         <p className="quote-small text-[10px] leading-4 text-[#58656c]">{account.bank}</p>
-                        <p className="break-all font-semibold tracking-wide text-[#26353b]">Account number: {account.accountNumber}</p>
+                        <p className="quote-bank-account-number break-all font-semibold tracking-wide text-[#26353b]">Account number: {account.accountNumber}</p>
                       </div>
                     ))}
                   </div>
@@ -292,10 +442,10 @@ export default async function ManualQuotationPage({ params }: { params: { token:
               )}
             </div>
 
-            <aside className="bg-[#071922] p-5 text-white">
+            <aside className="quote-total bg-[#071922] p-5 text-white">
               <p className="text-[9px] font-bold uppercase tracking-[.2em] text-[#d9bd7b]">Quotation total</p>
-              <p className="font-display mt-2 text-4xl text-[#ead7aa]">{money(quote.total, currency)}</p>
-              <div className="mt-4 space-y-2 border-y border-white/10 py-4 text-xs">
+              <p className="quote-total-amount font-display mt-2 text-4xl text-[#ead7aa]">{money(quote.total, currency)}</p>
+              <div className="quote-total-breakdown mt-4 space-y-2 border-y border-white/10 py-4 text-xs">
                 <p className="flex justify-between gap-3 text-white/55"><span>Subtotal</span><strong className="text-white">{money(quote.subtotal, currency)}</strong></p>
                 {Number(quote.discount_amount) > 0 && (
                   <p className="flex justify-between gap-3 text-white/55"><span>Discount</span><strong className="text-emerald-300">− {money(quote.discount_amount, currency)}</strong></p>
@@ -310,7 +460,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
             </aside>
           </div>
 
-          <div className="mt-5 grid gap-3 border-t border-[#ded5c5] pt-4 text-[10px] leading-4 text-[#6b777c] sm:grid-cols-[1fr_auto] sm:items-end">
+          <div className="quote-footer mt-5 grid gap-3 border-t border-[#ded5c5] pt-4 text-[10px] leading-4 text-[#6b777c] sm:grid-cols-[1fr_auto] sm:items-end">
             <div>
               <p className="flex items-center gap-2 font-semibold text-[#8d7037]"><Headphones className="h-3.5 w-3.5" /> Tripelor Travel Advisor</p>
               <p className="mt-1">WhatsApp: +960 9429403 · Maldives</p>
@@ -348,7 +498,7 @@ function QuickInfo({
       <p className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[.14em] text-[#8d7037]">
         <Icon className="h-3.5 w-3.5 shrink-0" /> {label}
       </p>
-      <p className="mt-1 truncate text-xs font-semibold text-[#39484e]" title={value}>{value}</p>
+      <p className="quote-info-value mt-1 truncate text-xs font-semibold text-[#39484e]" title={value}>{value}</p>
     </div>
   );
 }
