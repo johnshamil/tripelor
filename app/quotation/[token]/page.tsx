@@ -134,10 +134,10 @@ export default async function ManualQuotationPage({ params }: { params: { token:
           }
           header, footer, .no-print,
           .mobile-booking-bar, .floating-plan,
-          a[href^="https://wa.me/"] {
+          [data-mobile-float] {
             display: none !important;
           }
-          body > main, .route-transition, .manual-quote-page {
+          body main, .route-transition, .manual-quote-page {
             margin: 0 !important;
             padding: 0 !important;
             min-height: 0 !important;
@@ -249,6 +249,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
           }
           .quote-items {
             font-size: 10.5px !important;
+            line-height: 1.35 !important;
           }
           .quote-items thead {
             display: table-header-group;
@@ -259,8 +260,9 @@ export default async function ManualQuotationPage({ params }: { params: { token:
             break-inside: avoid;
           }
           .quote-items td, .quote-items th {
-            padding: 6px 8px !important;
+            padding: 4px 8px !important;
           }
+          .quote-items td p + p { margin-top: 2px !important; }
           .quote-items th:nth-child(2) { width: 14mm !important; }
           .quote-items th:nth-child(3) { width: 28mm !important; }
           .quote-items th:nth-child(4) { width: 32mm !important; }
@@ -274,11 +276,11 @@ export default async function ManualQuotationPage({ params }: { params: { token:
             margin-top: 4mm !important;
             gap: 5mm !important;
           }
-          .quote-notes > div {
+          .quote-note-block {
             margin-top: 2mm !important;
             break-inside: avoid;
           }
-          .quote-notes > div:first-child { margin-top: 0 !important; }
+          .quote-note-block:first-child { margin-top: 0 !important; }
           .quote-bank-accounts {
             margin-top: 5px !important;
           }
@@ -321,7 +323,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
             line-height: 1.4 !important;
             break-inside: avoid;
           }
-          .quote-footer > p { text-align: right !important; }
+          .quote-disclaimer { text-align: right !important; }
         }
       `}</style>
 
@@ -415,19 +417,19 @@ export default async function ManualQuotationPage({ params }: { params: { token:
           <div className="quote-summary mt-5 grid gap-5 md:grid-cols-[1fr_290px]">
             <div className="quote-notes space-y-3">
               {quote.notes && (
-                <div>
+                <div className="quote-note-block">
                   <p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#8d7037]">Notes</p>
                   <p className="quote-small mt-1 whitespace-pre-line text-[11px] leading-5 text-[#58656c]">{quote.notes}</p>
                 </div>
               )}
               {quote.terms && (
-                <div className={quote.notes ? "border-t border-[#ded5c5] pt-3" : ""}>
+                <div className={`quote-note-block ${quote.notes ? "border-t border-[#ded5c5] pt-3" : ""}`}>
                   <p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#8d7037]">Conditions</p>
                   <p className="quote-small mt-1 whitespace-pre-line text-[10px] leading-4 text-[#6b777c]">{quote.terms}</p>
                 </div>
               )}
               {currency === "MVR" && (
-                <div className="border-t border-[#ded5c5] pt-3">
+                <div className="quote-note-block border-t border-[#ded5c5] pt-3">
                   <p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#8d7037]">Bank details · confirmed bookings</p>
                   <div className="quote-bank-accounts mt-2 space-y-2">
                     {QUOTATION_BANK_ACCOUNTS.map(account => (
@@ -465,7 +467,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
               <p className="flex items-center gap-2 font-semibold text-[#8d7037]"><Headphones className="h-3.5 w-3.5" /> Tripelor Travel Advisor</p>
               <p className="mt-1">WhatsApp: +960 9429403 · Maldives</p>
             </div>
-            <p className="text-left sm:text-right">This quotation is not a confirmed reservation or inventory hold.</p>
+            <p className="quote-disclaimer text-left sm:text-right">This quotation is not a confirmed reservation or inventory hold.</p>
           </div>
         </section>
       </div>
