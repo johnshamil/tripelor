@@ -7,7 +7,6 @@ const PROTECTED_PREFIXES = [
   "/account",
   "/admin",
   "/booking",
-  "/build-your-trip",
   "/speedboat",
   "/partner",
   "/api/account",
