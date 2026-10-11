@@ -1,4 +1,4 @@
-import { ManualBookingError, ManualRoomOption, validateManualBooking } from "@/lib/manual-booking";
+import { ManualBookingError, ManualRoomAvailability, ManualRoomOption, validateManualBooking, validateManualStay } from "@/lib/manual-booking";
 
 export async function bookingDB(path: string, init: RequestInit = {}) {
   const url = process.env.SUPABASE_URL?.replace(/\/$/, "");
@@ -22,6 +22,22 @@ export async function bookingDB(path: string, init: RequestInit = {}) {
 export async function manualRoomOptions(): Promise<ManualRoomOption[]> {
   const rows = await bookingDB("property_inventory?active=eq.true&select=property_name,room_type,total_rooms&order=property_name,room_type");
   return rows.map((row: any) => ({ propertyName: row.property_name, roomType: row.room_type, totalRooms: Number(row.total_rooms) }));
+}
+
+export async function manualRoomAvailability(propertyName: string, checkIn: string, checkOut: string): Promise<ManualRoomAvailability[]> {
+  if (!propertyName.trim() || propertyName.length > 150) throw new ManualBookingError("Choose a property.");
+  validateManualStay(checkIn, checkOut);
+  const options = (await manualRoomOptions()).filter(room => room.propertyName === propertyName);
+  if (!options.length) throw new ManualBookingError("This property has no active room inventory. Choose another property.");
+  return Promise.all(options.map(async room => {
+    const result = await bookingDB("rpc/check_room_availability", { method: "POST", body: JSON.stringify({
+      p_property_name: propertyName, p_room_type: room.roomType, p_check_in: checkIn, p_check_out: checkOut, p_rooms: 1,
+    }) });
+    const availability = result?.[0];
+    const roomsLeft = Number(availability?.rooms_left);
+    if (!availability || !Number.isInteger(roomsLeft) || roomsLeft < 0 || typeof availability.available !== "boolean") throw new ManualBookingError("Unable to check room availability. Please try again.", 503);
+    return { ...room, roomsAvailable: availability.available ? Math.min(room.totalRooms, roomsLeft) : 0 };
+  }));
 }
 
 export async function manualBookingBody(request: Request) {

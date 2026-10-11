@@ -1,6 +1,8 @@
 export type BookingCurrency = "USD" | "MVR";
 export type ManualRoomOption = { propertyName: string; roomType: string; totalRooms: number };
+export type ManualRoomAvailability = ManualRoomOption & { roomsAvailable: number };
 export type ManualRoomSelection = { roomType: string; quantity: number; nightlyRate: number };
+export const AUTOMATIC_ROOM_TYPE = "__automatic_room_types__";
 export type ManualBookingInput = {
   requestId: string;
   propertyName: string;
@@ -35,6 +37,30 @@ export function stayNights(checkIn: string, checkOut: string) {
 
 export function manualRoomTotal(room: ManualRoomSelection, nights: number) {
   return Math.round(Number(room.nightlyRate || 0) * 100) * Number(room.quantity || 0) * nights / 100;
+}
+
+export function allocateManualRooms(options: ManualRoomAvailability[], selection: ManualRoomSelection): ManualRoomSelection[] {
+  const quantity = whole(selection.quantity, "Rooms", 1, 100);
+  const nightlyRate = selection.nightlyRate;
+  if (!Number.isFinite(nightlyRate) || nightlyRate < 0 || nightlyRate > 1000000) throw new ManualBookingError("Enter a valid price per room per night.");
+  const choices = selection.roomType === AUTOMATIC_ROOM_TYPE ? options : options.filter(room => room.roomType === selection.roomType);
+  if (!choices.length) throw new ManualBookingError("Choose a room type.");
+  const available = choices.reduce((sum, room) => sum + room.roomsAvailable, 0);
+  if (quantity > available) {
+    if (!available) throw new ManualBookingError("No rooms are available for this selection. Choose another room type or different dates.");
+    const label = selection.roomType === AUTOMATIC_ROOM_TYPE ? "Only" : `${selection.roomType}: only`;
+    const nextStep = selection.roomType === AUTOMATIC_ROOM_TYPE ? "Choose fewer rooms or different dates." : "Choose fewer rooms or split across available room types.";
+    throw new ManualBookingError(`${label} ${available} room${available === 1 ? " is" : "s are"} available for these dates. ${nextStep}`);
+  }
+  let remaining = quantity;
+  const allocated: ManualRoomSelection[] = [];
+  for (const room of choices) {
+    const rooms = Math.min(remaining, room.roomsAvailable);
+    if (rooms) allocated.push({ roomType: room.roomType, quantity: rooms, nightlyRate: Math.round(nightlyRate * 100) / 100 });
+    remaining -= rooms;
+    if (!remaining) break;
+  }
+  return allocated;
 }
 
 export function bookingMoney(value: number, currency: unknown = "USD") {
@@ -75,11 +101,15 @@ function validDate(value: unknown) {
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
+export function validateManualStay(checkIn: unknown, checkOut: unknown) {
+  if (!validDate(checkIn) || !validDate(checkOut) || !stayNights(checkIn as string, checkOut as string) || stayNights(checkIn as string, checkOut as string) > 365) throw new ManualBookingError("Choose valid check-in and check-out dates, up to 365 nights apart.");
+}
+
 export function validateManualBooking(value: unknown): ManualBookingInput {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new ManualBookingError("Enter the booking details.");
   const body = value as Record<string, any>;
   if (typeof body.requestId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.requestId)) throw new ManualBookingError("Please reopen the booking form and try again.");
-  if (!validDate(body.checkIn) || !validDate(body.checkOut) || !stayNights(body.checkIn, body.checkOut) || stayNights(body.checkIn, body.checkOut) > 365) throw new ManualBookingError("Choose valid check-in and check-out dates, up to 365 nights apart.");
+  validateManualStay(body.checkIn, body.checkOut);
   if (body.currency !== "USD" && body.currency !== "MVR") throw new ManualBookingError("Choose MVR or USD.");
   if (!["unpaid", "partial", "paid"].includes(body.paymentStatus)) throw new ManualBookingError("Choose a valid payment status.");
   if (!Array.isArray(body.rooms) || body.rooms.length < 1 || body.rooms.length > 20) throw new ManualBookingError("Add between 1 and 20 room types.");
