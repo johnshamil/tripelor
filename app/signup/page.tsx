@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, LockKeyhole, UserPlus } from "lucide-react";
 import TripelorMark from "@/components/tripelor-mark";
+import { reportGoogleAdsConversion } from "@/lib/google-ads-conversions";
 
 function safeNextPath(value: string | null) {
   return value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\") ? value : "";
@@ -41,10 +42,24 @@ export default function SignupPage() {
           metadata: { signedIn: result.signedIn ? "true" : "false" },
         },
       }));
+
+      const signupSendTo = process.env.NEXT_PUBLIC_GOOGLE_ADS_SIGNUP_SEND_TO;
       if (result.signedIn) {
-        window.location.href = nextPath || "/account";
+        const destination = nextPath || "/account";
+        reportGoogleAdsConversion(signupSendTo, {
+          value: 1,
+          currency: "USD",
+          transactionId: `signup-${crypto.randomUUID()}`,
+          onComplete: () => { window.location.href = destination; },
+        });
         return;
       }
+
+      reportGoogleAdsConversion(signupSendTo, {
+        value: 1,
+        currency: "USD",
+        transactionId: `signup-${crypto.randomUUID()}`,
+      });
       setSuccess(true);
       setStatus("Account created. Please check your email and confirm your address, then sign in to continue.");
     } catch (error) {
