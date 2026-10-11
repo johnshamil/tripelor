@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CheckCircle2, Clock3, Headphones, Sparkles } from "lucide-react";
 import { cookies } from "next/headers";
 import TripQuoteActions from "@/components/trip-quote-actions";
+import QuoteMemberPrompt from "@/components/quote-member-prompt";
 import TripelorMark from "@/components/tripelor-mark";
 import { professionalLocale } from "@/lib/professional-translations";
 import { decodeQuoteLines, quoteFromLines, quoteIssuedAt, quoteStatus, validQuoteReference, QUOTE_VALID_HOURS } from "@/lib/trip-quote";
@@ -477,6 +478,7 @@ export default function QuotePage({
             requestHref={requestHref}
             customizeHref={customizeHref}
           />
+          <QuoteMemberPrompt reference={params.reference} />
           <a href="https://wa.me/9609429403?text=Hello%20Tripelor%2C%20I%20would%20like%20help%20with%20my%20trip%20quote." className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-[#e2bd68] underline underline-offset-4">{copy.whatsapp}</a>
         </div>
       </div>
