@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, Eye, EyeOff, LockKeyhole, LogIn, ShieldCheck, Sparkles } from "lucide-react";
 import TripelorMark from "@/components/tripelor-mark";
+import { reportGoogleAdsConversion } from "@/lib/google-ads-conversions";
 
 function safeNextPath(value: string | null) {
   return value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\") ? value : "";
@@ -61,7 +62,13 @@ export default function LoginPage() {
           metadata: { destination: nextPath || "/account" },
         },
       }));
-      window.location.href = nextPath || "/account";
+      const destination = nextPath || "/account";
+      reportGoogleAdsConversion(process.env.NEXT_PUBLIC_GOOGLE_ADS_LOGIN_SEND_TO, {
+        value: 1,
+        currency: "USD",
+        transactionId: `login-${crypto.randomUUID()}`,
+        onComplete: () => { window.location.href = destination; },
+      });
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Unable to log in.");
     } finally {
