@@ -63,7 +63,7 @@ export default function LoginPage() {
         },
       }));
       const destination = nextPath || "/account";
-      reportGoogleAdsConversion(process.env.NEXT_PUBLIC_GOOGLE_ADS_LOGIN_SEND_TO, {
+      reportGoogleAdsConversion("AW-18458548937/hYc_CLT4sZkdEMm13OFE", {
         value: 1,
         currency: "USD",
         transactionId: `login-${crypto.randomUUID()}`,
