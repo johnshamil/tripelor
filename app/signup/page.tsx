@@ -43,7 +43,7 @@ export default function SignupPage() {
         },
       }));
 
-      const signupSendTo = process.env.NEXT_PUBLIC_GOOGLE_ADS_SIGNUP_SEND_TO;
+      const signupSendTo = "AW-18458548937/1yhJCLePsZkdEMm13OFE";
       if (result.signedIn) {
         const destination = nextPath || "/account";
         reportGoogleAdsConversion(signupSendTo, {
