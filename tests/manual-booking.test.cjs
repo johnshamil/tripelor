@@ -36,6 +36,24 @@ test("2 or 5 rooms calculate in the chosen currency, with cents rounded once", (
   assert.equal(pure.bookingMoney(7500, "MVR"), "MVR 7,500.00");
   assert.deepEqual(pure.bookingCurrencyTotals([{ currency: "MVR", estimated_total: 7500 }, { currency: "USD", estimated_total: 450, speedboat_total: 50 }]), { USD: 500, MVR: 7500 });
 });
+test("two rooms split across one-room categories without changing the USD 1190 price", () => {
+  const options = [{ propertyName: "Uhoo's Lavish Oasis", roomType: "Deluxe Double Roomm", totalRooms: 1, roomsAvailable: 1 }, { propertyName: "Uhoo's Lavish Oasis", roomType: "Deluxe Room", totalRooms: 1, roomsAvailable: 1 }];
+  const allocated = pure.allocateManualRooms(options, { roomType: pure.AUTOMATIC_ROOM_TYPE, quantity: 2, nightlyRate: 85 });
+  assert.deepEqual(allocated, [{ roomType: "Deluxe Double Roomm", quantity: 1, nightlyRate: 85 }, { roomType: "Deluxe Room", quantity: 1, nightlyRate: 85 }]);
+  assert.equal(allocated.reduce((total, room) => total + pure.manualRoomTotal(room, 7), 0), 1190);
+  assert.throws(() => pure.allocateManualRooms(options, { roomType: "Deluxe Room", quantity: 2, nightlyRate: 85 }), /only 1 room is available/);
+  assert.throws(() => pure.allocateManualRooms(options, { roomType: pure.AUTOMATIC_ROOM_TYPE, quantity: 3, nightlyRate: 85 }), /Only 2 rooms are available/);
+});
+test("automatic allocation excludes sold-out room types, supports five MVR rooms and preserves separate prices", () => {
+  const options = [{ propertyName: "Stay", roomType: "Sold out", totalRooms: 10, roomsAvailable: 0 }, { propertyName: "Stay", roomType: "Double", totalRooms: 3, roomsAvailable: 2 }, { propertyName: "Stay", roomType: "Twin", totalRooms: 5, roomsAvailable: 3 }];
+  const allocated = pure.allocateManualRooms(options, { roomType: pure.AUTOMATIC_ROOM_TYPE, quantity: 5, nightlyRate: 750 });
+  assert.deepEqual(allocated.map(room => [room.roomType, room.quantity]), [["Double", 2], ["Twin", 3]]);
+  assert.equal(allocated.reduce((total, room) => total + pure.manualRoomTotal(room, 2), 0), 7500);
+  const separate = [...pure.allocateManualRooms(options, { roomType: "Double", quantity: 2, nightlyRate: 85 }), ...pure.allocateManualRooms(options, { roomType: "Twin", quantity: 3, nightlyRate: 90 })];
+  assert.deepEqual(separate.map(room => room.nightlyRate), [85, 90]);
+  assert.throws(() => pure.allocateManualRooms(options, { roomType: "Sold out", quantity: 1, nightlyRate: 85 }), /No rooms are available/);
+  for (const quantity of [0, 1.5, 101]) assert.throws(() => pure.allocateManualRooms(options, { roomType: pure.AUTOMATIC_ROOM_TYPE, quantity, nightlyRate: 85 }), pure.ManualBookingError);
+});
 test("validates dates, prices, quantities, duplicate room types and supported currencies", () => {
   for (const change of [{ checkIn: "2026-02-30" }, { checkOut: "2026-12-10" }, { currency: "EUR" }, { rooms: [{ roomType: "Deluxe", quantity: 2.5, nightlyRate: 75 }] }, { rooms: [{ roomType: "Deluxe", quantity: 1, nightlyRate: "" }] }, { rooms: [{ roomType: "Deluxe", quantity: 1, nightlyRate: -1 }] }, { rooms: [{ roomType: "Deluxe", quantity: 1, nightlyRate: 5 }, { roomType: "deluxe", quantity: 1, nightlyRate: 5 }] }]) assert.throws(() => pure.validateManualBooking({ ...input(), ...change }), pure.ManualBookingError);
 });
@@ -58,6 +76,38 @@ test("booking API rejects anonymous, non-admin and cross-origin requests without
   user = { id: "customer", email: "customer@example.test" }; assert.equal((await manualRoute.POST(request())).status, 403);
   user = { id: "admin", email: "admin@example.test" }; assert.equal((await manualRoute.POST(request(input(), "https://other.example.test"))).status, 403);
   assert.equal((await manualRoute.POST(request({ ...input(), currency: "EUR" }))).status, 400);
+});
+test("availability API validates dates and admin access before querying inventory", async () => {
+  const availabilityRequest = query => new Request(`https://www.tripelor.com/api/admin/manual-bookings?${query}`);
+  global.fetch = () => { throw new Error("Must not access database"); };
+  user = null; assert.equal((await manualRoute.GET(availabilityRequest("propertyName=Stay&checkIn=2026-12-10&checkOut=2026-12-12"))).status, 401);
+  user = { id: "customer", email: "customer@example.test" }; assert.equal((await manualRoute.GET(availabilityRequest("propertyName=Stay&checkIn=2026-12-10&checkOut=2026-12-12"))).status, 403);
+  user = { id: "admin", email: "admin@example.test" };
+  for (const query of ["propertyName=Stay", "checkIn=2026-12-10&checkOut=2026-12-12", "propertyName=Stay&checkIn=2026-02-30&checkOut=2026-12-12", "propertyName=Stay&checkIn=2026-12-12&checkOut=2026-12-10"]) assert.equal((await manualRoute.GET(availabilityRequest(query))).status, 400);
+});
+test("availability API returns each category's full-stay availability and never falls back to inventory on an outage", async () => {
+  configured(); const checked = [];
+  const options = [{ property_name: "Stay", room_type: "Double", total_rooms: 1 }, { property_name: "Stay", room_type: "Twin", total_rooms: 3 }, { property_name: "Other stay", room_type: "Double", total_rooms: 10 }];
+  global.fetch = async (url, init) => {
+    if (url.includes("/property_inventory?")) return response(options);
+    assert.match(url, /rpc\/check_room_availability$/);
+    const body = JSON.parse(init.body); checked.push(body);
+    return response([{ available: body.p_room_type === "Twin", rooms_left: body.p_room_type === "Twin" ? 2 : 0, total_rooms: body.p_room_type === "Twin" ? 3 : 1 }]);
+  };
+  const result = await manualRoute.GET(new Request("https://www.tripelor.com/api/admin/manual-bookings?propertyName=Stay&checkIn=2026-12-10&checkOut=2026-12-12"));
+  assert.equal(result.status, 200); assert.equal(result.headers.get("Cache-Control"), "no-store");
+  assert.deepEqual((await result.json()).rooms.map(room => [room.roomType, room.roomsAvailable]), [["Double", 0], ["Twin", 2]]);
+  assert.equal(checked.length, 2); assert.ok(checked.every(body => body.p_property_name === "Stay" && body.p_check_in === "2026-12-10" && body.p_check_out === "2026-12-12" && body.p_rooms === 1));
+  global.fetch = async url => url.includes("/property_inventory?") ? response(options) : Response.json({ message: "database unavailable" }, { status: 503 });
+  assert.equal((await manualRoute.GET(new Request("https://www.tripelor.com/api/admin/manual-bookings?propertyName=Stay&checkIn=2026-12-10&checkOut=2026-12-12"))).status, 503);
+});
+test("automatically allocated room types save as one atomic USD booking with a shared reference", async () => {
+  configured();
+  const rooms = pure.allocateManualRooms([{ propertyName: "Stay", roomType: "Double", totalRooms: 1, roomsAvailable: 1 }, { propertyName: "Stay", roomType: "Twin", totalRooms: 1, roomsAvailable: 1 }], { roomType: pure.AUTOMATIC_ROOM_TYPE, quantity: 2, nightlyRate: 85 });
+  let calls = 0;
+  global.fetch = async (url, init) => { calls++; assert.match(url, /rpc\/create_manual_booking$/); const body = JSON.parse(init.body); assert.deepEqual(body.p_booking.rooms, rooms); return response(rooms.map(room => ({ rooms: room.quantity, estimated_total: pure.manualRoomTotal(room, 7), currency: "USD", booking_reference: "MAN-TEST" }))); };
+  const result = await manualRoute.POST(request({ ...input(), currency: "USD", checkOut: "2026-12-17", rooms }));
+  assert.equal(result.status, 200); assert.equal(calls, 1); const saved = await result.json(); assert.equal(saved.rooms, 2); assert.equal(saved.total, 1190); assert.equal(saved.currency, "USD");
 });
 test("booking API sends one atomic RPC, preserving rooms, MVR and request identity", async () => {
   configured(); let calls = 0;
