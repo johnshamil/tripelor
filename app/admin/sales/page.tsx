@@ -19,6 +19,8 @@ import {
   exportMonthlySalesExcel,
   exportMonthlySalesPdf,
 } from "@/lib/monthly-sales-export";
+import { bookingMoney } from "@/lib/manual-booking";
+import { MVR_PER_USD } from "@/lib/quote-currency";
 
 type Sale = {
   id: string;
@@ -50,6 +52,7 @@ type Booking = {
   payment_status: string;
   package_name: string | null;
   estimated_total: number | null;
+  currency?: string;
   speedboat_total: number | null;
   activities: string | null;
   created_at: string;
@@ -155,6 +158,7 @@ export default function AdminSalesPage() {
       return;
     }
     const amount = Number(booking.estimated_total || 0) + Number(booking.speedboat_total || 0);
+    const amountUsd = booking.currency === "MVR" ? Math.round(amount / MVR_PER_USD * 100) / 100 : amount;
     setForm((value) => ({
       ...value,
       reservationId: booking.id,
@@ -162,10 +166,10 @@ export default function AdminSalesPage() {
       customerEmail: booking.guest_email || "",
       category: booking.package_name ? "package" : "stay",
       description: booking.package_name || `${booking.property_name} · ${booking.room_type}`,
-      amountUsd: amount ? String(amount) : value.amountUsd,
-      paymentStatus: booking.payment_status || "pending",
+      amountUsd: String(amountUsd),
+      paymentStatus: booking.payment_status === "unpaid" ? "pending" : booking.payment_status || "pending",
       bookingSource: booking.booking_source || "Tripelor",
-      notes: booking.booking_reference ? `Booking ref: ${booking.booking_reference}` : value.notes,
+      notes: [booking.booking_reference ? `Booking ref: ${booking.booking_reference}` : "", booking.currency === "MVR" ? `Original booking: ${bookingMoney(amount, "MVR")}. USD ledger conversion: 1 USD = ${MVR_PER_USD} MVR.` : ""].filter(Boolean).join("\n"),
     }));
   }
 
@@ -349,6 +353,8 @@ export default function AdminSalesPage() {
                 ))}
               </select>
             </label>
+
+            {bookings.find(booking => booking.id === form.reservationId)?.currency === "MVR" && <p className="text-xs leading-5 text-gold">This booking is in MVR. The sales ledger uses USD; the suggested amount uses 1 USD = {MVR_PER_USD} MVR. Review the USD amount before saving.</p>}
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="grid gap-2 text-sm">
