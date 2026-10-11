@@ -19,6 +19,7 @@ import {
 import ReferralRewardsCard from "@/components/referral-rewards-card";
 import Rewards2Card from "@/components/rewards-2-card";
 import UpcomingTripCountdown from "@/components/upcoming-trip-countdown";
+import { bookingMoney } from "@/lib/manual-booking";
 
 type User = {email: string; fullName: string; isAdmin?: boolean};
 
@@ -216,7 +217,7 @@ export default function AccountPage() {
                   <p className={`mt-1 font-semibold ${payment === "paid" ? "text-emerald-300" : "text-amber-300"}`}>
                     {payment === "paid" ? "Paid" : "Payment pending"}
                   </p>
-                  {trip.estimated_total && <p className="mt-1 text-sm text-gray-400">USD {Number(trip.estimated_total).toFixed(2)}</p>}
+                  {trip.estimated_total != null && <p className="mt-1 text-sm text-gray-400">{bookingMoney(Number(trip.estimated_total), trip.currency)}</p>}
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/[.03] p-4">
                   <Ship className="h-5 w-5 text-gold" />
@@ -225,7 +226,7 @@ export default function AccountPage() {
                     {speedSeats > 0 ? `${speedSeats} seat${speedSeats > 1 ? "s" : ""} requested` : "Not added yet"}
                   </p>
                   {speedSeats > 0 && Number(trip.speedboat_total || 0) > 0 && (
-                    <p className="mt-1 text-sm text-gray-400">USD {Number(trip.speedboat_total).toFixed(2)}</p>
+                    <p className="mt-1 text-sm text-gray-400">{bookingMoney(Number(trip.speedboat_total), trip.currency)}</p>
                   )}
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/[.03] p-4">

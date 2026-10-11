@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
+  CalendarPlus,
   BarChart3,
   Building2,
   CheckCircle2,
@@ -23,6 +24,8 @@ import {
 } from "lucide-react";
 import AdminCommandCenter from "@/components/admin-command-center";
 import AdminPreArrival from "@/components/admin-pre-arrival";
+import AdminBookingReminders from "@/components/admin-booking-reminders";
+import { bookingCurrencyTotals, bookingMoney } from "@/lib/manual-booking";
 
 type BookingFilter = "all" | "pending" | "confirmed" | "completed" | "cancelled";
 type PaymentFilter = "all" | "paid" | "due";
@@ -184,14 +187,7 @@ export default function AdminPage() {
   }, [bookings]);
 
   const bookingValue = useMemo(
-    () =>
-      bookings
-        .filter((booking) => String(booking.status || "").toLowerCase() !== "cancelled")
-        .reduce(
-          (total, booking) =>
-            total + Number(booking.estimated_total || 0) + Number(booking.speedboat_total || 0),
-          0,
-        ),
+    () => bookingCurrencyTotals(bookings.filter((booking) => String(booking.status || "").toLowerCase() !== "cancelled")),
     [bookings],
   );
 
@@ -262,7 +258,10 @@ export default function AdminPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-            <Link href="/admin/sales" className="btn-gold min-h-[46px] gap-2 px-4 text-xs">
+            <Link href="/admin/manual-bookings" className="btn-gold min-h-[46px] gap-2 px-4 text-xs">
+              <CalendarPlus className="h-4 w-4" /> Manual Booking
+            </Link>
+            <Link href="/admin/sales" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
               <CircleDollarSign className="h-4 w-4" /> Sales
             </Link>
             <Link href="/admin/analytics" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
@@ -304,6 +303,8 @@ export default function AdminPage() {
           {status}
         </div>
       )}
+
+      <AdminBookingReminders />
 
       <section
         id="referral-promotion"
@@ -500,7 +501,7 @@ export default function AdminPage() {
           <div className="grid grid-cols-3 gap-2 text-center sm:flex sm:text-left">
             <SummaryPill label="Bookings" value={bookings.length} icon={CalendarDays} />
             <SummaryPill label="Payment due" value={paymentDueCount} icon={CreditCard} />
-            <SummaryPill label="Booking value" value={`$${bookingValue.toFixed(0)}`} icon={CircleDollarSign} />
+            <SummaryPill label="Booking value" value={<><span className="block text-sm">{bookingMoney(bookingValue.USD)}</span>{bookingValue.MVR > 0 && <span className="block text-sm">{bookingMoney(bookingValue.MVR, "MVR")}</span>}</>} icon={CircleDollarSign} />
           </div>
         </div>
 
@@ -714,12 +715,12 @@ function BookingMobileCard({
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
-        <InfoCell label="Stay" value={booking.property_name || "—"} sub={booking.room_type || ""} />
+        <InfoCell label="Stay" value={booking.property_name || "—"} sub={`${booking.rooms || 1} room(s) · ${booking.room_type || ""}`} />
         <InfoCell label="Dates" value={booking.check_in || "—"} sub={booking.check_out ? `to ${booking.check_out}` : ""} />
         <InfoCell
           label="Payment"
           value={paymentStatus}
-          sub={value ? `USD ${value.toFixed(2)}` : ""}
+          sub={booking.estimated_total !== null ? bookingMoney(value, booking.currency) : ""}
           accent={paymentStatus === "paid" ? "text-emerald-300" : "text-amber-300"}
         />
         <InfoCell label="Source" value={booking.booking_source || "website"} sub={booking.booking_reference || ""} />
@@ -760,7 +761,7 @@ function BookingTableRow({
       </td>
       <td className="p-4">
         {booking.property_name}
-        <div className="mt-1 text-xs text-gray-500">{booking.room_type}</div>
+        <div className="mt-1 text-xs text-gray-500">{booking.rooms || 1} room(s) · {booking.room_type}</div>
       </td>
       <td className="p-4">
         {booking.check_in}
@@ -768,7 +769,7 @@ function BookingTableRow({
       </td>
       <td className="p-4">
         <span className={paymentStatus === "paid" ? "text-emerald-300" : "text-amber-300"}>{paymentStatus}</span>
-        {value > 0 && <div className="mt-1 text-xs text-gray-500">USD {value.toFixed(2)}</div>}
+        {booking.estimated_total !== null && <div className="mt-1 text-xs text-gray-500">{bookingMoney(value, booking.currency)}</div>}
       </td>
       <td className="p-4">
         {booking.booking_source || "website"}

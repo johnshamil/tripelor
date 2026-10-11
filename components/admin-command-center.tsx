@@ -34,7 +34,7 @@ const money = (value: number) =>
   })}`;
 
 export default function AdminCommandCenter() {
-  const [data, setData] = useState<any>({ bookings: [], sales: [], services: [] });
+  const [data, setData] = useState<any>({ bookings: [], sales: [], services: [], inventory: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -104,12 +104,12 @@ export default function AdminCommandCenter() {
       .filter((sale: any) => ["pending", "partial"].includes(String(sale.payment_status || "").toLowerCase()))
       .reduce((total: number, sale: any) => total + Number(sale.amount_usd || 0), 0);
 
-    const totalRooms = 8;
+    const totalRooms = (data.inventory || []).reduce((total: number, room: any) => total + Number(room.total_rooms || 0), 0);
     const occupied = Math.min(
       totalRooms,
       inHouse.reduce((total: number, booking: any) => total + Number(booking.rooms || 1), 0),
     );
-    const occupancy = Math.round((occupied / totalRooms) * 100);
+    const occupancy = totalRooms ? Math.round((occupied / totalRooms) * 100) : 0;
 
     return {
       today,
