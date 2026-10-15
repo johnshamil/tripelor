@@ -8,12 +8,15 @@
   --brand-muted: #69716a;
   --brand-line: #dedfd5;
   --brand-accent-rgb: 48 73 223;
+  --brand-ease: cubic-bezier(.22, 1, .36, 1);
   --gold: var(--brand-blue);
   --gold-light: #263ed0;
   --ivory: var(--brand-cream);
   color-scheme: light;
 }
 body { background: var(--brand-cream); color: var(--brand-ink); }
+html { scrollbar-gutter: stable; }
+.coastal-content [id] { scroll-margin-top: 132px; }
 ::selection { background: #dbe1ff; color: #172346; }
 .font-display, .section-title { font-family: Arial, Helvetica, ui-sans-serif, sans-serif; font-weight: 700; letter-spacing: -.045em; }
 .btn-gold { background: var(--brand-blue); color: #fff; border-color: var(--brand-blue); text-transform: none; letter-spacing: 0; font-weight: 600; }
@@ -100,10 +103,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .brand-saved, .brand-menu-toggle { display: flex; width: 38px; height: 44px; align-items: center; justify-content: center; flex: none; }
 .brand-saved svg { width: 22px; height: 22px; }
 .brand-menu-toggle svg { width: 26px; height: 26px; stroke-width: 1.6; }
-.brand-signin { display: inline-flex; min-height: 46px; align-items: center; gap: 14px; background: var(--brand-blue); color: #fff; padding: 0 18px; font-size: 12px; white-space: nowrap; }
+.brand-signin { display: inline-flex; width: 144px; min-height: 46px; flex: none; justify-content: space-between; align-items: center; gap: 14px; background: var(--brand-blue); color: #fff; padding: 0 18px; font-size: 12px; white-space: nowrap; }
 .brand-signin:hover { background: var(--brand-blue-hover); }
 .brand-signin svg { width: 16px; height: 16px; }
-.brand-menu { position: fixed; inset: var(--brand-header-height) 0 0; z-index: 95; overflow-y: auto; overscroll-behavior: contain; background: var(--brand-cream); border-top: 1px solid var(--brand-line); color: var(--brand-ink); }
+.brand-menu { position: fixed; inset: var(--brand-header-height) 0 0; z-index: 95; overflow-y: auto; overscroll-behavior: contain; background: var(--brand-cream); border-top: 1px solid var(--brand-line); color: var(--brand-ink); visibility: hidden; opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity 200ms var(--brand-ease), transform 240ms var(--brand-ease), visibility 0s 240ms; }
+.brand-menu[data-open="true"] { visibility: visible; opacity: 1; transform: none; pointer-events: auto; transition-delay: 0s; }
 .brand-menu-inner { padding-top: 24px; padding-bottom: max(32px, env(safe-area-inset-bottom)); }
 .brand-menu-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .brand-menu-heading p { font-size: 11px; text-transform: uppercase; letter-spacing: .18em; }
@@ -144,9 +148,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .coastal-search { border: 1px solid var(--brand-line); background: #fff; box-shadow: 0 12px 50px rgb(44 55 39 / .035); }
 .coastal-search-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 0 30px; border-bottom: 1px solid #e8e9e3; }
 .coastal-search-heading [role="tablist"] { display: flex; gap: 32px; }
-.coastal-search-heading button { display: flex; position: relative; min-height: 63px; align-items: center; gap: 10px; color: #404741; font-size: 13px; }
+.coastal-search-heading button { display: flex; position: relative; min-height: 63px; align-items: center; gap: 10px; color: #404741; font-size: 13px; transition: color 180ms ease; }
 .coastal-search-heading button[aria-selected="true"] { color: var(--brand-blue); }
-.coastal-search-heading button[aria-selected="true"]::after { position: absolute; content: ""; inset: auto 0 -1px; height: 2px; background: var(--brand-blue); }
+.coastal-search-heading button::after { position: absolute; content: ""; inset: auto 0 -1px; height: 2px; background: var(--brand-blue); opacity: 0; transform: scaleX(.55); transition: opacity 180ms ease, transform 220ms var(--brand-ease); }
+.coastal-search-heading button[aria-selected="true"]::after { opacity: 1; transform: scaleX(1); }
+.coastal-search-panels { overflow: clip; transition: height 240ms var(--brand-ease); }
 .coastal-search-heading svg { width: 21px; height: 21px; stroke-width: 1.6; }
 .coastal-search-heading > p { font-size: 11px; color: var(--brand-muted); }
 .coastal-search-form { display: grid; grid-template-columns: 1.25fr 1fr 1fr .9fr auto; align-items: end; gap: 24px; padding: 28px 30px; }
@@ -154,7 +160,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .coastal-search-form label > span { display: flex; align-items: center; gap: 10px; color: #777f76; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
 .coastal-search-form label > span svg { width: 17px; height: 17px; stroke-width: 1.5; }
 .coastal-content .coastal-search-form :is(select, input) { width: 100%; min-height: 42px; padding: 0; border: 0; background: #fff; color: var(--brand-ink); font-size: 14px; border-radius: 0; }
-.coastal-button { display: inline-flex; min-height: 52px; align-items: center; justify-content: center; gap: 22px; padding: 15px 25px; border: 1px solid var(--brand-blue); border-radius: 0; background: var(--brand-blue); color: #fff; font-size: 13px; line-height: 1.5; font-weight: 550; text-align: center; transition: background .2s, transform .2s; }
+.coastal-button { display: inline-flex; min-height: 52px; align-items: center; justify-content: center; gap: 22px; padding: 15px 25px; border: 1px solid var(--brand-blue); border-radius: 0; background: var(--brand-blue); color: #fff; font-size: 13px; line-height: 1.5; font-weight: 550; text-align: center; transition: background-color 180ms ease, transform 200ms var(--brand-ease); }
+.coastal-button:active { transform: translateY(0) scale(.985); }
+.brand-signin, .brand-saved, .brand-menu-toggle, .coastal-text-link, .brand-menu-links a, .coastal-promo-close { transition: color 180ms ease, background-color 180ms ease; }
 .coastal-button svg { width: 20px; height: 20px; flex: none; }
 .coastal-button:hover { background: var(--brand-blue-hover); color: #fff; transform: translateY(-1px); }
 .coastal-search-submit { min-height: 58px; }
@@ -177,7 +185,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .coastal-text-link:hover { color: var(--brand-blue); }
 .coastal-property-section { padding-top: 70px; padding-bottom: 70px; background: var(--brand-cream); }
 .coastal-property-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 26px; }
-.coastal-property-card { display: flex; min-width: 0; flex-direction: column; background: #fff; border: 1px solid var(--brand-line); }
+.coastal-property-card { display: flex; min-width: 0; flex-direction: column; background: #fff; border: 1px solid var(--brand-line); transition: border-color 200ms ease, box-shadow 240ms ease; }
+.coastal-property-card:hover { border-color: #b6c1f5; box-shadow: 0 8px 28px rgb(34 41 35 / .06); }
 .coastal-property-image { position: relative; aspect-ratio: 5/4; overflow: hidden; background: #eaeee7; }
 .coastal-property-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s; }
 .coastal-property-card:hover img { transform: scale(1.035); }
@@ -231,7 +240,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .coastal-referral-banner { margin-top: 20px; box-shadow: none; border-block: 1px solid var(--brand-line); }
 .coastal-referral-banner > .pointer-events-none { display: none; }
 .coastal-referral-banner a { border-radius: 0; background: var(--brand-blue); color: #fff; box-shadow: none; }
-.coastal-promo-notice { position: fixed; z-index: 70; left: 24px; bottom: 24px; width: min(360px, calc(100% - 48px)); max-height: calc(100dvh - 140px); overflow-y: auto; padding: 22px; border: 1px solid var(--brand-line); background: var(--brand-cream); color: var(--brand-ink); box-shadow: 0 12px 45px rgb(10 25 38 / .16); }
+.coastal-promo-notice { position: fixed; z-index: 70; left: 24px; bottom: 24px; width: min(360px, calc(100% - 48px)); max-height: calc(100dvh - 140px); overflow-y: auto; padding: 22px; border: 1px solid var(--brand-line); background: var(--brand-cream); color: var(--brand-ink); box-shadow: 0 12px 45px rgb(10 25 38 / .16); animation: coastalNoticeIn 280ms var(--brand-ease) both; }
+@keyframes coastalNoticeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .coastal-promo-close { position: absolute; top: 4px; right: 4px; display: grid; width: 44px; height: 44px; place-items: center; color: var(--brand-muted); }
 .coastal-promo-close svg { width: 18px; height: 18px; }
 .coastal-promo-label { display: flex; align-items: center; gap: 8px; padding-right: 28px; color: var(--brand-blue); font-size: 9px; font-weight: 650; line-height: 1.6; letter-spacing: .13em; text-transform: uppercase; }
@@ -285,7 +295,8 @@ body:has(.coastal-home) { padding-bottom: 0; }
   .tripelor-wordmark-tagline { margin-top: 9px; font-size: 7px; letter-spacing: .12em; }
   .brand-nav-actions { gap: 8px; }
   .brand-saved, .brand-menu-toggle { width: 31px; }
-  .brand-signin { min-height: 44px; max-width: 100px; gap: 6px; padding: 0 10px; font-size: 11px; white-space: normal; }
+  .brand-signin { width: 92px; min-height: 44px; max-width: 100px; gap: 6px; padding: 0 10px; font-size: 11px; white-space: normal; }
+  .coastal-content [id] { scroll-margin-top: 124px; }
   .brand-announcement a { font-size: 8px; gap: 5px; }
   .brand-announcement span { font-size: 8px; letter-spacing: .05em; }
   .brand-menu-links { grid-template-columns: 1fr; }
@@ -371,7 +382,11 @@ body:has(.coastal-home) { padding-bottom: 0; }
   .coastal-photo-star { display: none; }
   .coastal-property-grid { grid-template-columns: 1fr; }
 }
-@media (prefers-reduced-motion: reduce) { .coastal-button, .coastal-property-image img { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .brand-menu, .brand-signin, .brand-saved, .brand-menu-toggle, .brand-menu-links a, .coastal-button, .coastal-text-link, .coastal-property-card, .coastal-property-image img, .coastal-search-panels, .coastal-search-heading button, .coastal-search-heading button::after, .coastal-promo-close { transition: none; }
+  .brand-menu, .coastal-button, .coastal-property-card:hover img { transform: none; }
+  .coastal-promo-notice { animation: none; }
+}
 @media print {
   .brand-header, .brand-footer, .brand-menu, .mobile-booking-bar, .floating-plan, .coastal-promo-notice { display: none !important; }
   body { padding-bottom: 0 !important; }

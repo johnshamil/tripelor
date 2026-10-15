@@ -47,7 +47,7 @@ export default function PropertyCards({ managedProperties = [], featured = false
       </div>
       {visible.length ? <div className="coastal-property-grid">
         {visible.map(property => <Link key={property.slug} href={`/stays/${property.slug}${query ? `?${query}` : ""}`} className="coastal-property-card">
-          <div className="coastal-property-image"><img src={property.image} alt={property.name} loading="lazy" width={600} height={480} /></div>
+          <div className="coastal-property-image"><img src={property.image} alt={property.name} loading="lazy" decoding="async" width={600} height={480} /></div>
           <div className="coastal-property-info">
             <p className="coastal-property-location"><MapPin aria-hidden="true" />{property.location}</p>
             <h3>{property.name}</h3>
