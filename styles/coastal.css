@@ -122,7 +122,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 
 /* The reference's split hero. */
 .coastal-home { overflow: clip; background: var(--brand-cream); color: var(--brand-ink); }
-.coastal-hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(24px, 4vw, 64px); padding-top: 44px; padding-bottom: 36px; }
+.coastal-hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(24px, 4vw, 64px); padding-top: 0; padding-bottom: 30px; }
 .coastal-hero-copy { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; padding: 25px 0; }
 .coastal-eyebrow { display: flex; align-items: center; gap: 16px; font-size: 10px; font-weight: 650; line-height: 1.65; letter-spacing: .16em; text-transform: uppercase; }
 .coastal-small-star { width: 24px; height: 24px; flex: none; color: var(--brand-blue); }
@@ -134,8 +134,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .coastal-hero-bottom > p { max-width: 300px; font-size: 14px; line-height: 1.8; }
 .coastal-hero-bottom > a { display: grid; width: 48px; height: 48px; flex: none; place-items: center; border: 1px solid var(--brand-line); border-radius: 50%; }
 .coastal-hero-bottom svg { width: 25px; height: 25px; stroke-width: 1.4; }
-.coastal-hero-photo { position: relative; min-width: 0; height: min(59vw, 640px); min-height: 320px; overflow: hidden; background: #2cccd3; color: #fff; }
-.coastal-hero-photo > img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.coastal-hero-photo { position: relative; align-self: start; min-width: 0; height: min(59vw, 640px); min-height: 320px; overflow: hidden; background: #2cccd3; color: #fff; }
+.coastal-hero-photo > img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .coastal-photo-location { position: absolute; inset: 25px 25px auto; font-size: 10px; line-height: 1.6; letter-spacing: .08em; text-transform: uppercase; text-shadow: 0 1px 8px #001c3345; }
 .coastal-photo-caption { position: absolute; inset: auto 25px 25px; display: grid; grid-template-columns: 1fr 72px; align-items: center; gap: 22px; text-shadow: 0 2px 25px #06384930; }
 .coastal-photo-caption > p { max-width: 265px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(30px, 4.2vw, 58px); font-style: italic; line-height: .98; letter-spacing: -.055em; }
@@ -231,11 +231,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .coastal-referral-banner { margin-top: 20px; box-shadow: none; border-block: 1px solid var(--brand-line); }
 .coastal-referral-banner > .pointer-events-none { display: none; }
 .coastal-referral-banner a { border-radius: 0; background: var(--brand-blue); color: #fff; box-shadow: none; }
-.coastal-referral-dialog { border-radius: 0 !important; box-shadow: 0 30px 90px #05152c44 !important; }
-.coastal-referral-dialog aside { background: #edf0ff; }
-.coastal-referral-dialog [class*="text-[#f2dfae]"] { color: var(--brand-blue); }
-.coastal-referral-dialog a { border-radius: 0; background: var(--brand-blue); color: #fff; box-shadow: none; }
-.coastal-referral-dialog button:not([aria-label]) { border-radius: 0; }
+.coastal-promo-notice { position: fixed; z-index: 70; left: 24px; bottom: 24px; width: min(360px, calc(100% - 48px)); max-height: calc(100dvh - 140px); overflow-y: auto; padding: 22px; border: 1px solid var(--brand-line); background: var(--brand-cream); color: var(--brand-ink); box-shadow: 0 12px 45px rgb(10 25 38 / .16); }
+.coastal-promo-close { position: absolute; top: 4px; right: 4px; display: grid; width: 44px; height: 44px; place-items: center; color: var(--brand-muted); }
+.coastal-promo-close svg { width: 18px; height: 18px; }
+.coastal-promo-label { display: flex; align-items: center; gap: 8px; padding-right: 28px; color: var(--brand-blue); font-size: 9px; font-weight: 650; line-height: 1.6; letter-spacing: .13em; text-transform: uppercase; }
+.coastal-promo-label svg { width: 16px; height: 16px; flex: none; }
+.coastal-promo-notice h2 { margin-top: 10px; padding-right: 12px; font-family: Arial, Helvetica, sans-serif; font-size: 23px; font-weight: 700; line-height: 1.1; letter-spacing: -.045em; }
+.coastal-promo-stay { margin-top: 10px; color: var(--brand-muted); font-size: 12px; line-height: 1.6; }
+.coastal-promo-ends { margin-top: 5px; color: var(--brand-muted); font-size: 10px; line-height: 1.6; }
+.coastal-promo-qualified { display: flex; align-items: flex-start; gap: 7px; margin-top: 10px; color: #186246; font-size: 11px; line-height: 1.6; }
+.coastal-promo-qualified svg { width: 16px; height: 16px; flex: none; }
+.coastal-promo-notice .coastal-button { width: 100%; min-height: 44px; margin-top: 16px; padding: 10px 14px; font-size: 12px; }
 
 /* A calm footer with a clear, useful last step. */
 .brand-footer { border-top: 1px solid var(--brand-line); background: #f0f1e8; color: var(--brand-ink); }
@@ -285,7 +291,7 @@ body:has(.coastal-home) { padding-bottom: 0; }
   .brand-menu-links { grid-template-columns: 1fr; }
   .brand-menu-links a { min-height: 54px; font-size: 18px; }
   .brand-menu-bottom label { width: 100%; }
-  .coastal-hero { gap: 23px; padding-top: 30px; padding-bottom: 25px; }
+  .coastal-hero { gap: 23px; padding-top: 0; padding-bottom: 20px; }
   .coastal-hero-copy { padding-top: 14px; padding-bottom: 0; }
   .coastal-eyebrow { gap: 10px; font-size: 8px; letter-spacing: .12em; }
   .coastal-small-star { width: 19px; height: 19px; }
@@ -295,12 +301,14 @@ body:has(.coastal-home) { padding-bottom: 0; }
   .coastal-hero-bottom > p { font-size: 10px; line-height: 1.8; }
   .coastal-hero-bottom > a { width: 29px; height: 29px; }
   .coastal-hero-bottom svg { width: 19px; height: 19px; }
-  .coastal-hero-photo { height: 76vw; min-height: 260px; max-height: 550px; }
+  .coastal-hero-photo { height: 72vw; min-height: 240px; max-height: 520px; }
   .coastal-photo-location { inset: 17px 15px auto; font-size: 8px; }
   .coastal-photo-caption { inset: auto 15px 18px; grid-template-columns: 1fr 40px; gap: 16px 5px; }
   .coastal-photo-caption > p { font-size: clamp(23px, 5.1vw, 41px); }
   .coastal-photo-star { width: 40px; height: 40px; }
   .coastal-photo-caption > span { font-size: 7px; }
+  .coastal-promo-notice { left: 12px; bottom: max(12px, env(safe-area-inset-bottom)); width: min(340px, calc(100% - 24px)); padding: 18px; }
+  .coastal-promo-notice h2 { font-size: 21px; }
   .coastal-search-heading { gap: 8px; padding-inline: 17px; }
   .coastal-search-heading [role="tablist"] { gap: 22px; }
   .coastal-home:not([data-locale="en"]) .coastal-search-heading [role="tablist"] { gap: 12px; }
@@ -365,6 +373,6 @@ body:has(.coastal-home) { padding-bottom: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .coastal-button, .coastal-property-image img { transition: none; } }
 @media print {
-  .brand-header, .brand-footer, .brand-menu, .mobile-booking-bar, .floating-plan { display: none !important; }
+  .brand-header, .brand-footer, .brand-menu, .mobile-booking-bar, .floating-plan, .coastal-promo-notice { display: none !important; }
   body { padding-bottom: 0 !important; }
 }
