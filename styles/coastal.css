@@ -46,10 +46,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
   color: #fff;
 }
 .coastal-content .section-title, .coastal-content .text-white { color: rgb(var(--tone-rgb)); }
+.coastal-content .field-label, .coastal-content [class*="text-[#f8f3e8]"] { color: rgb(var(--tone-rgb)); }
 .coastal-content [class~="text-white/90"], .coastal-content [class~="text-white/85"] { color: rgb(var(--tone-rgb) / .9); }
 .coastal-content [class~="text-white/80"], .coastal-content [class~="text-white/75"] { color: rgb(var(--tone-rgb) / .8); }
 .coastal-content [class~="text-white/70"], .coastal-content [class~="text-white/65"], .coastal-content [class~="text-white/60"] { color: rgb(var(--tone-rgb) / .72); }
 .coastal-content [class~="text-white/55"], .coastal-content [class~="text-white/50"], .coastal-content [class~="text-white/45"], .coastal-content [class~="text-white/40"], .coastal-content [class~="text-white/35"], .coastal-content [class~="text-white/30"] { color: rgb(var(--tone-rgb) / .64); }
+.coastal-content [class~="text-white/25"], .coastal-content [class~="text-white/20"], .coastal-content [class~="text-white/15"] { color: rgb(var(--tone-rgb) / .64); }
 .coastal-content :is(.text-gray-200, .text-gray-300, .text-gray-400, .text-gray-500) { color: rgb(var(--tone-rgb) / .7); }
 .coastal-content :is(.eyebrow, .offer-tag, .luxury-link), .coastal-content [class*="text-[#c9a86a]"], .coastal-content [class*="text-[#d9bd7b]"], .coastal-content [class*="text-[#ead7aa]"], .coastal-content [class*="text-[#e3ca91]"], .coastal-content [class*="text-[#8d7037]"], .coastal-content [class*="text-[#9c7d3d]"], .coastal-content [class*="text-[#a98750]"] { color: rgb(var(--brand-accent-rgb)); }
 .coastal-content :is(.section-shell, .availability-panel, .card, .offer-card), .coastal-content [class~="bg-black"], .coastal-content [class*="bg-[#0"], .coastal-content [class*="bg-[#f8f4ec]"], .coastal-content [class*="bg-[#fffdf8]"] { background-color: var(--tone-paper); }
@@ -230,6 +232,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .coastal-referral-banner > .pointer-events-none { display: none; }
 .coastal-referral-banner a { border-radius: 0; background: var(--brand-blue); color: #fff; box-shadow: none; }
 .coastal-referral-dialog { border-radius: 0 !important; box-shadow: 0 30px 90px #05152c44 !important; }
+.coastal-referral-dialog aside { background: #edf0ff; }
+.coastal-referral-dialog [class*="text-[#f2dfae]"] { color: var(--brand-blue); }
+.coastal-referral-dialog a { border-radius: 0; background: var(--brand-blue); color: #fff; box-shadow: none; }
+.coastal-referral-dialog button:not([aria-label]) { border-radius: 0; }
 
 /* A calm footer with a clear, useful last step. */
 .brand-footer { border-top: 1px solid var(--brand-line); background: #f0f1e8; color: var(--brand-ink); }
@@ -297,6 +303,9 @@ body:has(.coastal-home) { padding-bottom: 0; }
   .coastal-photo-caption > span { font-size: 7px; }
   .coastal-search-heading { gap: 8px; padding-inline: 17px; }
   .coastal-search-heading [role="tablist"] { gap: 22px; }
+  .coastal-home:not([data-locale="en"]) .coastal-search-heading [role="tablist"] { gap: 12px; }
+  .coastal-home:not([data-locale="en"]) .coastal-search-heading button { font-size: 10px; gap: 5px; }
+  .coastal-home:not([data-locale="en"]) .coastal-search-heading svg { width: 15px; }
   .coastal-search-heading button { min-height: 56px; gap: 7px; font-size: 11px; }
   .coastal-search-heading svg { width: 17px; height: 17px; }
   .coastal-search-heading > p { display: none; }
