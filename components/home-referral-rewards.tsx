@@ -6,13 +6,9 @@ import {
   CheckCircle2,
   Crown,
   Gift,
-  MapPin,
-  Sparkles,
-  Trophy,
-  Utensils,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { translations, type ProfessionalLocale } from "@/lib/professional-translations";
 
@@ -28,8 +24,6 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
   const [member, setMember] = useState<Member | null>(null);
   const [open, setOpen] = useState(false);
   const [qualified, setQualified] = useState(false);
-  const dialogRef = useRef<HTMLElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -87,41 +81,15 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
   useEffect(() => {
     if (!open) return;
 
-    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeButtonRef.current?.focus({ preventScroll: true });
-
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !document.querySelector('dialog[open], [aria-modal="true"]')) {
         event.preventDefault();
         close();
-        return;
-      }
-      if (event.key !== "Tab") return;
-
-      const controls = dialogRef.current?.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), [tabindex="0"]',
-      );
-      if (!controls?.length) return;
-      const first = controls[0];
-      const last = controls[controls.length - 1];
-      const outsideDialog = !dialogRef.current?.contains(document.activeElement);
-      if (event.shiftKey && (document.activeElement === first || outsideDialog)) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && (document.activeElement === last || outsideDialog)) {
-        event.preventDefault();
-        first.focus();
       }
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", handleKeyDown);
-      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
-    };
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, close]);
 
   const href = member ? "/account#referral-rewards" : "/signup?next=%2Faccount%23referral-rewards";
@@ -165,177 +133,22 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
         </div>
       </section>
 
-      {/* Keep the welcome dialog outside the animated page's containing block. */}
       {open && createPortal(
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#010406]/60 p-3 sm:p-6"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) close();
-          }}
+        <section
+          className="coastal-promo-notice"
+          role="region"
+          aria-labelledby="share-win-home-title"
         >
-          <section
-            ref={dialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="share-win-home-title"
-            className="coastal-referral-dialog coastal-content relative max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl overflow-x-hidden overflow-y-auto overscroll-contain rounded-[2.25rem] border border-[#d9bd7b]/45 bg-[#061118] text-white shadow-[0_40px_140px_rgba(0,0,0,.82),0_0_70px_rgba(217,189,123,.10)] sm:max-h-[calc(100dvh-3rem)]"
-          >
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_5%,rgba(217,189,123,.18),transparent_30%),radial-gradient(circle_at_10%_95%,rgba(68,126,142,.10),transparent_32%)]" />
-            <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[#ead7aa] to-transparent" />
-            <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full border border-[#d9bd7b]/10" />
-            <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full border border-[#d9bd7b]/10" />
-
-            <button
-              ref={closeButtonRef}
-              type="button"
-              onClick={close}
-              className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white/50 backdrop-blur transition hover:border-[#d9bd7b]/35 hover:text-white"
-              aria-label={copy.close}
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="relative grid lg:grid-cols-[1.18fr_.82fr]">
-              <div className="p-6 sm:p-8 lg:p-10">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[#d9bd7b]/35 bg-[#d9bd7b]/10 text-[#ead7aa]">
-                    <Crown className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <p className="text-[9px] font-black uppercase tracking-[.30em] text-[#d9bd7b]">
-                      {copy.homePromoBadge}
-                    </p>
-                    <p className="mt-1 text-[11px] font-medium text-white/35">{copy.homePromoEnds}</p>
-                  </div>
-                </div>
-
-                {qualified && member && (
-                  <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-2 text-xs font-semibold text-emerald-200">
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                    {copy.homeQualified}
-                  </div>
-                )}
-
-                <div className="mt-7">
-                  <p className="text-[10px] font-semibold uppercase tracking-[.32em] text-[#d9bd7b]">
-                    {copy.homePromoEyebrow}
-                  </p>
-                  <h2
-                    id="share-win-home-title"
-                    className="font-display mt-3 max-w-xl text-[2.7rem] leading-[.98] tracking-[-.02em] text-[#f8f3e8] sm:text-6xl"
-                  >
-                    {copy.homePromoHeadline}
-                  </h2>
-                  <div className="mt-5 h-px w-16 bg-[#d9bd7b]/60" />
-                  <p className="mt-5 max-w-xl text-sm leading-7 text-white/55 sm:text-[15px]">
-                    {member ? copy.homePromoMemberBody : copy.homePromoGuestBody}
-                  </p>
-                </div>
-
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl border border-white/[.07] bg-white/[.025] p-4">
-                    <p className="text-[9px] font-semibold uppercase tracking-[.18em] text-white/30">
-                      Referral Benefit
-                    </p>
-                    <p className="mt-2 text-xl font-semibold text-[#ead7aa]">20%</p>
-                    <p className="mt-1 text-xs text-white/45">Friend saving</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/[.07] bg-white/[.025] p-4">
-                    <p className="text-[9px] font-semibold uppercase tracking-[.18em] text-white/30">
-                      Your Reward
-                    </p>
-                    <p className="mt-2 text-xl font-semibold text-[#ead7aa]">100</p>
-                    <p className="mt-1 text-xs text-white/45">Tripelor Points</p>
-                  </div>
-                </div>
-
-                <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                  <Link
-                    href={href}
-                    onClick={close}
-                    className="inline-flex min-h-[50px] flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#b88a35] via-[#ead7aa] to-[#c49b4e] px-5 text-sm font-black text-[#061118] shadow-[0_14px_34px_rgba(217,189,123,.18)] transition hover:-translate-y-0.5"
-                  >
-                    {cta}
-                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={close}
-                    className="min-h-[50px] flex-1 rounded-full border border-white/10 bg-white/[.025] px-5 text-sm font-semibold text-white/55 transition hover:border-[#d9bd7b]/30 hover:text-white"
-                  >
-                    {copy.exploreFirst}
-                  </button>
-                </div>
-
-                <p className="mt-4 text-center text-[10px] leading-5 text-white/25">
-                  {copy.homePromoNote}
-                </p>
-              </div>
-
-              <aside className="relative border-t border-[#d9bd7b]/15 bg-[linear-gradient(180deg,rgba(217,189,123,.08),rgba(0,0,0,.14))] p-6 sm:p-8 lg:border-l lg:border-t-0 lg:p-9">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-[9px] font-black uppercase tracking-[.30em] text-[#d9bd7b]">
-                      Grand Prize
-                    </p>
-                    <p className="font-display mt-3 text-7xl leading-none text-[#f2dfae]">05</p>
-                    <p className="mt-1 text-xs font-bold uppercase tracking-[.22em] text-white/45">
-                      Nights
-                    </p>
-                  </div>
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[#d9bd7b]/30 bg-[#d9bd7b]/10 text-[#ead7aa]">
-                    <Trophy className="h-5 w-5" />
-                  </span>
-                </div>
-
-                <div className="mt-8 space-y-5">
-                  <div className="flex items-start gap-3 border-b border-white/[.07] pb-5">
-                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#d9bd7b]" />
-                    <div>
-                      <p className="text-[9px] font-semibold uppercase tracking-[.18em] text-white/30">
-                        {copy.homePrizeStayLabel}
-                      </p>
-                      <p className="mt-1 text-sm font-semibold leading-6 text-white/80">
-                        {copy.homePrizeStay}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 border-b border-white/[.07] pb-5">
-                    <Utensils className="mt-0.5 h-4 w-4 shrink-0 text-[#d9bd7b]" />
-                    <div>
-                      <p className="text-[9px] font-semibold uppercase tracking-[.18em] text-white/30">
-                        {copy.homePrizeMealLabel}
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-white/80">{copy.homePrizeMeal}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[#d9bd7b]" />
-                    <div>
-                      <p className="text-[9px] font-semibold uppercase tracking-[.18em] text-white/30">
-                        {copy.homePrizeExtraLabel}
-                      </p>
-                      <p className="mt-1 text-sm font-semibold leading-6 text-white/80">
-                        {copy.homePrizeExtra}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-8 rounded-2xl border border-[#d9bd7b]/18 bg-black/20 p-4">
-                  <div className="flex items-center gap-2 text-[#ead7aa]">
-                    <Gift className="h-4 w-4" />
-                    <p className="text-[10px] font-black uppercase tracking-[.18em]">How to enter</p>
-                  </div>
-                  <p className="mt-3 text-xs leading-6 text-white/40">{copy.homeEntryLine}</p>
-                </div>
-              </aside>
-            </div>
-          </section>
-        </div>,
+          <button type="button" onClick={close} className="coastal-promo-close" aria-label={copy.close}>
+            <X aria-hidden="true" />
+          </button>
+          <p className="coastal-promo-label"><Gift aria-hidden="true" />{copy.newReward}</p>
+          <h2 id="share-win-home-title">{copy.homePromoHeadline}</h2>
+          <p className="coastal-promo-stay">{copy.homePrizeStay}</p>
+          <p className="coastal-promo-ends">{copy.homePromoEnds}</p>
+          {qualified && member && <p className="coastal-promo-qualified"><CheckCircle2 aria-hidden="true" />{copy.homeQualified}</p>}
+          <Link href={href} onClick={close} className="coastal-button">{cta}<ArrowRight aria-hidden="true" /></Link>
+        </section>,
         document.body,
       )}
     </>
