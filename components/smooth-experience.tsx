@@ -15,6 +15,7 @@ const mobileActions = [
 export default function SmoothExperience({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const adminSurface = pathname === "/admin" || pathname.startsWith("/admin/");
+  const documentSurface = pathname.startsWith("/quote/") || pathname.startsWith("/quotation/");
   const [showPlanButton, setShowPlanButton] = useState(false);
   const authSurface = ["/login", "/signup", "/forgot-password", "/reset-password"].some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
@@ -30,7 +31,7 @@ export default function SmoothExperience({ children }: { children: React.ReactNo
   useEffect(() => {
     const elements = Array.from(
       document.querySelectorAll<HTMLElement>(
-        ".route-transition > section:not(.host-surface), .route-transition [data-smooth-reveal]",
+        ".route-transition [data-smooth-reveal]",
       ),
     );
 
@@ -59,7 +60,7 @@ export default function SmoothExperience({ children }: { children: React.ReactNo
 
   return (
     <>
-      <div key={pathname} className="route-transition">
+      <div key={pathname} className={`route-transition${documentSurface ? "" : " coastal-content"}`}>
         {children}
       </div>
 
@@ -82,7 +83,7 @@ export default function SmoothExperience({ children }: { children: React.ReactNo
             </span>
           </Link>
 
-          <nav className="mobile-booking-bar md:hidden" aria-label="Quick mobile navigation">
+          {pathname !== "/" && <nav className="mobile-booking-bar md:hidden" aria-label="Quick mobile navigation">
             {mobileActions.map(({ href, label, icon: Icon, primary }) => {
               const active = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
               return (
@@ -97,7 +98,7 @@ export default function SmoothExperience({ children }: { children: React.ReactNo
                 </Link>
               );
             })}
-          </nav>
+          </nav>}
         </>
       )}
     </>

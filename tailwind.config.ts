@@ -9,11 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        gold: "#C9A86A",
-        ink: "#071922",
+        gold: "rgb(var(--brand-accent-rgb) / <alpha-value>)",
+        ink: "#222923",
       },
       boxShadow: {
-        gold: "0 16px 40px rgba(201,168,106,.18)",
+        gold: "0 16px 40px rgba(48,73,223,.12)",
       },
     },
   },
