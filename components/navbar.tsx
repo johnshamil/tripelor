@@ -60,7 +60,7 @@ export default function Navbar() {
       <div className="brand-nav-actions">
         <div className="brand-language"><LanguageSwitcher compact /></div>
         <div className="brand-plan"><CartLink compact /></div>
-        <Link href="/account/saved" className="brand-saved" aria-label={brand.saved}><Heart aria-hidden="true" /></Link>
+        <Link href="/account/saved" className="brand-saved" aria-label={brand.saved} onClick={() => setOpen(false)}><Heart aria-hidden="true" /></Link>
         <Link href={user ? "/account" : "/login"} className="brand-signin" onClick={() => setOpen(false)}>{user ? copy.myAccount : copy.signIn}<ArrowUpRight aria-hidden="true" /></Link>
         <button type="button" className="brand-menu-toggle" onClick={() => setOpen(current => !current)} aria-label={open ? "Close navigation menu" : "Open menu"} aria-expanded={open} aria-controls="tripelor-menu">{open ? <X /> : <Menu />}</button>
       </div>
@@ -70,7 +70,7 @@ export default function Navbar() {
         <div className="brand-menu-heading"><p>{brand.menu}</p><button type="button" onClick={() => setOpen(false)} aria-label="Close menu"><X /></button></div>
         {user?.isAdmin && <nav className="brand-admin-links" aria-label="Admin navigation">{[["/admin", copy.adminHome], ["/admin/manual-bookings", "Manual Booking"], ["/admin/properties", copy.properties], ["/admin/quotations", "Quotations"]].map(([href, label]) => <Link key={href} href={href} onClick={() => setOpen(false)}>{label}<ArrowUpRight /></Link>)}</nav>}
         <nav className="brand-menu-links" aria-label="More navigation">{menuLinks.map(([href, label]) => <Link key={href} href={href} onClick={() => setOpen(false)}>{label}<ArrowUpRight aria-hidden="true" /></Link>)}</nav>
-        <div className="brand-menu-bottom"><LanguageSwitcher fullWidth /><CartLink />{user && <button type="button" onClick={logout}><LogOut />{copy.logOut}</button>}<Link href="/build-your-trip" onClick={() => setOpen(false)} className="coastal-button">{copy.planTrip}<ArrowUpRight /></Link></div>
+        <div className="brand-menu-bottom"><LanguageSwitcher fullWidth /><CartLink onClick={() => setOpen(false)} />{user && <button type="button" onClick={logout}><LogOut />{copy.logOut}</button>}<Link href="/build-your-trip" onClick={() => setOpen(false)} className="coastal-button">{copy.planTrip}<ArrowUpRight /></Link></div>
       </div>
     </div>}
   </header>;

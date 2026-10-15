@@ -68,6 +68,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .coastal-content [class*="text-green-"], .coastal-content [class*="text-emerald-"] { color: #186246; }
 .coastal-content [class*="text-amber-"] { color: #835317; }
 .coastal-content .btn-gold, .coastal-content .coastal-button { background: var(--brand-blue); border-color: var(--brand-blue); color: #fff; }
+.coastal-content .bg-gold, .brand-header .bg-gold { color: #fff; }
 .coastal-content .btn-outline { color: rgb(var(--brand-accent-rgb)); background: transparent; }
 .coastal-content .eyebrow { letter-spacing: .18em; }
 
