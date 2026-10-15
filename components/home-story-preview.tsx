@@ -148,7 +148,7 @@ export default function HomeStoryPreview({
           <img
             src={property?.photos[0] ? propertyPhotoUrl(property.photos[0]) : "/properties/rivethi-beach-hotel/1719713475.jpeg"}
             alt={property ? `${property.name} in ${property.island}` : "Maldives beachfront"}
-            loading="lazy"
+            loading="lazy" decoding="async"
             className="absolute inset-0 -z-20 h-full w-full object-cover"
           />
           <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#051318]/95 via-[#051318]/35 to-[#051318]/20" />

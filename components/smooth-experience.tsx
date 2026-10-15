@@ -22,7 +22,13 @@ export default function SmoothExperience({ children }: { children: React.ReactNo
   );
 
   useEffect(() => {
-    const update = () => setShowPlanButton(window.scrollY > 560);
+    let visible = false;
+    const update = () => {
+      const next = window.scrollY > 560;
+      if (next === visible) return;
+      visible = next;
+      setShowPlanButton(next);
+    };
     update();
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
@@ -35,6 +41,7 @@ export default function SmoothExperience({ children }: { children: React.ReactNo
       ),
     );
 
+    if (!elements.length) return;
     elements.forEach((element) => element.classList.add("smooth-reveal"));
 
     if (!("IntersectionObserver" in window)) {
