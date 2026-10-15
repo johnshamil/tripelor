@@ -129,7 +129,7 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
 
   return (
     <>
-      <section className="relative z-20 overflow-hidden border-b border-[#d9bd7b]/30 bg-[#07161d] text-white shadow-[0_12px_34px_rgba(0,0,0,.24)]">
+      <section className="coastal-referral-banner relative z-20 overflow-hidden border-b border-[#d9bd7b]/30 bg-[#07161d] text-white shadow-[0_12px_34px_rgba(0,0,0,.24)]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_50%,rgba(217,189,123,.16),transparent_30%),radial-gradient(circle_at_85%_50%,rgba(217,189,123,.10),transparent_24%)]" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#ead7aa]/70 to-transparent" />
 
@@ -179,7 +179,7 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
             role="dialog"
             aria-modal="true"
             aria-labelledby="share-win-home-title"
-            className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl overflow-x-hidden overflow-y-auto overscroll-contain rounded-[2.25rem] border border-[#d9bd7b]/45 bg-[#061118] text-white shadow-[0_40px_140px_rgba(0,0,0,.82),0_0_70px_rgba(217,189,123,.10)] sm:max-h-[calc(100dvh-3rem)]"
+            className="coastal-referral-dialog coastal-content relative max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl overflow-x-hidden overflow-y-auto overscroll-contain rounded-[2.25rem] border border-[#d9bd7b]/45 bg-[#061118] text-white shadow-[0_40px_140px_rgba(0,0,0,.82),0_0_70px_rgba(217,189,123,.10)] sm:max-h-[calc(100dvh-3rem)]"
           >
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_5%,rgba(217,189,123,.18),transparent_30%),radial-gradient(circle_at_10%_95%,rgba(68,126,142,.10),transparent_32%)]" />
             <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[#ead7aa] to-transparent" />

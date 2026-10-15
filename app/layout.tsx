@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import "../styles/mobile-comfort.css";
+import "../styles/coastal.css";
 import type { Metadata } from "next";
 import { CartProvider } from "@/components/cart-provider";
 import Navbar from "@/components/navbar";
@@ -41,8 +42,8 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [{ url: "/tripelor-favicon.svg?v=4", type: "image/svg+xml" }],
-    shortcut: "/tripelor-favicon.svg?v=4",
+    icon: [{ url: "/tripelor-favicon.svg?v=5", type: "image/svg+xml" }],
+    shortcut: "/tripelor-favicon.svg?v=5",
   },
   openGraph: {
     type: "website",

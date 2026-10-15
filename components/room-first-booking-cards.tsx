@@ -1,12 +1,19 @@
 import Link from "next/link";
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight, ArrowUpRight, MapPin } from "lucide-react";
 import { properties } from "@/lib/properties";
-import { propertyPhotoUrl } from "@/lib/property-model";
-import type { PublicProperty } from "@/lib/property-model";
+import { propertyPhotoUrl, type PublicProperty } from "@/lib/property-model";
 import { translations, type ProfessionalLocale } from "@/lib/professional-translations";
+import { coastalCopy } from "@/lib/coastal-copy";
+import { matchesIsland, staySearchQuery, type StaySearch } from "@/lib/stay-search";
 
-export default function PropertyCards({ managedProperties = [], featured = false, locale = "en" }: { managedProperties?: PublicProperty[]; featured?: boolean; locale?: ProfessionalLocale }) {
+export default function PropertyCards({ managedProperties = [], featured = false, locale = "en", search }: {
+  managedProperties?: PublicProperty[];
+  featured?: boolean;
+  locale?: ProfessionalLocale;
+  search?: StaySearch;
+}) {
   const copy = translations[locale].properties;
+  const brand = coastalCopy[locale];
   const cards = new Map(properties.map(property => [property.slug, {
     slug: property.slug, name: property.name, location: property.location,
     image: property.images[0], description: property.description, startingFrom: property.startingFrom,
@@ -24,37 +31,35 @@ export default function PropertyCards({ managedProperties = [], featured = false
     "masfalhi-view-inn": copy.masfalhi,
     "rivethi-beach-hotel": copy.rivethi,
   };
-  const displayedProperties = Array.from(cards.values()).map(property => ({
-    ...property,
-    description: localizedDescriptions[property.slug] || property.description,
-  }));
-  const visibleProperties = displayedProperties;
-  return <section id="properties" className="scroll-mt-24 bg-[#f1ebdf] text-[#071922]">
-    <div className="container py-14 md:py-20">
-      <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-        <div className="max-w-2xl">
-          <p className="eyebrow text-[#8d7037]">{featured ? copy.featured : copy.explore}</p>
-          <h2 className="font-display mt-4 text-4xl md:text-5xl">{copy.title}</h2>
-          <p className="mt-4 leading-7 text-[#58656c]">{copy.body}</p>
+  const matched = Array.from(cards.values()).filter(property => matchesIsland(property.location, search?.island));
+  const visible = featured ? matched.slice(0, 6) : matched;
+  const query = search ? staySearchQuery(search) : "";
+
+  return <section id="properties" className="coastal-property-section scroll-mt-32">
+    <div className="container">
+      <div className="coastal-section-heading">
+        <div>
+          <p className="coastal-eyebrow">{featured ? brand.goodPlaces : copy.explore}</p>
+          <h2>{featured ? brand.stayTitle : copy.title}</h2>
+          <p>{featured ? brand.chosen : copy.body}</p>
         </div>
-        {featured && <Link href="/stays" className="inline-flex min-h-[48px] shrink-0 items-center gap-3 rounded-full border border-[#8d7037]/40 px-6 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#8d7037]">{copy.viewAll} <ArrowRight className="h-4 w-4" /></Link>}
+        {featured && <Link href="/stays" className="coastal-text-link">{copy.viewAll}<ArrowRight /></Link>}
       </div>
-      <div className="mb-6"><Link href="/holiday-shortlist" className="inline-flex min-h-11 items-center rounded-full border border-[#8d7037]/40 px-5 text-sm font-semibold">{copy.shortlist}</Link></div>
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {visibleProperties.map(property => <Link key={property.slug} href={`/stays/${property.slug}`} className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[#d0c5b0] bg-[#f8f4ec] shadow-sm transition hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#8d7037]">
-          <div className="relative aspect-[5/4] overflow-hidden"><img src={property.image} alt={property.name} loading="lazy" className="h-full w-full object-cover transition duration-700 motion-safe:group-hover:scale-105 motion-reduce:transition-none" /></div>
-          <div className="flex flex-1 flex-col p-6">
-            <p className="flex items-center gap-2 text-xs text-[#745b2e]"><MapPin className="h-4 w-4 shrink-0" />{property.location}</p>
-            <h3 className="font-display mt-3 text-3xl">{property.name}</h3>
-            <p className="mb-6 mt-3 line-clamp-3 text-sm leading-6 text-[#58656c]">{property.description}</p>
-            <div className="mt-auto flex flex-wrap items-center justify-between gap-4 border-t border-[#d0c5b0] pt-5">
-              <p className="text-sm text-[#745b2e]">{property.startingFrom > 0 ? <>{copy.from} <strong className="text-xl">${property.startingFrom}</strong><span className="block text-xs text-[#58656c]">{copy.perNight}</span></> : copy.ratesRequest}</p>
-              <span className="inline-flex items-center gap-2 text-sm font-semibold">{copy.exploreRooms} <ArrowRight className="h-4 w-4" /></span>
+      {visible.length ? <div className="coastal-property-grid">
+        {visible.map(property => <Link key={property.slug} href={`/stays/${property.slug}${query ? `?${query}` : ""}`} className="coastal-property-card">
+          <div className="coastal-property-image"><img src={property.image} alt={property.name} loading="lazy" width={600} height={480} /></div>
+          <div className="coastal-property-info">
+            <p className="coastal-property-location"><MapPin aria-hidden="true" />{property.location}</p>
+            <h3>{property.name}</h3>
+            <p className="coastal-property-description">{localizedDescriptions[property.slug] || property.description}</p>
+            <div className="coastal-property-bottom">
+              <p>{property.startingFrom > 0 ? <>{copy.from} <strong>USD {property.startingFrom}</strong><small>{copy.perNight}</small></> : copy.ratesRequest}</p>
+              <span aria-label={copy.exploreRooms}><ArrowUpRight aria-hidden="true" /></span>
             </div>
           </div>
         </Link>)}
-      </div>
-      <p className="mt-6 text-xs leading-6 text-[#58656c]">{copy.note}</p>
+      </div> : <div className="coastal-search-summary"><p role="status">{brand.noStays}</p><Link href="/stays" className="coastal-text-link">{brand.allStays}<ArrowRight /></Link></div>}
+      <div className="coastal-property-shortlist"><p className="coastal-property-note">{copy.note}</p><Link href="/holiday-shortlist" className="coastal-text-link">{copy.shortlist}<ArrowRight /></Link></div>
     </div>
   </section>;
 }
