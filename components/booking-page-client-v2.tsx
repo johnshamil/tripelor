@@ -24,6 +24,7 @@ import { propertyRateForDate, seasonalRateForDate } from "@/lib/property-model";
 import type { PublicProperty } from "@/lib/property-model";
 import { translations, type ProfessionalLocale } from "@/lib/professional-translations";
 import { DEFAULT_SPEEDBOAT_SEAT_PRICE_USD } from "@/lib/transfer-pricing";
+import { cleanStaySearch } from "@/lib/stay-search";
 
 const PACKAGE_HOTEL = "Uhoo's Lavish Oasis";
 
@@ -165,6 +166,7 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
     if (room) setRoomType(room);
     if (checkInParam) setCheckIn(checkInParam);
     if (checkOutParam) setCheckOut(checkOutParam);
+    if (params.has("adults")) setAdults(cleanStaySearch({ guests: params.get("adults") || "" }).guests || "2");
     setSpeedboatSeats(Number(params.get("speedboatSeats") || 0));
     setSpeedboatTotal(Number(params.get("speedboatTotal") || 0));
     setPlanTotal(Number(params.get("planTotal") || 0));
@@ -263,7 +265,7 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
       : ["Room Only", "Bed & Breakfast"]
     : ["Bed & Breakfast", "Half Board", "Full Board"];
 
-  const adultOptions = Array.from({ length: maxGuests }, (_, index) => index + 1);
+  const adultOptions = Array.from({ length: Math.max(maxGuests, Number(adults)) }, (_, index) => index + 1);
   const childOptions = Array.from({ length: Math.min(4, maxGuests) + 1 }, (_, index) => index);
 
   function handlePropertyChange(value: string) {
@@ -281,8 +283,6 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
 
   function handleRoomChange(value: string) {
     setRoomType(value);
-    setAdults("2");
-    setChildren("0");
     setAvailability(null);
     setStatus("");
   }
@@ -543,6 +543,8 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
                 </label>
               </div>
             )}
+
+            {!packageName && Number(adults) + Number(children) > maxGuests && <p role="status" className="mt-4 border border-amber-500/30 bg-amber-50 p-4 text-sm text-amber-900">{fill(copy.maxGuests, { room: roomLabel, guests: maxGuests })}</p>}
 
             {isMasfalhi && (
               <div className="mt-5 border border-[#8ea99a]/45 bg-[#e5eee7] p-4 text-sm leading-6 text-[#40564a]">

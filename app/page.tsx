@@ -8,6 +8,7 @@ import PropertyCards from "@/components/room-first-booking-cards";
 import TripelorMark from "@/components/tripelor-mark";
 import SaveTripButton from "@/components/save-trip-button";
 import { publishedProperties } from "@/lib/property-store";
+import { properties as defaultProperties } from "@/lib/properties";
 import { propertyPhotoUrl } from "@/lib/property-model";
 import { professionalLocale, translations } from "@/lib/professional-translations";
 import { coastalCopy } from "@/lib/coastal-copy";
@@ -28,7 +29,11 @@ export default async function Home() {
   const locale = professionalLocale(cookies().get("tripelor_lang")?.value);
   const copy = coastalCopy[locale], original = translations[locale].home;
   const [reviews, managedProperties] = await Promise.all([getReviews(), publishedProperties()]);
-  const islands = Array.from(new Set(managedProperties.map(property => property.island).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+  const managedSlugs = new Set(managedProperties.map(property => property.slug));
+  const islands = Array.from(new Set([
+    ...managedProperties.map(property => property.island),
+    ...defaultProperties.filter(property => !managedSlugs.has(property.slug)).map(property => property.location),
+  ].filter(location => location && location !== "Maldives"))).sort((a, b) => a.localeCompare(b));
   const experiences = managedProperties.flatMap(property => (property.experiences || []).filter(item => item.enabled && item.photos.length).map(item => ({ item, propertyName: property.name, island: property.island, slug: property.slug }))).slice(0, 3);
   const icons = [Compass, Waves, Ship, Check];
   return <div className="coastal-home" data-locale={locale}>

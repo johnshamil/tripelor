@@ -53,7 +53,7 @@ export default function PropertyCards({ managedProperties = [], featured = false
             <h3>{property.name}</h3>
             <p className="coastal-property-description">{localizedDescriptions[property.slug] || property.description}</p>
             <div className="coastal-property-bottom">
-              <p>{property.startingFrom > 0 ? <>{copy.from} <strong>USD {property.startingFrom}</strong><small>{copy.perNight}</small></> : copy.ratesRequest}</p>
+              <p>{property.startingFrom > 0 ? <>{copy.from}{" "}<strong>USD {property.startingFrom}</strong><small>{copy.perNight.replace(/^USD\s*\/?\s*/i, "")}</small></> : copy.ratesRequest}</p>
               <span aria-label={copy.exploreRooms}><ArrowUpRight aria-hidden="true" /></span>
             </div>
           </div>
