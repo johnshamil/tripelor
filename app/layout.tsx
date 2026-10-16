@@ -42,8 +42,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [{ url: "/tripelor-favicon.svg?v=5", type: "image/svg+xml" }],
-    shortcut: "/tripelor-favicon.svg?v=5",
+    icon: [{ url: "/brand/tripelor-globe-icon.png", type: "image/png", sizes: "96x96" }],
+    shortcut: "/brand/tripelor-globe-icon.png",
+    apple: [{ url: "/brand/tripelor-globe-apple.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
     type: "website",
@@ -68,6 +69,7 @@ const organization = {
   "@id": "https://tripelor.com/#organization",
   name: "Tripelor",
   url: "https://tripelor.com",
+  logo: "https://tripelor.com/brand/tripelor-globe-gold.webp",
   email: "bookings@tripelor.com",
   telephone: "+9609429403",
   description:

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, LockKeyhole, UserPlus } from "lucide-react";
-import TripelorMark from "@/components/tripelor-mark";
+import TripelorEmblem from "@/components/tripelor-emblem";
 import { reportGoogleAdsConversion } from "@/lib/google-ads-conversions";
 
 function safeNextPath(value: string | null) {
@@ -76,7 +76,7 @@ export default function SignupPage() {
       <div className="container">
         <div className="mx-auto grid max-w-5xl overflow-hidden border border-[#c9b88f] bg-[#fffdf8] shadow-[0_30px_100px_rgba(34,43,46,.12)] lg:grid-cols-[.72fr_1.28fr]">
           <aside className="bg-[#06151c] p-8 text-white md:p-10">
-            <TripelorMark className="h-14 w-14 text-[#d9bd7b]" />
+            <TripelorEmblem className="h-14 w-14 text-[#d9bd7b]" />
             <p className="eyebrow mt-9">Tripelor membership</p>
             <h1 className="font-display mt-4 text-4xl leading-tight">Unlock more of your Maldives journey.</h1>
             <div className="mt-8 space-y-5">

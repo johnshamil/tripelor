@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, Eye, EyeOff, LockKeyhole, LogIn, ShieldCheck, Sparkles } from "lucide-react";
-import TripelorMark from "@/components/tripelor-mark";
+import TripelorEmblem from "@/components/tripelor-emblem";
 import { reportGoogleAdsConversion } from "@/lib/google-ads-conversions";
 
 function safeNextPath(value: string | null) {
@@ -108,7 +108,7 @@ export default function LoginPage() {
         <section className="flex items-center border border-[#d0c5b0] bg-[#fffdf8] px-6 py-10 shadow-[0_30px_100px_rgba(34,43,46,.12)] md:px-12 lg:border-l-0 xl:px-16">
           <div className="mx-auto w-full max-w-md">
             <div className="flex items-center gap-3">
-              <TripelorMark className="h-12 w-12 text-[#9c7d3d]" />
+              <TripelorEmblem className="h-12 w-12 text-[#9c7d3d]" />
               <div>
                 <p className="font-display text-xl tracking-[.09em]">TRIPELOR</p>
                 <p className="mt-1 text-[8px] font-semibold uppercase tracking-[.25em] text-[#8d7037]">Private member access</p>

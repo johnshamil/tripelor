@@ -1,6 +1,6 @@
 import { CalendarDays, Clock3, Headphones, MapPin, Users } from "lucide-react";
 import ManualQuotationActions from "@/components/manual-quotation-actions";
-import TripelorMark from "@/components/tripelor-mark";
+import TripelorEmblem from "@/components/tripelor-emblem";
 import { QUOTATION_BANK_ACCOUNTS } from "@/lib/quotation-bank-details";
 
 export const dynamic = "force-dynamic";
@@ -331,7 +331,7 @@ export default async function ManualQuotationPage({ params }: { params: { token:
         <section className="quote-header bg-[#06151c] px-6 py-7 text-white md:px-9 md:py-8">
           <div className="quote-header-layout grid gap-5 md:grid-cols-[1fr_auto] md:items-start">
             <div className="flex items-start gap-4">
-              <TripelorMark className="quote-logo h-14 w-14 shrink-0 text-[#ead7aa] md:h-16 md:w-16" />
+              <TripelorEmblem className="quote-logo h-14 w-14 shrink-0 text-[#ead7aa] md:h-16 md:w-16" />
               <div>
                 <p className="quote-brand text-[10px] font-bold uppercase tracking-[.28em] text-[#d9bd7b]">Tripelor · Maldives Travel</p>
                 <h1 className="font-display mt-2 text-4xl leading-none md:text-5xl">Quotation</h1>
