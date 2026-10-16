@@ -3,7 +3,7 @@ import { CheckCircle2, Clock3, Headphones, Sparkles } from "lucide-react";
 import { cookies } from "next/headers";
 import TripQuoteActions from "@/components/trip-quote-actions";
 import QuoteMemberPrompt from "@/components/quote-member-prompt";
-import TripelorMark from "@/components/tripelor-mark";
+import TripelorEmblem from "@/components/tripelor-emblem";
 import { professionalLocale } from "@/lib/professional-translations";
 import { decodeQuoteLines, quoteFromLines, quoteIssuedAt, quoteStatus, validQuoteReference, QUOTE_VALID_HOURS } from "@/lib/trip-quote";
 import type { CartLine } from "@/lib/trip-cart";
@@ -336,7 +336,7 @@ export default function QuotePage({
                 <p className="mt-4 max-w-lg text-sm leading-6 text-white/65">{copy.subtitle}</p>
               </div>
               <div className="flex items-center gap-3 text-[#e2bd68]">
-                <TripelorMark className="h-14 w-14" />
+                <TripelorEmblem className="h-14 w-14" />
                 <span className="font-display text-xl tracking-[.15em]">TRIPELOR</span>
               </div>
             </div>

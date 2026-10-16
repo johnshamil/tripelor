@@ -59,7 +59,7 @@ export default function Navbar() {
   return <header className="brand-header" data-menu-open={open || undefined}>
     <div className="brand-announcement"><div className="container"><span>{brand.announcement}</span><Link href="/maldives-matchmaker">{brand.local}<ArrowUpRight aria-hidden="true" /></Link></div></div>
     <div className="container brand-navigation">
-      <Link href="/" onClick={() => setOpen(false)} aria-label="Tripelor home"><TripelorWordmark tagline={brand.tagline} /></Link>
+      <Link href="/" onClick={() => setOpen(false)} aria-label="Tripelor home"><TripelorWordmark /></Link>
       <nav className="brand-main-links" aria-label="Main navigation">{primaryLinks.map(([href, label]) => <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined}>{label}</Link>)}</nav>
       <div className="brand-nav-actions">
         <div className="brand-language"><LanguageSwitcher compact /></div>

@@ -78,12 +78,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .coastal-content .eyebrow { letter-spacing: .18em; }
 
 /* Wordmark and shared navigation. */
-.tripelor-wordmark { display: inline-flex; flex-direction: column; color: var(--brand-ink); vertical-align: middle; }
-.tripelor-wordmark-name { display: flex; align-items: center; font-family: Arial, Helvetica, sans-serif; font-size: 40px; font-weight: 800; letter-spacing: -.065em; line-height: .95; }
-.tripelor-wordmark-star { width: 29px; height: 29px; margin-left: 3px; color: var(--brand-blue); }
-.tripelor-wordmark-tagline { margin-top: 11px; font-size: 8px; font-weight: 600; letter-spacing: .17em; text-transform: uppercase; white-space: nowrap; }
-.tripelor-wordmark.is-light { color: #fff; }
-.tripelor-wordmark.is-light .tripelor-wordmark-star { color: #fff; }
+.tripelor-wordmark { display: inline-flex; flex: none; align-items: center; gap: 9px; padding: 7px 11px; border: 1px solid #c7a851; border-radius: 4px; background: #061d3b; color: #f1d27d; vertical-align: middle; }
+.tripelor-wordmark-emblem { display: block; width: 48px; height: 48px; flex: none; object-fit: contain; }
+.tripelor-wordmark-copy { display: flex; min-width: 0; flex-direction: column; }
+.tripelor-wordmark-name { display: block; font-family: Georgia, "Times New Roman", serif; font-size: 27px; font-weight: 500; letter-spacing: .015em; line-height: 1; color: #f1d27d; background: linear-gradient(110deg, #d6a82f, #fff1bb 35%, #e2b83f 70%, #fff1bb); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.tripelor-wordmark-tagline { display: block; margin-top: 5px; font-family: Georgia, "Times New Roman", serif; font-size: 10px; font-weight: 400; line-height: 1.25; letter-spacing: .015em; color: #fff5dd; white-space: nowrap; }
 .brand-header { --brand-header-height: 114px; position: sticky; top: 0; z-index: 80; background: var(--brand-cream); border-bottom: 1px solid var(--brand-line); color: var(--brand-ink); }
 .brand-announcement { min-height: 29px; background: var(--brand-blue); color: #fff; }
 .brand-announcement > div { display: flex; min-height: 29px; align-items: center; justify-content: space-between; gap: 12px; }
@@ -290,9 +289,15 @@ body:has(.coastal-home) { padding-bottom: 0; }
 @media (max-width: 767px) {
   .brand-header { --brand-header-height: 108px; }
   .brand-navigation { height: 79px; gap: 12px; }
-  .tripelor-wordmark-name { font-size: 32px; }
-  .tripelor-wordmark-star { width: 24px; height: 24px; }
-  .tripelor-wordmark-tagline { margin-top: 9px; font-size: 7px; letter-spacing: .12em; }
+  .brand-navigation > a:first-child { min-width: 0; flex: none; }
+  .tripelor-wordmark { gap: 5px; padding: 6px; }
+  .tripelor-wordmark-emblem { width: 32px; height: 32px; }
+  .tripelor-wordmark-name { font-size: 18px; }
+  .tripelor-wordmark-tagline { margin-top: 4px; font-size: 7px; }
+  .brand-footer .tripelor-wordmark { gap: 9px; padding: 9px 12px; }
+  .brand-footer .tripelor-wordmark-emblem { width: 48px; height: 48px; }
+  .brand-footer .tripelor-wordmark-name { font-size: 27px; }
+  .brand-footer .tripelor-wordmark-tagline { font-size: 10px; }
   .brand-nav-actions { gap: 8px; }
   .brand-saved, .brand-menu-toggle { width: 31px; }
   .brand-signin { width: 92px; min-height: 44px; max-width: 100px; gap: 6px; padding: 0 10px; font-size: 11px; white-space: normal; }
@@ -374,6 +379,9 @@ body:has(.coastal-home) { padding-bottom: 0; }
 }
 @media (max-width: 500px) { .brand-announcement a { font-size: 0; } .brand-announcement a svg { width: 15px; height: 15px; } }
 @media (max-width: 360px) {
+  .brand-navigation .tripelor-wordmark { gap: 4px; }
+  .brand-navigation .tripelor-wordmark-emblem { width: 28px; height: 28px; }
+  .brand-navigation .tripelor-wordmark-name { font-size: 17px; }
   .brand-saved { display: none; }
   .coastal-hero { gap: 14px; }
   .coastal-hero h1 { font-size: 25px; }

@@ -15,7 +15,7 @@ export default function Footer() {
     <div className="container">
       <div className="brand-footer-invitation"><div><p>{brand.small}</p><h2>{brand.footerTitle}</h2><p>{brand.footerBody}</p></div><Link href="/contact" className="coastal-button">{brand.footerCta}<ArrowUpRight /></Link></div>
       <div className="brand-footer-grid">
-        <div><Link href="/" aria-label="Tripelor home"><TripelorWordmark tagline={brand.tagline} /></Link><p className="brand-footer-intro">{copy.intro}</p></div>
+        <div><Link href="/" aria-label="Tripelor home"><TripelorWordmark /></Link><p className="brand-footer-intro">{copy.intro}</p></div>
         <div><h3>{copy.explore}</h3><Link href="/stays">{copy.ourStays}</Link><Link href="/island-adventures">{copy.islandPackages}</Link><Link href="/excursions">{brand.experiences}</Link><Link href="/speedboat">{copy.transfers}</Link><Link href="/reviews">{copy.guestReviews}</Link></div>
         <div><h3>{copy.information}</h3><Link href="/about">{copy.about}</Link><Link href="/travel-info#faq">{copy.faq}</Link><Link href="/travel-info#terms">{copy.terms}</Link><Link href="/travel-info#cancellation">{copy.cancellation}</Link><Link href="/travel-info#privacy">{copy.privacy}</Link></div>
         <div><h3>{copy.contact}</h3><a href="mailto:bookings@tripelor.com"><Mail />bookings@tripelor.com</a><a href="tel:+9609429403"><Phone />+960 942 9403</a><p><MapPin />Maldives</p><Link href="/contact" className="brand-footer-contact">{copy.enquiry}<ArrowUpRight /></Link></div>

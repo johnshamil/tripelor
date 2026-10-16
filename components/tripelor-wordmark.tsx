@@ -1,8 +1,11 @@
-import TripelorMark from "@/components/tripelor-mark";
+import TripelorEmblem from "@/components/tripelor-emblem";
 
-export default function TripelorWordmark({ tagline = "Maldives, made personal", light = false }: { tagline?: string; light?: boolean }) {
-  return <span className={`tripelor-wordmark${light ? " is-light" : ""}`}>
-    <span className="tripelor-wordmark-name">tripelor<TripelorMark className="tripelor-wordmark-star" /></span>
-    <span className="tripelor-wordmark-tagline">{tagline}</span>
+export default function TripelorWordmark() {
+  return <span className="tripelor-wordmark">
+    <TripelorEmblem className="tripelor-wordmark-emblem" />
+    <span className="tripelor-wordmark-copy">
+      <span className="tripelor-wordmark-name">TRIPELOR</span>
+      <span className="tripelor-wordmark-tagline">The Art of Exploring</span>
+    </span>
   </span>;
 }
