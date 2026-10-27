@@ -11,11 +11,11 @@ This is the existing Tripelor Next.js repository, not the separate Runable proto
 - Only sample availability and property editing APIs are enabled. Real booking requests, accounts, email, uploads, quotations and other admin mutations return 403.
 - Banner buttons provide synthetic member/admin sessions. Endpoint returns 404 with demo mode off; production mock-admin cookie is rejected. No changes to actual Supabase auth rules.
 - Google Ads and analytics are suppressed in demo mode; CSP blocks external browser connections and script sources. External contact links are intercepted. Production integrations remain enabled with demo mode off.
-- Demo is noindex/nofollow. Admin data is temporary and shared within a server instance; changes may reset between requests/cold starts. Do not enter private information.
+- Demo is noindex/nofollow. Admin saves return a validated sample to the current browser view only; reloading resets them and no property is publicly published. This avoids false version conflicts between independent serverless instances. Actual production save/version rules are untouched. Do not enter private information.
 
 ## Testing on an iPhone
 
-Open the hosted HTTPS URL in Safari. Use the menu, choose destination/dates/guests, open a property and select a room plus BB/HB/FB. When redirected to login, tap **Enter member demo** in the yellow banner; the selected room/meal/dates are retained. No actual password is needed. Tap **Open admin demo** to search/edit properties and use private preview or sample-memory save. **Sign out demo** clears the synthetic session.
+Open the hosted HTTPS URL in Safari. Use the menu, choose destination/dates/guests, open a property and select a room plus BB/HB/FB. When redirected to login, tap **Enter member demo** in the yellow banner; the selected room/meal/dates are retained. No actual password is needed. Tap **Open admin demo** to search/edit properties and use private preview or browser-view-only save. **Sign out demo** clears the synthetic session.
 
 The booking request button does not make a reservation; it displays the disabled-service error. Payment, confirmation and email delivery are not connected. Property data/rates/photos and availability are examples, not verified current offers.
 

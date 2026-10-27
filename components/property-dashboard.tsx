@@ -206,7 +206,7 @@ export default function PropertyDashboard() {
       setProperties(current => [saved, ...current.filter(property => property.id !== saved.id)]);
       setForm(propertyToForm(saved));
       setSavedForm(JSON.stringify(propertyToForm(saved)));
-      setNotice(saved.status === "published" ? "Property published. It is now available on the public Stays page." : "Draft saved. You can publish it when all details are ready.");
+      setNotice(result.demo ? "Sample changes applied to this browser view only. Reloading resets them; nothing was published." : saved.status === "published" ? "Property published. It is now available on the public Stays page." : "Draft saved. You can publish it when all details are ready.");
     } catch (e) { setError(e instanceof Error ? e.message : "Unable to save property."); }
     finally { setSaving(false); }
   }

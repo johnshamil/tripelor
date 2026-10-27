@@ -1,5 +1,6 @@
 """Local-only browser checks. Requires Python Playwright and installed Chrome."""
 import json
+import re
 from pathlib import Path
 from urllib.parse import urlparse
 from playwright.sync_api import sync_playwright
@@ -149,7 +150,7 @@ with sync_playwright() as p:
         page.evaluate('window.scrollTo(0, 0)')
         page.screenshot(path=str(OUT / f'admin-{width}.png'), full_page=True)
         page.get_by_role('button', name='Save & Publish', exact=True).click()
-        page.get_by_text('Property published. It is now available', exact=False).wait_for()
+        page.get_by_text(re.compile('Sample changes applied to this browser view only.|Property published. It is now available')).wait_for()
         assert page.get_by_text('Unsaved changes · preview does not publish them.').count() == 0
         record(f'{width}px admin find/edit/private-preview/save to in-memory fixture')
         # Reset edited fixture name so the next width runs the same search.

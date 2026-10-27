@@ -22,7 +22,7 @@ export default function DemoBanner() {
   return <aside aria-label="Sample-data preview" className="demo-banner">
     <div><strong>TRIPELOR · SAMPLE-DATA PREVIEW</strong>
       <p>Not Tripelor.com. Rates & availability are examples. No real bookings, payments, email or uploads. Use fictional details only.</p>
-      <p>Admin changes are temporary, shared demo memory and may reset between requests or deployments.</p></div>
+      <p>Admin saves update this browser view only. Reloading resets them; nothing is published.</p></div>
     <div className="demo-actions">
       <form action="/api/demo/session" method="post"><input type="hidden" name="role" value="member"/><input type="hidden" name="next" value={next === "/login" ? "/booking" : next}/><button>Enter member demo</button></form>
       <form action="/api/demo/session" method="post"><input type="hidden" name="role" value="admin"/><input type="hidden" name="next" value="/admin/properties"/><button>Open admin demo</button></form>

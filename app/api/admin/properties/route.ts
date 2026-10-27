@@ -20,6 +20,14 @@ export async function POST(r: Request) {
 
     const input = JSON.parse(body);
     const value = validateProperty(input);
+    if (process.env.TRIPELOR_MOCK_PREVIEW === "1") {
+      // Serverless instances do not share memory. Return a validated sample
+      // for this browser view only; never invoke the real save/version RPCs.
+      return Response.json({ property: {
+        ...value.data, slug: value.slug, status: value.status,
+        id: input.id || crypto.randomUUID(), updated_at: new Date().toISOString(),
+      }, demo: true }, { headers: { "Cache-Control": "no-store" } });
+    }
     let rows: any[];
 
     if (input.id) {

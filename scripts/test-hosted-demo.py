@@ -32,6 +32,7 @@ with sync_playwright() as p:
         page.get_by_role('button', name='Enter member demo', exact=True).click()
         page.wait_for_url('**/booking?**')
         page.get_by_role('button', name='Request My Stay').wait_for()
+        page.get_by_role('button', name='10 Dec 2026').wait_for()
         assert page.get_by_role('button', name='10 Dec 2026').count() == 1
         assert page.locator('.booking-flow form select').nth(2).input_value() == 'Full Board'
         page.get_by_role('button', name='Check Live Availability', exact=True).click()
@@ -53,8 +54,9 @@ with sync_playwright() as p:
         page.get_by_role('button', name='Back to editing').click()
         page.get_by_role('button', name='Save & Publish', exact=True).click()
         page.get_by_text('Unsaved changes · preview does not publish them.').wait_for(state='hidden')
+        assert page.get_by_text('Sample changes applied to this browser view only.', exact=False).is_visible()
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
-        checks.append(f'{width}px mobile admin edit/private preview/sample-memory save')
+        checks.append(f'{width}px mobile admin edit/private preview/browser-view-only save')
         editor.locator('input').first.fill('Masfalhi View Inn')
         page.get_by_role('button', name='Save & Publish', exact=True).click()
         page.get_by_text('Unsaved changes · preview does not publish them.').wait_for(state='hidden')
