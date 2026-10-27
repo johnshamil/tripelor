@@ -2,6 +2,10 @@
 
 This is the existing Tripelor Next.js repository, not the separate Runable prototype. Hosted demo implementation was explicitly approved on 27 October 2026.
 
+**Hosted preview:** https://tripelor-mobile-demo.vercel.app  
+**Verified deployment:** `dpl_CTBtpfdNywjpeam9sjsSF1JJ6by5`, source `eac2e0b`; READY in the separate demo project.  
+**GitHub status:** commits are local. Supplied PAT fails Git blob write/push with 403 (`contents=write` required); no remote branch or PR yet.
+
 ## Isolation and access
 
 - Separate Vercel project: `tripelor-mobile-demo` (`prj_SIbBMw9JWpXi8gqpqvmQ9QQ8H8pj`). No Git auto-deploy connection, custom Tripelor domain, or production integration.
@@ -36,6 +40,12 @@ The booking request button does not make a reservation; it displays the disabled
 - Non-demo server: demo session endpoint returns 404; synthetic admin cookie redirects to login; demo banner absent.
 
 Run deployed-demo checks with `PREVIEW_URL=https://the-deployment-url python3 scripts/test-hosted-demo.py`.
+
+## Live HTTPS verification
+
+The no-browser-mock suite also passed all 20 check groups on https://tripelor-mobile-demo.vercel.app at 320/390/768/1440px, with zero uncaught page errors and no observed production Supabase/Resend/Google Analytics/Google Ads browser requests. Public unauthenticated homepage returns 200; robots disallows all indexing. The demo project's only environment key remains `TRIPELOR_MOCK_PREVIEW`, no Git link/SSO requirement. Tripelor's latest production remains `19faabd` / `dpl_2g9BmwwLpZ1obzN4LVwWd5ma5a8d`.
+
+Vercel's initial deployment uses the separate demo project's production slot; it is not a deployment to the existing `tripelor` project or Tripelor.com. The first live run exposed cross-instance memory version conflicts, corrected by browser-view-only sample saves; the final live suite passed after that fix.
 
 ## Before updating Tripelor.com
 
