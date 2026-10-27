@@ -36,8 +36,9 @@ function monthYear(value: string, locale: string) {
   return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T12:00:00Z`));
 }
 
-export default async function PublicStoryPage({ params }: { params: { token: string } }) {
-  const localeKey = professionalLocale(cookies().get("tripelor_lang")?.value);
+export default async function PublicStoryPage(props: { params: Promise<{ token: string }> }) {
+  const params = await props.params;
+  const localeKey = professionalLocale((await cookies()).get("tripelor_lang")?.value);
   const locale = localeKey === "it" ? "it-IT" : localeKey === "ru" ? "ru-RU" : "en-GB";
   const copy = localeKey === "it"
     ? {

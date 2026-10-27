@@ -24,28 +24,29 @@ function dateLabel(value: string, locale: "en" | "it" | "ru", withTime = false) 
   ).format(date);
 }
 
-export default function QuotePage({
-  params,
-  searchParams,
-}: {
-  params: { reference: string };
-  searchParams?: {
-    issued?: string;
-    item?: string | string[];
-    room?: string;
-    meal?: string;
-    transferSeats?: string;
-    request?: string;
-    customize?: string;
-    currency?: string;
-    fxRate?: string;
-    clientName?: string;
-    clientEmail?: string;
-    clientPhone?: string;
-    sig?: string;
-  };
-}) {
-  const locale = professionalLocale(cookies().get("tripelor_lang")?.value);
+export default async function QuotePage(
+  props: {
+    params: Promise<{ reference: string }>;
+    searchParams?: Promise<{
+      issued?: string;
+      item?: string | string[];
+      room?: string;
+      meal?: string;
+      transferSeats?: string;
+      request?: string;
+      customize?: string;
+      currency?: string;
+      fxRate?: string;
+      clientName?: string;
+      clientEmail?: string;
+      clientPhone?: string;
+      sig?: string;
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+  const locale = professionalLocale((await cookies()).get("tripelor_lang")?.value);
   const copy = locale === "it"
     ? {
         eyebrow: "Proposta di viaggio Tripelor",

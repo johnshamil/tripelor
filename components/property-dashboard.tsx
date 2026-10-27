@@ -98,7 +98,23 @@ export default function PropertyDashboard() {
   const [uploading, setUploading] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({ rooms: true, seasonal: true, inventory: true, commercial: true, partner: true });
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({ rooms: true, seasonal: false, inventory: false, commercial: false, partner: false });
+  const [query, setQuery] = useState("");
+  const [savedForm, setSavedForm] = useState("");
+  const dirty = Boolean(form && JSON.stringify(form) !== savedForm);
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    const guardLink = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      const link = (event.target as Element).closest<HTMLAnchorElement>("a[href]");
+      if (!link || link.target === "_blank" || link.closest(".property-editor") || link.getAttribute("href")?.startsWith("#")) return;
+      if (!window.confirm("Leave this page and discard unsaved property changes?")) { event.preventDefault(); event.stopPropagation(); }
+    };
+    window.addEventListener("beforeunload", warn);
+    document.addEventListener("click", guardLink, true);
+    return () => { window.removeEventListener("beforeunload", warn); document.removeEventListener("click", guardLink, true); };
+  }, [dirty]);
 
   async function load() {
     setLoading(true); setError("");
@@ -112,15 +128,15 @@ export default function PropertyDashboard() {
   }
   useEffect(() => { load(); }, []);
 
-  const sortedProperties = useMemo(() => [...properties].sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))), [properties]);
+  const sortedProperties = useMemo(() => [...properties].filter(property => `${property.name} ${property.island} ${property.status}`.toLowerCase().includes(query.toLowerCase().trim())).sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))), [properties, query]);
   const update = <K extends keyof FormState,>(key: K, value: FormState[K]) => setForm(current => current ? { ...current, [key]: value } : current);
   const updateRoom = (index: number, key: keyof FormRoom, value: string | number) => setForm(current => current ? { ...current, rooms: current.rooms.map((room, i) => i === index ? { ...room, [key]: value } : room) } : current);
   const updateSeasonalRate = (index: number, key: keyof SeasonalRate, value: string | number) => setForm(current => current ? { ...current, seasonalRates: current.seasonalRates.map((rate, i) => i === index ? { ...rate, [key]: value } : rate) } : current);
   const updateInventoryRule = (index: number, key: keyof InventoryRule, value: string | number | boolean) => setForm(current => current ? { ...current, inventoryRules: current.inventoryRules.map((rule, i) => i === index ? { ...rule, [key]: value } : rule) } : current);
 
-  function openNew() { setForm(emptyForm()); setNotice(""); setError(""); window.scrollTo({ top: 0, behavior: "smooth" }); }
-  function edit(property: ManagedProperty) { setForm(propertyToForm(property)); setNotice(""); setError(""); window.scrollTo({ top: 0, behavior: "smooth" }); }
-  function closeForm() { setForm(null); setNotice(""); setError(""); }
+  function openNew() { const next = emptyForm(); setForm(next); setSavedForm(JSON.stringify(next)); setNotice(""); setError(""); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  function edit(property: ManagedProperty) { const next = propertyToForm(property); setForm(next); setSavedForm(JSON.stringify(next)); setNotice(""); setError(""); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  function closeForm() { if (dirty && !window.confirm("Discard unsaved property changes?")) return; setForm(null); setNotice(""); setError(""); }
   function toggle(section: string) { setOpenSections(value => ({ ...value, [section]: !value[section] })); }
 
   async function uploadPhotos(files: FileList | null, target: PhotoTarget) {
@@ -189,7 +205,8 @@ export default function PropertyDashboard() {
       const saved = result.property as ManagedProperty;
       setProperties(current => [saved, ...current.filter(property => property.id !== saved.id)]);
       setForm(propertyToForm(saved));
-      setNotice(saved.status === "published" ? "Property published. It is now available on the public Stays page." : "Draft saved. You can publish it when all details are ready.");
+      setSavedForm(JSON.stringify(propertyToForm(saved)));
+      setNotice(result.demo ? "Sample changes applied to this browser view only. Reloading resets them; nothing was published." : saved.status === "published" ? "Property published. It is now available on the public Stays page." : "Draft saved. You can publish it when all details are ready.");
     } catch (e) { setError(e instanceof Error ? e.message : "Unable to save property."); }
     finally { setSaving(false); }
   }
@@ -203,6 +220,8 @@ export default function PropertyDashboard() {
     {notice && !form && <Notice tone="success">{notice}</Notice>}
     {error && !form && <Notice tone="error">{error}</Notice>}
     {!form && <PropertySubmissionInbox onApproved={(property) => setProperties((current) => [property, ...current.filter((item) => item.id !== property.id)])} />}
+    {!form && <label className="mt-6 grid gap-2 text-sm">Find a property<input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Name, island or draft/published" className="min-h-12 w-full rounded-xl border border-white/20 bg-[#071922] px-4 text-base"/><span role="status" className="text-gray-400">{sortedProperties.length} of {properties.length} properties</span></label>}
+    {dirty && <p role="status" className="mt-4 text-sm text-gold">Unsaved changes · preview does not publish them.</p>}
     {form ? <PropertyForm form={form} update={update} updateRoom={updateRoom} updateSeasonalRate={updateSeasonalRate} updateInventoryRule={updateInventoryRule} setForm={setForm} openSections={openSections} toggle={toggle} onUpload={uploadPhotos} onHostBusy={setUploading} uploading={uploading} saving={saving} onSave={save} onCancel={closeForm} notice={notice} error={error} /> : <PropertyList properties={sortedProperties} onEdit={edit} onNew={openNew} />}
   </main>;
 }

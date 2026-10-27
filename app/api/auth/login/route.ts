@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     if (!result.access_token || !result.user?.id) {
       return Response.json({ error: "Unable to create your session. Please try again." }, { status: 502 });
     }
-    setSession(result.access_token, result.refresh_token, result.expires_in);
+    await setSession(result.access_token, result.refresh_token, result.expires_in);
     await notifyCustomerSignIn(result.user);
     return Response.json({ success: true, user: result.user });
   } catch (error) {

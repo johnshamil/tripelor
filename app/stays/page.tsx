@@ -1,4 +1,7 @@
 import PropertyCards from "@/components/room-first-booking-cards";
+import HomeSearch from "@/components/home-search";
+import { properties } from "@/lib/properties";
+import { maldivesToday } from "@/lib/manual-booking";
 import { publishedProperties } from "@/lib/property-store";
 import { cookies } from "next/headers";
 import { professionalLocale, translations } from "@/lib/professional-translations";
@@ -7,8 +10,11 @@ import { cleanStaySearch, type StaySearch } from "@/lib/stay-search";
 
 export const dynamic = "force-dynamic";
 
-export default async function StaysPage({ searchParams = {} }: { searchParams?: Record<string, string | string[] | undefined> }) {
-  const locale = professionalLocale(cookies().get("tripelor_lang")?.value);
+export default async function StaysPage(
+  props: { searchParams?: Promise<Record<string, string | string[] | undefined>> }
+) {
+  const searchParams = (await props.searchParams) || {};
+  const locale = professionalLocale((await cookies()).get("tripelor_lang")?.value);
   const copy = translations[locale].staysPage;
   const brand = coastalCopy[locale];
   const input: StaySearch = Object.fromEntries(["island", "checkIn", "checkOut", "guests"].map(key => [key, typeof searchParams[key] === "string" ? searchParams[key] : ""]));
@@ -23,10 +29,12 @@ export default async function StaysPage({ searchParams = {} }: { searchParams?: 
         <p className="mt-5 max-w-2xl leading-7 text-white/65">{copy.body}</p>
       </div>
     </header>
+    <div className="container pt-6"><HomeSearch key={JSON.stringify(search)} islands={Array.from(new Set([...managedProperties.map(property => property.island), ...properties.map(property => property.location)]))} locale={locale} today={maldivesToday()} initialSearch={search} staysOnly /></div>
     {hasSearch && <div className="container"><div className="coastal-search-summary">
       <p className="coastal-eyebrow">{brand.searchFor}</p>
       <p><strong>{search.island || brand.allIslands}</strong>{search.checkIn && search.checkOut ? ` · ${search.checkIn} — ${search.checkOut}` : ""} · {search.guests} {brand.guestsLabel}</p>
       <p>{brand.searchNote}</p>
+      {((input.checkIn || input.checkOut) && !search.checkIn) && <p role="alert">Please choose a valid check-in and later check-out date (up to 365 nights).</p>}
     </div></div>}
     <PropertyCards managedProperties={managedProperties} locale={locale} search={hasSearch ? search : undefined} />
   </main>;

@@ -95,7 +95,8 @@ function dateTime(value: string) {
   }).format(new Date(value));
 }
 
-export default async function ManualQuotationPage({ params }: { params: { token: string } }) {
+export default async function ManualQuotationPage(props: { params: Promise<{ token: string }> }) {
+  const params = await props.params;
   const quote = await quotation(params.token);
 
   if (!quote) {

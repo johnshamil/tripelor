@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { BOOKING_DRAFT_KEY, decodeBookingDraft, encodeBookingDraft } from "@/lib/booking-draft";
 import {
   ArrowRight,
   BedDouble,
@@ -130,6 +132,12 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
   const [checkedSelection, setCheckedSelection] = useState('');
   const selectionKey = [propertyName, roomType, checkIn, checkOut].join('|');
   const [managedProperties, setManagedProperties] = useState<PublicProperty[]>([]);
+  const [draftReady, setDraftReady] = useState(false);
+  const draftOwner = useRef("");
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [authRequired, setAuthRequired] = useState(false);
+  const [loginHref, setLoginHref] = useState("/login?next=%2Fbooking");
+  const submissionBusy = useRef(false);
 
   const managedProperty = managedProperties.find((property) => property.name === propertyName);
   const roomOptions = managedProperty
@@ -151,16 +159,36 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    (async () => {
+    let user: { email?: string; fullName?: string } | null = null;
+    try {
+      const response = await fetch("/api/auth/me", { cache: "no-store" });
+      if (response.ok) user = (await response.json()).user || null;
+    } catch { /* A restricted connection must not prevent date selection. */ }
+    if (cancelled) return;
+    draftOwner.current = user?.email || "anonymous";
+    let draft = null;
+    try { draft = decodeBookingDraft(sessionStorage.getItem(BOOKING_DRAFT_KEY), draftOwner.current); } catch { /* Storage is optional. */ }
     const params = new URLSearchParams(window.location.search);
+    setLoginHref(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
     const property = params.get("property");
     const meal = params.get("mealPlan");
     const room = params.get("roomType");
     const checkInParam = params.get("checkIn");
     const checkOutParam = params.get("checkOut");
+    if (draft) {
+      setFullName(draft.fullName); setEmail(draft.email); setPhone(draft.phone); setSpecialRequests(draft.specialRequests);
+      setCheckIn(draft.checkIn); setCheckOut(draft.checkOut); setAdults(draft.adults); setChildren(draft.children);
+      if (!params.has("package") && (!property || property === draft.propertyName)) {
+        setPropertyName(draft.propertyName); setRoomType(draft.roomType); setMealPlan(draft.mealPlan);
+      }
+      setDraftRestored(true);
+    } else { setFullName(user?.fullName || ""); setEmail(user?.email || ""); }
 
     if (property) {
       setPropertyName(property);
-      setRoomType(PROPERTY_ROOMS[property]?.[0]?.value || PROPERTY_ROOMS[PACKAGE_HOTEL][0].value);
+      if (!draft || property !== draft.propertyName) setRoomType(PROPERTY_ROOMS[property]?.[0]?.value || PROPERTY_ROOMS[PACKAGE_HOTEL][0].value);
     }
     if (meal) setMealPlan(meal);
     if (room) setRoomType(room);
@@ -185,7 +213,15 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
       setAdults("2");
       setChildren("0");
     }
+    setDraftReady(true);
+    })();
+    return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    if (!draftReady) return;
+    try { sessionStorage.setItem(BOOKING_DRAFT_KEY, encodeBookingDraft({ propertyName, roomType, mealPlan, checkIn, checkOut, adults, children, fullName, email, phone, specialRequests }, draftOwner.current)); } catch { /* Private/restricted storage must not block booking. */ }
+  }, [draftReady, propertyName, roomType, mealPlan, checkIn, checkOut, adults, children, fullName, email, phone, specialRequests]);
 
   useEffect(() => {
     if (!managedProperty) return;
@@ -195,17 +231,6 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
       setMealPlan(matchingRoom.mealPlan);
     }
   }, [managedProperty, roomType, mealPlan]);
-
-  useEffect(() => {
-    fetch("/api/auth/me", { cache: "no-store" })
-      .then((response) => response.json())
-      .then((result) => {
-        if (!result?.user) return;
-        setFullName((current) => current || result.user.fullName || "");
-        setEmail((current) => current || result.user.email || "");
-      })
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     if (packageName && checkIn) setCheckOut(addDays(checkIn, packageNights));
@@ -269,14 +294,10 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
   const childOptions = Array.from({ length: Math.min(4, maxGuests) + 1 }, (_, index) => index);
 
   function handlePropertyChange(value: string) {
-    const firstRoomValue = PROPERTY_ROOMS[value]?.[0]?.value || managedProperties.find((property) => property.name === value)?.rooms[0]?.name || "ROOM 101";
+    const firstRoomValue = managedProperties.find((property) => property.name === value)?.rooms[0]?.name || PROPERTY_ROOMS[value]?.[0]?.value || "ROOM 101";
     setPropertyName(value);
     setRoomType(firstRoomValue);
     setMealPlan(value === "Rivethi Beach Hotel" ? "Room Only" : "Bed & Breakfast");
-    setAdults("2");
-    setChildren("0");
-    setCheckIn("");
-    setCheckOut("");
     setAvailability(null);
     setStatus("");
   }
@@ -308,6 +329,7 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
         body: JSON.stringify({ propertyName, roomType, checkIn, checkOut, rooms: 1 }),
       });
       const result = await response.json();
+      if (response.status === 401) setAuthRequired(true);
       if (!response.ok) throw new Error(result?.error || copy.unableAvailability);
       setAvailability(result);
       setCheckedSelection(selectionKey);
@@ -354,11 +376,13 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
   }
 
   async function sendBooking() {
+    if (submissionBusy.current) return;
     setStatus("");
     if (!validate()) return;
-    let available = availability?.available;
+    submissionBusy.current = true;
+    let available = checkedSelection === selectionKey && availability?.available;
     if (!available) available = await checkAvailability();
-    if (!available) return;
+    if (!available) { submissionBusy.current = false; return; }
 
     setSending(true);
     try {
@@ -404,8 +428,10 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
         }),
       });
       const result = await response.json();
+      if (response.status === 401) setAuthRequired(true);
       if (!response.ok) throw new Error(result?.error || copy.unableRequest);
 
+      try { sessionStorage.removeItem(BOOKING_DRAFT_KEY); } catch { /* optional storage */ }
       const title = packageName || `${propertyName} · ${roomLabel}`;
       window.location.href = `/booking/confirmation?name=${encodeURIComponent(fullName.trim())}&title=${encodeURIComponent(
         title,
@@ -416,12 +442,13 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
       setStatus(error instanceof Error ? error.message : copy.unableRequest);
       setAvailability(null);
     } finally {
+      submissionBusy.current = false;
       setSending(false);
     }
   }
 
   return (
-    <section className="bg-[#f1ebdf] pb-24 text-[#071922]">
+    <section className="booking-flow bg-[#f1ebdf] pb-24 text-[#071922]">
       <div className="bg-[#06151c] text-white">
         <div className="container py-16 md:py-20">
           <p className="eyebrow">{copy.eyebrow}</p>
@@ -447,6 +474,7 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
       </div>
 
       <div className="container grid gap-7 pt-10 lg:grid-cols-[1fr_360px] lg:items-start">
+        {draftRestored && <p role="status" className="booking-draft-notice lg:col-span-2">Your booking details have been restored in this tab. Availability and prices are checked again.</p>}
         <form
           className="border border-[#d0c5b0] bg-[#f8f4ec] shadow-[0_24px_80px_rgba(34,43,46,.08)]"
           onSubmit={(event) => event.preventDefault()}
@@ -480,9 +508,7 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
                 <label className="premium-label">
                   <span><Hotel className="h-4 w-4 text-[#9c7d3d]" /> {copy.property}</span>
                   <select value={propertyName} onChange={(event) => handlePropertyChange(event.target.value)} className="premium-control">
-                    <option>Uhoo&apos;s Lavish Oasis</option>
-                    <option>Masfalhi View Inn</option>
-                    <option>Rivethi Beach Hotel</option>
+                    {["Uhoo's Lavish Oasis", "Masfalhi View Inn", "Rivethi Beach Hotel"].filter(name => !managedProperties.some(property => property.name === name)).map(name => <option key={name}>{name}</option>)}
                     {managedProperties.map((property) => <option key={property.id} value={property.name}>{property.name}</option>)}
                   </select>
                 </label>
@@ -597,15 +623,15 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
             <div className="grid gap-5 md:grid-cols-3">
               <label className="premium-label">
                 <span>{copy.fullName}</span>
-                <input value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder={copy.fullNamePlaceholder} className="premium-control" />
+                <input autoComplete="name" value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder={copy.fullNamePlaceholder} className="premium-control" />
               </label>
               <label className="premium-label">
                 <span>{copy.email}</span>
-                <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@email.com" type="email" className="premium-control" />
+                <input autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@email.com" type="email" className="premium-control" />
               </label>
               <label className="premium-label">
                 <span>{copy.phone}</span>
-                <input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder={copy.phonePlaceholder} className="premium-control" />
+                <input autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder={copy.phonePlaceholder} type="tel" className="premium-control" />
               </label>
             </div>
 
@@ -622,7 +648,7 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
               </label>
             )}
 
-            {status && <div className="mt-5 border border-[#c4b89f] bg-[#eee5d4] p-4 text-sm text-[#5e625f]">{status}</div>}
+            {status && <div role="alert" className="mt-5 border border-[#c4b89f] bg-[#eee5d4] p-4 text-sm text-[#5e625f]">{status}{authRequired && <Link href={loginHref} className="mt-3 block underline">Sign in to continue · your details stay saved in this tab</Link>}</div>}
           </div>
         </form>
 
@@ -654,7 +680,9 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
             )}
           </div>
 
-          <button type="button" onClick={sendBooking} disabled={sending} className="btn-gold w-full disabled:opacity-60">
+          {managedProperty && <details className="booking-conditions"><summary>Inclusions & booking conditions</summary><dl>{[["Taxes & service charges", managedProperty.taxes], ["Transfers", managedProperty.transfers], ["Cancellation", managedProperty.cancellation], ["Payment", managedProperty.payment]].map(([label, text]) => <div key={label}><dt>{label}</dt><dd>{text || "Ask Tripelor to confirm before payment."}</dd></div>)}</dl></details>}
+
+          <button type="button" onClick={sendBooking} disabled={sending || checking || !draftReady} className="btn-gold w-full disabled:opacity-60">
             {sending ? copy.preparing : copy.requestStay} <ArrowRight className="h-4 w-4" />
           </button>
 

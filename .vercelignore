@@ -1,0 +1,12 @@
+.git
+.next
+node_modules
+.env
+.env.*
+*.tsbuildinfo
+test-results
+tests
+scripts
+docs
+task.md
+design.md

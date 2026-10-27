@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useSiteLanguage } from "@/components/use-site-language";
 
@@ -47,26 +47,51 @@ export default function AvailabilityDatePicker({
   const [month, setMonth] = useState(() => new Date(initial.getFullYear(), initial.getMonth(), 1));
   const [days, setDays] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
+  const [calendarError, setCalendarError] = useState(false);
+  const modal = useRef<HTMLDivElement>(null);
   const start = new Date(month.getFullYear(), month.getMonth(), 1);
   const end = new Date(month.getFullYear(), month.getMonth() + 1, 0);
   const today = iso(new Date());
 
   useEffect(() => {
     if (!open) return;
+    const controller = new AbortController();
     setLoading(true);
+    setDays({}); setCalendarError(false);
     fetch(
       `/api/availability/calendar?propertyName=${encodeURIComponent(propertyName)}&roomType=${encodeURIComponent(roomType)}&from=${iso(start)}&to=${iso(end)}`,
-      { cache: "no-store" },
+      { cache: "no-store", signal: controller.signal },
     )
-      .then((response) => response.json())
+      .then((response) => { if (!response.ok) throw new Error("Calendar unavailable"); return response.json(); })
       .then((result) => {
+        if (controller.signal.aborted) return;
         const nextDays: Record<string, boolean> = {};
         for (const day of result.days || []) nextDays[day.day] = Boolean(day.available);
         setDays(nextDays);
       })
-      .catch(() => setDays({}))
-      .finally(() => setLoading(false));
+      .catch(() => { if (!controller.signal.aborted) { setDays({}); setCalendarError(true); } })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
   }, [open, propertyName, roomType, month.getFullYear(), month.getMonth()]);
+
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    modal.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); setOpen(false); }
+      if (event.key !== "Tab") return;
+      const buttons = modal.current?.querySelectorAll<HTMLButtonElement>("button:not([disabled])");
+      if (!buttons?.length) return;
+      const first = buttons[0], last = buttons[buttons.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", keydown);
+    return () => { document.removeEventListener("keydown", keydown); document.body.style.overflow = overflow; previous?.focus(); };
+  }, [open]);
 
   useEffect(() => {
     if (value) {
@@ -101,7 +126,7 @@ export default function AvailabilityDatePicker({
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#021015]/80 p-4 backdrop-blur-md" onClick={() => setOpen(false)}>
+        <div ref={modal} role="dialog" aria-modal="true" aria-label={label} className="booking-calendar fixed inset-0 z-[100] flex items-center justify-center bg-[#021015]/80 p-4 backdrop-blur-md" onClick={() => setOpen(false)}>
           <div className="w-full max-w-md overflow-hidden border border-[#c9a86a]/30 bg-[#071922] text-white shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <div className="flex items-start justify-between border-b border-white/10 bg-[#0b2731] p-6">
               <div>
@@ -139,7 +164,8 @@ export default function AvailabilityDatePicker({
                   if (!date) return <span key={`empty-${index}`} className="aspect-square" />;
                   const key = iso(date);
                   const past = key < today || (minDate ? key < minDate : false);
-                  const available = days[key] !== false;
+                  const unknown = typeof days[key] !== "boolean";
+                  const available = days[key] === true;
                   const selected = value === key;
                   return (
                     <button
@@ -147,9 +173,12 @@ export default function AvailabilityDatePicker({
                       type="button"
                       disabled={past || (!available && !allowUnavailable) || loading}
                       onClick={() => choose(key, available, past)}
+                      aria-label={`${date.toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" })} · ${unknown ? "Availability unverified" : available ? copy.available : copy.booked}`}
                       className={`aspect-square text-sm font-semibold transition ${
                         past
                           ? "text-white/15"
+                          : unknown
+                            ? "bg-white/5 text-white/70"
                           : !available
                             ? `bg-red-400/15 text-red-300/70 ${allowUnavailable ? 'hover:bg-red-400/25' : 'cursor-not-allowed'} ${selected ? 'ring-2 ring-red-300/70' : ''}`
                             : selected
@@ -169,6 +198,7 @@ export default function AvailabilityDatePicker({
                 <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 bg-white/15" /> {copy.past}</span>
               </div>
               {allowUnavailable && <p className="mt-4 text-center text-xs leading-5 text-white/60">{copy.alert}</p>}
+              {calendarError && <p role="alert" className="mt-3 text-sm text-amber-200">Calendar unavailable. Dates can still be selected; check full-stay availability before requesting.</p>}
             </div>
           </div>
         </div>

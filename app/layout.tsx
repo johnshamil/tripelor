@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import "../styles/mobile-comfort.css";
 import "../styles/coastal.css";
+import "../styles/refinement.css";
 import type { Metadata } from "next";
 import { CartProvider } from "@/components/cart-provider";
 import Navbar from "@/components/navbar";
@@ -8,6 +9,9 @@ import Footer from "@/components/footer";
 import WhatsAppFloat from "@/components/whatsapp-float";
 import SmoothExperience from "@/components/smooth-experience";
 import AnalyticsTracker from "@/components/analytics-tracker";
+import DemoBanner from "@/components/demo-banner";
+
+const demo = process.env.TRIPELOR_MOCK_PREVIEW === "1";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tripelor.com"),
@@ -31,11 +35,11 @@ export const metadata: Metadata = {
     "Felidhoo Maldives",
   ],
   robots: {
-    index: true,
-    follow: true,
+    index: !demo,
+    follow: !demo,
     googleBot: {
-      index: true,
-      follow: true,
+      index: !demo,
+      follow: !demo,
       "max-image-preview": "large",
       "max-snippet": -1,
       "max-video-preview": -1,
@@ -91,7 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        <script
+        {!demo && <><script
           async
           src="https://www.googletagmanager.com/gtag/js?id=AW-18458548937"
         />
@@ -104,17 +108,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               gtag('config', 'AW-18458548937');
             `,
           }}
-        />
+        /></>}
       </head>
       <body>
+        {demo && <DemoBanner />}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }} />
         <CartProvider>
         <Navbar />
         <main><SmoothExperience>{children}</SmoothExperience></main>
         <Footer />
-        <WhatsAppFloat />
-        <AnalyticsTracker />
+        {!demo && <WhatsAppFloat />}
+        {!demo && <AnalyticsTracker />}
         </CartProvider>
       </body>
     </html>
