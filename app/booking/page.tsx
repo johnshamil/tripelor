@@ -3,8 +3,9 @@ import {Gift} from "lucide-react";
 import {cookies} from "next/headers";
 import {professionalLocale,translations} from "@/lib/professional-translations";
 
-export default function BookingPage({searchParams}:{searchParams?:{ref?:string}}){
-  const locale=professionalLocale(cookies().get("tripelor_lang")?.value);
+export default async function BookingPage(props:{searchParams?: Promise<{ref?:string}>}) {
+  const searchParams = await props.searchParams;
+  const locale=professionalLocale((await cookies()).get("tripelor_lang")?.value);
   const copy=translations[locale].booking;
   const ref=(searchParams?.ref||"").trim().toUpperCase();
   return <>

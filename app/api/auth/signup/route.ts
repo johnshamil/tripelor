@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     }
 
     if (result.access_token) {
-      setSession(result.access_token, result.refresh_token, result.expires_in);
+      await setSession(result.access_token, result.refresh_token, result.expires_in);
       await notifyCustomerSignIn(result.user, "new_account");
     }
     return Response.json({

@@ -10,8 +10,11 @@ import { cleanStaySearch, type StaySearch } from "@/lib/stay-search";
 
 export const dynamic = "force-dynamic";
 
-export default async function StaysPage({ searchParams = {} }: { searchParams?: Record<string, string | string[] | undefined> }) {
-  const locale = professionalLocale(cookies().get("tripelor_lang")?.value);
+export default async function StaysPage(
+  props: { searchParams?: Promise<Record<string, string | string[] | undefined>> }
+) {
+  const searchParams = (await props.searchParams) || {};
+  const locale = professionalLocale((await cookies()).get("tripelor_lang")?.value);
   const copy = translations[locale].staysPage;
   const brand = coastalCopy[locale];
   const input: StaySearch = Object.fromEntries(["island", "checkIn", "checkOut", "guests"].map(key => [key, typeof searchParams[key] === "string" ? searchParams[key] : ""]));

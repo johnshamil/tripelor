@@ -71,11 +71,12 @@ function prettyDate(value: string) {
   }
 }
 
-export default async function ConfirmationPage({
-  searchParams,
-}: {
-  searchParams?: { name?: string; title?: string; dates?: string; ref?: string; total?: string };
-}) {
+export default async function ConfirmationPage(
+  props: {
+    searchParams?: Promise<{ name?: string; title?: string; dates?: string; ref?: string; total?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const ref = searchParams?.ref || "Pending";
   const booking = await getReservation(ref);
   const payment = booking?.payment_status?.toLowerCase() === "paid" ? "Paid" : "Payment pending";

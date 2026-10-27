@@ -25,7 +25,7 @@ async function getReviews(): Promise<Review[]> {
 }
 
 export default async function Home() {
-  const locale = professionalLocale(cookies().get("tripelor_lang")?.value);
+  const locale = professionalLocale((await cookies()).get("tripelor_lang")?.value);
   const copy = coastalCopy[locale], original = translations[locale].home;
   const [reviews, managedProperties] = await Promise.all([getReviews(), publishedProperties()]);
   const managedSlugs = new Set(managedProperties.map(property => property.slug));
