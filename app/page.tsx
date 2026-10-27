@@ -3,7 +3,6 @@ import { ArrowDown, ArrowRight, ArrowUpRight, Check, Compass, Ship, Star, Waves 
 import { cookies } from "next/headers";
 import HomeSearch from "@/components/home-search";
 import HomeReferralRewards from "@/components/home-referral-rewards";
-import HomeStoryPreview from "@/components/home-story-preview";
 import PropertyCards from "@/components/room-first-booking-cards";
 import TripelorMark from "@/components/tripelor-mark";
 import SaveTripButton from "@/components/save-trip-button";
@@ -66,15 +65,8 @@ export default async function Home() {
       </div>
     </section>
 
-    <HomeStoryPreview properties={managedProperties} locale={locale} copy={{ title: original.islandStoryTitle, body: original.islandStoryBody, cta: original.islandStoryCta }} />
-
-    <section className="container coastal-personal-grid">
-      <article className="coastal-personal-card"><TripelorMark className="coastal-card-star" /><p className="coastal-eyebrow">{copy.helpEyebrow}</p><h2>{copy.helpTitle}</h2><p>{copy.helpBody}</p><Link href="/maldives-matchmaker" className="coastal-text-link">{copy.helpCta}<ArrowRight /></Link></article>
-      <article className="coastal-personal-card is-blue"><Compass className="coastal-card-star" /><p className="coastal-eyebrow">{copy.lessPlanning}</p><h2>{copy.secretTitle}</h2><p>{copy.secretBody}</p><Link href="/secret-deals" className="coastal-text-link">{copy.secretCta}<ArrowRight /></Link></article>
-    </section>
-
+    <section className="container coastal-members"><div><p className="coastal-eyebrow">{copy.helpEyebrow}</p><h2>{copy.helpTitle}</h2><p>{copy.helpBody}</p></div><Link href="/maldives-matchmaker" className="coastal-button">{copy.helpCta}<ArrowRight /></Link></section>
     <HomeReferralRewards locale={locale} />
-    <section className="container coastal-members"><div><p className="coastal-eyebrow">{copy.joinEyebrow}</p><h2>{copy.joinTitle}</h2><p>{copy.joinBody}</p></div><Link href="/signup?next=%2Faccount" className="coastal-button">{copy.joinCta}<ArrowUpRight /></Link></section>
 
     {reviews.length > 0 && <section className="container coastal-reviews"><div className="coastal-section-heading"><div><p className="coastal-eyebrow">{copy.reviewsEyebrow}</p><h2>{copy.reviewsTitle}</h2></div><Link href="/reviews" className="coastal-text-link">{copy.allReviews}<ArrowUpRight /></Link></div><div className="coastal-review-grid">{reviews.map(review => <article key={review.id}><div aria-label={`${review.rating} out of 5 stars`} className="coastal-rating">{Array.from({ length: Math.min(5, Math.max(1, Math.round(review.rating))) }, (_, index) => <Star key={index} aria-hidden="true" />)}</div><blockquote>“{review.review_text}”</blockquote><p>{review.guest_name}<span>{[review.country, review.property_name].filter(Boolean).join(" · ")}</span></p></article>)}</div></section>}
   </div>;

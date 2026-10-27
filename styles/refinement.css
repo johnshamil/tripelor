@@ -1,0 +1,69 @@
+/* In-place Tripelor refinement: existing palette, logo and typography retained. */
+:is(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid #3156e8; outline-offset: 4px; }
+.brand-planning-tools { margin-top: 20px; border-block: 1px solid var(--brand-line); }
+.brand-planning-tools summary { min-height: 52px; padding: 16px 0; cursor: pointer; font-size: 15px; font-weight: 600; }
+.brand-planning-tools nav { padding-bottom: 20px; }
+.coastal-search-form :is(select, input), .coastal-content .coastal-search-form :is(select, input) { width: 100%; min-width: 0; min-height: 48px; font-size: 16px; }
+.coastal-search-form label > span { font-size: 11px; color: #535e58; }
+.coastal-property-location { font-size: 13px; }
+.coastal-property-description { font-size: 14px; }
+.coastal-property-info .stay-rate-disclaimer { margin-top: 12px; font-size: 12px; line-height: 1.6; color: var(--brand-muted); }
+.coastal-property-grid { align-items: stretch; }
+.coastal-property-card { display: flex; flex-direction: column; }
+.coastal-property-info { flex: 1; }
+.property-section-nav { display: flex; flex-wrap: wrap; gap: 12px; padding-block: 20px; }
+.property-section-nav a { display: inline-flex; align-items: center; min-height: 48px; padding: 10px 16px; border: 1px solid var(--brand-line); color: var(--brand-blue); font-size: 14px; }
+:is(#property-facilities, #property-policies, #choose-room) { scroll-margin-top: 140px; }
+.booking-flow :is(form, aside, .premium-label, .premium-control) { min-width: 0; }
+.booking-flow .premium-control { width: 100%; font-size: 16px; }
+.booking-flow .booking-draft-notice { border: 1px solid #b6c8b6; background: #e5eee7; padding: 16px; font-size: 14px; line-height: 1.7; }
+.booking-conditions { border-block: 1px solid #ffffff30; margin-bottom: 24px; }
+.booking-conditions summary { padding-block: 16px; min-height: 48px; font-size: 14px; cursor: pointer; }
+.booking-conditions dl { padding-bottom: 18px; font-size: 14px; line-height: 1.7; }
+.booking-conditions dt { margin-top: 14px; font-weight: 600; color: var(--brand-blue); }
+.booking-conditions dd { color: var(--brand-muted); overflow-wrap: anywhere; }
+.booking-calendar > div { max-height: calc(100dvh - 32px); overflow-y: auto; }
+.booking-calendar button { min-height: 44px; }
+.property-editor :is(p, label, input, textarea, select) { overflow-wrap: anywhere; }
+.property-editor button { max-width: 100%; }
+
+@media (max-width: 767px) {
+  .brand-navigation { gap: 10px; }
+  .brand-saved, .brand-menu-toggle { min-width: 44px; min-height: 48px; }
+  .brand-signin { min-height: 48px; padding-inline: 12px; }
+  .coastal-hero { grid-template-columns: 1fr; gap: 0; padding-block: 12px 20px; }
+  .coastal-hero-copy { padding: 8px 0 0; }
+  .coastal-hero h1, .coastal-home[data-locale="it"] .coastal-hero h1, .coastal-home[data-locale="ru"] .coastal-hero h1 { font-size: clamp(36px, 10vw, 62px); line-height: .98; padding-block: 18px; }
+  .coastal-hero h1 { display: flex; flex-wrap: wrap; gap: 0 .15em; width: 100%; }
+  .coastal-hero h1 span { display: block; margin: 0; }
+  .coastal-hero-bottom > p { font-size: 15px; line-height: 1.7; max-width: 100%; }
+  .coastal-hero-bottom > a { display: none; }
+  .coastal-hero-photo { display: none; }
+  .coastal-search-form { gap: 16px; padding: 18px 16px; }
+  .coastal-search-form label > span { font-size: 11px; gap: 6px; }
+  .coastal-content .coastal-search-form :is(input, select) { min-height: 48px; font-size: 16px; }
+  .coastal-property-location { font-size: 13px; }
+  .coastal-property-grid { grid-template-columns: minmax(0, 1fr); }
+  .coastal-property-description { font-size: 14px; line-height: 1.7; }
+  .coastal-property-bottom p, .coastal-property-bottom small { font-size: 13px; }
+  .property-cinematic-hero h1 { font-size: clamp(36px, 10vw, 56px); line-height: 1.08; }
+  .property-mobile-cta { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  body:has(.property-mobile-cta) .floating-plan { display: none; }
+  body:has(.property-mobile-cta) .mobile-booking-bar { display: none; }
+  .booking-flow h1 { font-size: 40px; }
+  .booking-flow aside { padding: 24px; }
+  .booking-flow form > div { padding: 22px 18px; }
+  .coastal-content .booking-flow :is([class~="text-white/40"], [class~="text-white/35"], [class~="text-white/45"]) { color: rgb(var(--tone-rgb) / .78); }
+  .property-editor section { scroll-margin-top: 190px; }
+  .property-editor-actions { top: var(--brand-header-height, 100px) !important; }
+  .coastal-content .property-editor .text-gray-500 { color: rgb(var(--tone-rgb) / .78); }
+}
+@media (max-width: 380px) {
+  .brand-saved { display: none; }
+  .coastal-search-form { grid-template-columns: 1fr; }
+  .coastal-search-form label:nth-of-type(2), .coastal-search-form label:nth-of-type(3) { grid-column: auto; grid-row: auto; }
+  .booking-calendar { padding: 8px; }
+  .booking-calendar > div > div { padding: 12px; }
+  .booking-calendar button { min-height: 38px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

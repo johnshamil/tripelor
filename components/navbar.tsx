@@ -44,7 +44,7 @@ export default function Navbar() {
     function keyboard(event: KeyboardEvent) {
       if (event.key === "Escape") { event.preventDefault(); setOpen(false); }
       if (event.key !== "Tab") return;
-      const controls = menuRef.current?.querySelectorAll<HTMLElement>("a[href],button:not([disabled]),select");
+      const controls = Array.from(menuRef.current?.querySelectorAll<HTMLElement>("a[href],button:not([disabled]),select,summary") || []).filter(element => element.getClientRects().length > 0);
       if (!controls?.length) return;
       const first = controls[0], last = controls[controls.length - 1];
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
@@ -73,7 +73,9 @@ export default function Navbar() {
       <div className="container brand-menu-inner">
         <div className="brand-menu-heading"><p>{brand.menu}</p><button type="button" onClick={() => setOpen(false)} aria-label="Close menu"><X /></button></div>
         {user?.isAdmin && <nav className="brand-admin-links" aria-label="Admin navigation">{[["/admin", copy.adminHome], ["/admin/manual-bookings", "Manual Booking"], ["/admin/properties", copy.properties], ["/admin/quotations", "Quotations"]].map(([href, label]) => <Link key={href} href={href} onClick={() => setOpen(false)}>{label}<ArrowUpRight /></Link>)}</nav>}
-        <nav className="brand-menu-links" aria-label="More navigation">{menuLinks.map(([href, label]) => <Link key={href} href={href} onClick={() => setOpen(false)}>{label}<ArrowUpRight aria-hidden="true" /></Link>)}</nav>
+        <nav className="brand-menu-links" aria-label="Travel services">{menuLinks.slice(0, 6).map(([href, label]) => <Link key={href} href={href} onClick={() => setOpen(false)}>{label}<ArrowUpRight aria-hidden="true" /></Link>)}</nav>
+        <details className="brand-planning-tools"><summary>Planning tools & member rewards</summary><nav className="brand-menu-links" aria-label="Planning tools">{menuLinks.slice(6, -2).map(([href, label]) => <Link key={href} href={href} onClick={() => setOpen(false)}>{label}<ArrowUpRight aria-hidden="true" /></Link>)}</nav></details>
+        <nav className="brand-menu-links" aria-label="Help and reviews">{menuLinks.slice(-2).map(([href, label]) => <Link key={href} href={href} onClick={() => setOpen(false)}>{label}<ArrowUpRight aria-hidden="true" /></Link>)}</nav>
         <div className="brand-menu-bottom"><LanguageSwitcher fullWidth /><CartLink onClick={() => setOpen(false)} />{user && <button type="button" onClick={logout}><LogOut />{copy.logOut}</button>}<Link href="/build-your-trip" onClick={() => setOpen(false)} className="coastal-button">{copy.planTrip}<ArrowUpRight /></Link></div>
       </div>
     </div>

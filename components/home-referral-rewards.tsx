@@ -35,8 +35,6 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
   }, []);
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-
     (async () => {
       try {
         const response = await fetch("/api/auth/me", { cache: "no-store" });
@@ -65,17 +63,7 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
       }
     })();
 
-    try {
-      if (!sessionStorage.getItem(SESSION_KEY)) {
-        timer = setTimeout(() => setOpen(true), 250);
-      }
-    } catch {
-      timer = setTimeout(() => setOpen(true), 250);
-    }
-
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
+    // Keep the reward discoverable inline, never interrupt destination/date entry.
   }, []);
 
   useEffect(() => {
@@ -130,6 +118,7 @@ export default function HomeReferralRewards({ locale = "en" }: { locale?: Profes
             {cta}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
           </Link>
+          <button type="button" onClick={() => setOpen(true)} className="min-h-12 px-3 text-sm underline underline-offset-4">{copy.newReward} · Details</button>
         </div>
       </section>
 

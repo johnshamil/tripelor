@@ -19,7 +19,7 @@ export default function PropertyCards({ managedProperties = [], featured = false
     image: property.images[0], description: property.description, startingFrom: property.startingFrom,
   }]));
   for (const property of managedProperties) {
-    const rates = property.rooms.map(room => room.sellingRate).filter(rate => Number.isFinite(rate) && rate > 0);
+    const rates = [...property.rooms, ...property.seasonalRates].map(room => room.sellingRate).filter(rate => Number.isFinite(rate) && rate > 0);
     cards.set(property.slug, {
       slug: property.slug, name: property.name, location: property.island,
       image: property.photos[0] ? propertyPhotoUrl(property.photos[0]) : cards.get(property.slug)?.image || "/properties/rivethi-beach-hotel/1719713475.jpeg",
@@ -56,6 +56,7 @@ export default function PropertyCards({ managedProperties = [], featured = false
               <p>{property.startingFrom > 0 ? <>{copy.from}{" "}<strong>USD {property.startingFrom}</strong><small>{copy.perNight.replace(/^USD\s*\/?\s*/i, "")}</small></> : copy.ratesRequest}</p>
               <span aria-label={copy.exploreRooms}><ArrowUpRight aria-hidden="true" /></span>
             </div>
+            <p className="stay-rate-disclaimer">Reference rate · dates, taxes and transfers confirmed before payment</p>
           </div>
         </Link>)}
       </div> : <div className="coastal-search-summary"><p role="status">{brand.noStays}</p><Link href="/stays" className="coastal-text-link">{brand.allStays}<ArrowRight /></Link></div>}

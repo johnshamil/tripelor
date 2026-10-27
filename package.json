@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "preview:mock": "node scripts/preview-mock.cjs",
+    "test:mobile": "node --test tests/stay-search.test.cjs tests/booking-draft.test.cjs tests/mobile-refinement.test.cjs"
   },
   "dependencies": {
     "next": "14.2.4",

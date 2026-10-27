@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import "../styles/mobile-comfort.css";
 import "../styles/coastal.css";
+import "../styles/refinement.css";
 import type { Metadata } from "next";
 import { CartProvider } from "@/components/cart-provider";
 import Navbar from "@/components/navbar";
