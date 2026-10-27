@@ -4,7 +4,7 @@ This is the existing Tripelor Next.js repository, not the separate Runable proto
 
 **Hosted preview:** https://tripelor-mobile-demo.vercel.app  
 **Verified deployment:** `dpl_CTBtpfdNywjpeam9sjsSF1JJ6by5`, source `eac2e0b`; READY in the separate demo project.  
-**GitHub status:** commits are local. Supplied PAT fails Git blob write/push with 403 (`contents=write` required); no remote branch or PR yet.
+**GitHub status:** pushed to `improve/mobile-booking-20261027`. [Draft pull request #117](https://github.com/johnshamil/tripelor/pull/117) targets `main`; not merged. Token permissions were corrected and write/push verified. The hosted runtime matches the pushed code; subsequent changes are documentation only.
 
 ## Isolation and access
 

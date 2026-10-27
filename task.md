@@ -39,9 +39,10 @@
 - Next: commit security and hosted-demo changes, atomically push guarded branch, create draft PR, deploy only separate project, run live HTTPS demo checks, verify production unchanged, deliver URL + refreshed code/test handoff.
 ## Current verified outcome
 - Local commits: cd2b21d (UI), aa445dd (security/async APIs), 3aa6a77 (hosted demo), 34a3799 (deployment exclusions), eac2e0b (browser-local demo saves).
-- Push FAILED 403. GitHub PAT reads metadata but Git blob probe rejects contents=write. No remote branch or PR; need corrected PAT permission. GitHub plugin account permissions alone did not prove PAT write permission.
+- Earlier push attempts failed 403; after user corrected the saved token permissions, Git blob write probe returned 201 and the full branch push succeeded. Remote branch verified at 31e310c before this documentation update.
 - Hosted HTTPS https://tripelor-mobile-demo.vercel.app; final READY deployment dpl_CTBtpfdNywjpeam9sjsSF1JJ6by5, deployed source eac2e0b.
 - First live suite exposed serverless memory version conflicts; fixed sample saves to return validated current-browser-view-only data, reload resets it. Production save validation/version/RPC path untouched.
 - Final live HTTPS no-browser-mock suite passed 20 check groups at 320/390/768/1440px, zero page errors and no observed production-service requests.
 - Separate project only demo flag, no Git link, no SSO requirement; public 200/noindex. Existing Tripelor production deployment remains dpl_2g9BmwwLpZ1obzN4LVwWd5ma5a8d / 19faabd. No production changes or bookings/emails.
-- Remaining: corrected GitHub contents/PR write token, push/PR verification; actual iPhone Safari and real isolated staging login/booking/email/payment/storage/concurrency/remaining admin tests before release.
+- Draft PR #117 created and verified: https://github.com/johnshamil/tripelor/pull/117, head improve/mobile-booking-20261027, base main. No merge. Vercel inspection after push confirms no deployment in the production-connected project; original production still 19faabd. Hosted preview remains public HTTP 200/noindex.
+- Remaining: actual iPhone Safari and real isolated staging login/booking/email/payment/storage/concurrency/remaining admin tests before release. Refresh source/report handoff with successful GitHub status.
