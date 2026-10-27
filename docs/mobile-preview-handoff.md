@@ -1,5 +1,7 @@
 # Tripelor — local mocked preview handoff
 
+> Historical handoff for the initial local-only commit. For the subsequently approved isolated hosted demo and security upgrade, see [hosted-demo.md](hosted-demo.md). The local commit/deployment and vulnerability statuses below describe that earlier checkpoint, not the current branch.
+
 **Implemented in the existing Next.js repository on `improve/mobile-booking-20261027`, based on production commit `19faabd`. Nothing has been pushed or deployed.** This is an in-place refinement, not the earlier standalone Runable prototype.
 
 ## Changes

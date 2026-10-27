@@ -1,3 +1,5 @@
+.demo-banner{position:relative;z-index:60;background:#fff4ce;color:#182d35;padding:16px clamp(12px,4vw,48px);border-bottom:2px solid #aa8136;font-family:Arial,sans-serif;font-size:13px;line-height:1.55}
+.demo-banner p{margin:4px 0;max-width:980px}.demo-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.demo-actions button{min-height:44px;padding:8px 13px;border:1px solid #78643e;background:#fffdf8;color:#182d35;font-weight:600}
 /* In-place Tripelor refinement: existing palette, logo and typography retained. */
 :is(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid #3156e8; outline-offset: 4px; }
 .brand-planning-tools { margin-top: 20px; border-block: 1px solid var(--brand-line); }

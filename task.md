@@ -24,7 +24,16 @@
 - Local mock listeners 4300/4301; no Resend credentials, mutation RPCs blocked, launcher refuses real .env files/Vercel.
 - Handoff/run instructions: docs/mobile-preview-handoff.md.
 ## Blockers
-- GitHub write authorisation not yet granted.
+- GitHub connector is connected; repository API confirms admin/push permissions. Local git has no credential helper/token and gh is unavailable. Branch remains local at cd2b21d; no push attempted because automatic Vercel preview isolation remains unverified.
 - Need Vercel project environment metadata and safe preview backend configuration (connector only lists deployments).
 - Need isolated Supabase test data/admin account to test mutations and email safely.
 - Need approved dependency/security patch before any release; other admin screens/upload and real staging login/payment/email remain unverified.
+## Hosted preview continuation
+- User approved isolated hosted mock and security fixes, supplied scoped tokens outside repo. Both tokens validated via API.
+- Production env metadata confirms Supabase/Resend variables target both preview and production. No production settings changed.
+- Created separate Vercel project tripelor-mobile-demo / prj_SIbBMw9JWpXi8gqpqvmQ9QQ8H8pj; only TRIPELOR_MOCK_PREVIEW=1; no Git link; Node 22; no production domain.
+- Next 15.5.28 + PostCSS 8.5.32 override + lockfile; npm audit reports zero vulnerabilities. Async cookie/query migration; no change to reservation/payment rules.
+- Hosted fixture installed via Node instrumentation; all non-fixture external server fetches blocked. Demo middleware allowlist blocks bookings/accounts/mail/uploads/other admin mutations.
+- Banner member/admin/signout uses synthetic HttpOnly sessions; sample-data/noindex labels; production ads/analytics disabled only in demo. Non-demo endpoint 404 and mock-admin cookie rejected verified.
+- Demo and non-demo builds passed, 99 static pages; 11 targeted + 19 regression tests; rerun 95 browser checks passed; additional 20 demo check groups passed without browser API mocks. All 3 fail-closed config guards verified.
+- Next: commit security and hosted-demo changes, atomically push guarded branch, create draft PR, deploy only separate project, run live HTTPS demo checks, verify production unchanged, deliver URL + refreshed code/test handoff.

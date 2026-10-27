@@ -4,3 +4,4 @@
 /.env.*
 /*.tsbuildinfo
 /test-results/
+/.vercel/

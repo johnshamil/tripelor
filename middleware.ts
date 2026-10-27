@@ -85,6 +85,22 @@ function unauthorizedResponse(request: NextRequest) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  if (process.env.TRIPELOR_MOCK_PREVIEW === "1") {
+    if (pathname === "/api/analytics") return new NextResponse(null, { status: 204 });
+    if (pathname.startsWith("/api/")) {
+      const read = request.method === "GET" && ["/api/properties", "/api/availability", "/api/availability/calendar", "/api/auth/me", "/api/admin/properties"].includes(pathname);
+      const write = request.method === "POST" && ["/api/demo/session", "/api/admin/properties", "/api/availability"].includes(pathname);
+      if (!read && !write) return NextResponse.json({ error: "Sample-data preview only. Booking requests, real accounts, payments, emails and uploads are disabled." }, { status: 403 });
+    }
+    if (requiresLogin(pathname)) {
+      const token = request.cookies.get(ACCESS_COOKIE)?.value;
+      if (token !== "mock-member" && token !== "mock-admin") return unauthorizedResponse(request);
+      if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+        if (token !== "mock-admin") return NextResponse.json({ error: "Demo admin session required" }, { status: 403 });
+      }
+    }
+    return NextResponse.next();
+  }
   if (!requiresLogin(pathname)) return NextResponse.next();
 
   const accessToken = request.cookies.get(ACCESS_COOKIE)?.value;
