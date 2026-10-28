@@ -36,6 +36,7 @@ const trustedPhotoHosts = new Set([
   "cf.bstatic.com",
   "hotel.hardrock.com",
   "www.saiihotels.com",
+  "unimagrand.com",
 ]);
 
 export function isTrustedRemotePhotoUrl(value: string) {
