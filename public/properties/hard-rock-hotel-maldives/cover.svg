@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#071922"/>
+      <stop offset="0.5" stop-color="#0d5363"/>
+      <stop offset="1" stop-color="#32a6b5"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0b7285"/>
+      <stop offset="1" stop-color="#36b6c8"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d9bd7b"/>
+      <stop offset="1" stop-color="#f0dfad"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <circle cx="1270" cy="180" r="110" fill="#f7e4a5" opacity="0.9"/>
+  <path d="M0 590 C300 530 500 620 800 565 C1100 510 1320 570 1600 520 L1600 1000 L0 1000Z" fill="url(#sea)"/>
+  <path d="M0 760 C330 690 560 815 880 735 C1120 675 1360 725 1600 690 L1600 1000 L0 1000Z" fill="url(#sand)"/>
+  <path d="M300 715 C420 640 560 650 700 710 C550 760 410 770 300 715Z" fill="#1a463d" opacity="0.9"/>
+  <g fill="#0d302b">
+    <path d="M450 680 l35-120 18 4 -8 125z"/>
+    <path d="M483 568 c-70-25-110-5-140 40 55-22 99-14 140 7z"/>
+    <path d="M490 570 c60-46 116-47 155-15-63 0-103 17-150 52z"/>
+  </g>
+  <rect x="95" y="90" width="760" height="280" rx="18" fill="#041117" opacity="0.72"/>
+  <text x="145" y="175" fill="#ead7aa" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" letter-spacing="5">TRIPELOR PARTNER STAY</text>
+  <text x="145" y="250" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="66" font-weight="700">Hard Rock Hotel Maldives</text>
+  <text x="145" y="310" fill="#dbe8eb" font-family="Arial, Helvetica, sans-serif" font-size="30">CROSSROADS Maldives · South Malé Atoll</text>
+  <text x="145" y="355" fill="#ead7aa" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">RATES ON REQUEST</text>
+</svg>
