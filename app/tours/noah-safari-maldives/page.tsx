@@ -20,9 +20,10 @@ const rates = [
 export default function NoahSafariPage() {
   const whatsapp = "https://wa.me/9609429403?text=" + encodeURIComponent("Hello Tripelor, I would like a quote for the NOAH Maldives Safari Boat.");
   return <main className="bg-[#06151c] text-white">
-    <section className="relative overflow-hidden border-b border-white/10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(217,189,123,.14),transparent_30%),radial-gradient(circle_at_85%_15%,rgba(31,139,164,.18),transparent_32%)]" />
-      <div className="container relative py-20 md:py-28">
+    <section className="relative min-h-[70vh] overflow-hidden border-b border-white/10">
+      <img src="https://noahmaldives.com/wp-content/uploads/2026/07/NOAH-safari-boat-for-rent-MALDIVES-41-1080.jpg" alt="NOAH Maldives safari boat" className="absolute inset-0 h-full w-full object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#031018]/95 via-[#031018]/75 to-[#031018]/30" />
+      <div className="container relative flex min-h-[70vh] items-end py-20 md:py-28">
         <p className="eyebrow">Tripelor Safari Partner</p>
         <h1 className="font-display mt-4 max-w-5xl text-5xl leading-tight md:text-7xl">NOAH Maldives Safari Boat</h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-white/60">Explore the Maldives by liveaboard with shared departures or a private whole-boat charter. Trips can run from 3 to 14 nights, with a sample route through North Malé, Goidhoo Atoll, Baa Atoll and Gaafaru.</p>
@@ -31,6 +32,20 @@ export default function NoahSafariPage() {
           <Link href="/contact" className="btn-outline">Send an Enquiry</Link>
         </div>
       </div>
+    </section>
+
+    <section className="container py-12 md:py-16">
+      <div className="grid gap-5 md:grid-cols-2">
+        <figure className="overflow-hidden rounded-3xl border border-white/10 bg-white/[.025]">
+          <img src="https://noahmaldives.com/wp-content/uploads/2026/07/NOAH-safari-boat-for-rent-MALDIVES-41-1080.jpg" alt="NOAH safari boat after its 2026 refurbishment" className="h-80 w-full object-cover md:h-96" loading="lazy" />
+          <figcaption className="p-4 text-xs text-white/45">NOAH safari boat · official 2026 refurbishment photo</figcaption>
+        </figure>
+        <figure className="overflow-hidden rounded-3xl border border-white/10 bg-white/[.025]">
+          <img src="https://noahmaldives.com/wp-content/uploads/2026/07/NOAH-safari-boat-for-rent-MALDIVES-42-1080.jpg" alt="NOAH Maldives safari boat" className="h-80 w-full object-cover md:h-96" loading="lazy" />
+          <figcaption className="p-4 text-xs text-white/45">NOAH Maldives · official supplier photo</figcaption>
+        </figure>
+      </div>
+      <p className="mt-4 text-xs text-white/35">Photos used with permission from NOAH for Tripelor marketing.</p>
     </section>
 
     <section className="container py-14 md:py-18">
