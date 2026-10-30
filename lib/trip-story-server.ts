@@ -364,6 +364,6 @@ export async function publicStories(limit = 24) {
     const reservation = reservations?.[0] || null;
     if (!reservation) return null;
     const photos = await signedPhotosForStory(story.id, 3600);
-    return { story, reservation, cover: photos.find(photo => photo.signed_url)?.signed_url || "" };
+    return { story, reservation, cover: photos.find(photo => photo.media_type !== "video" && photo.signed_url)?.signed_url || "" };
   })).then(items => items.filter(Boolean));
 }
