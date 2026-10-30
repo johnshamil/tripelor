@@ -33,7 +33,7 @@ function cleanBadges(value: unknown) {
 }
 
 function shareUrl(story: any) {
-  return story?.is_public && story?.share_token ? `/story/${story.share_token}` : "";
+  return story?.visibility !== "private" && story?.share_token ? `/story/${story.share_token}` : "";
 }
 
 export async function GET(request: Request) {
@@ -73,12 +73,18 @@ export async function POST(request: Request) {
     if (!reservation) return Response.json({ error: "Journey not found." }, { status: 404 });
 
     const current = await ensureStory(user, reservation);
+    const requestedVisibility = ["private", "unlisted", "public"].includes(String(body?.visibility))
+      ? String(body.visibility)
+      : Boolean(body?.isPublic) ? "unlisted" : "private";
     const story = await updateStory(current.id, {
       title: cleanText(body?.title, 160),
       story_text: cleanText(body?.storyText, 6000),
       favorite_moment: cleanText(body?.favoriteMoment, 500),
       badges: cleanBadges(body?.badges),
-      is_public: Boolean(body?.isPublic),
+      is_public: requestedVisibility !== "private",
+      visibility: requestedVisibility,
+      public_name: cleanText(body?.publicName, 80),
+      published_at: requestedVisibility === "public" ? (current.published_at || new Date().toISOString()) : null,
     } as any);
     const photos = await signedPhotosForStory(story.id);
 
