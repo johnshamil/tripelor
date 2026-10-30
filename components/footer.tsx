@@ -20,6 +20,15 @@ export default function Footer() {
         <div><h3>{copy.information}</h3><Link href="/about">{copy.about}</Link><Link href="/travel-info#faq">{copy.faq}</Link><Link href="/travel-info#terms">{copy.terms}</Link><Link href="/travel-info#cancellation">{copy.cancellation}</Link><Link href="/travel-info#privacy">{copy.privacy}</Link></div>
         <div><h3>{copy.contact}</h3><a href="mailto:bookings@tripelor.com"><Mail />bookings@tripelor.com</a><a href="tel:+9609429403"><Phone />+960 942 9403</a><p><MapPin />Maldives</p><Link href="/contact" className="brand-footer-contact">{copy.enquiry}<ArrowUpRight /></Link></div>
       </div>
+      <div className="brand-footer-worldwide" aria-label="Tripelor worldwide">
+        <span>Tripelor Worldwide</span>
+        <Link href="/it" hrefLang="it">Italiano</Link>
+        <Link href="/de" hrefLang="de">Deutsch</Link>
+        <Link href="/ru" hrefLang="ru">Русский</Link>
+        <Link href="/zh" hrefLang="zh-CN">中文</Link>
+        <Link href="/fr" hrefLang="fr">Français</Link>
+        <Link href="/es" hrefLang="es">Español</Link>
+      </div>
       <div className="brand-footer-legal"><p>© {new Date().getFullYear()} Tripelor. {copy.rights}</p><p>{brand.tagline}</p></div>
     </div>
   </footer>;
