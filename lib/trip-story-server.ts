@@ -267,7 +267,7 @@ export async function deleteStoryPhoto(storyId: string, photoId: string) {
 export async function publicStoryByToken(token: string) {
   const { url } = cfg();
   const response = await fetch(
-    `${url}/rest/v1/trip_stories?select=*&share_token=eq.${encodeURIComponent(token)}&is_public=eq.true&limit=1`,
+    `${url}/rest/v1/trip_stories?select=*&share_token=eq.${encodeURIComponent(token)}&visibility=neq.private&limit=1`,
     { headers: headers(false), cache: "no-store" },
   );
   const data = await jsonResponse(response, "Story not found.");
