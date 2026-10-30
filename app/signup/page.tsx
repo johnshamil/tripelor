@@ -77,12 +77,12 @@ export default function SignupPage() {
         <div className="mx-auto grid max-w-5xl overflow-hidden border border-[#c9b88f] bg-[#fffdf8] shadow-[0_30px_100px_rgba(34,43,46,.12)] lg:grid-cols-[.72fr_1.28fr]">
           <aside className="bg-[#06151c] p-8 text-white md:p-10">
             <TripelorEmblem className="h-14 w-14 text-[#d9bd7b]" />
-            <p className="eyebrow mt-9">Tripelor membership</p>
-            <h1 className="font-display mt-4 text-4xl leading-tight">Unlock more of your Maldives journey.</h1>
+            <p className="eyebrow mt-9">Tripelor Maldives Pass</p>
+            <h1 className="font-display mt-4 text-4xl leading-tight">Your free member pass to a smarter Maldives trip.</h1>
             <div className="mt-8 space-y-5">
               {[
-                "Get first access to private Maldives member offers",
-                "Save stays, trip plans and booking requests in one place",
+                "Unlock private Tripelor price checks and Secret Deals",
+                "Save stays, quotes and trip plans in one place",
                 "Earn Tripelor Points and unlock referral rewards",
                 "Set availability alerts for stays you are watching",
                 "Keep your local Tripelor concierge connected to your journey",
@@ -96,8 +96,8 @@ export default function SignupPage() {
 
           <section className="p-7 md:p-10 lg:p-12">
             <p className="eyebrow text-[#8d7037]">Create your account</p>
-            <h2 className="font-display mt-3 text-4xl md:text-5xl">Join Tripelor. Unlock member benefits.</h2>
-            <p className="mt-4 text-sm leading-7 text-[#687377]">Create your free travel account to unlock private offers, save your plans, earn Tripelor Points and keep your Maldives requests together.</p>
+            <h2 className="font-display mt-3 text-4xl md:text-5xl">Unlock My Maldives Pass.</h2>
+            <p className="mt-4 text-sm leading-7 text-[#687377]">Create your free Tripelor account to keep your private price checks, Secret Deals, saved plans, alerts, points and Maldives concierge support together.</p>
 
             <form onSubmit={submit} className="mt-8 grid gap-5">
               <label className="premium-label">
@@ -120,7 +120,7 @@ export default function SignupPage() {
               )}
 
               <button disabled={busy} className="btn-gold w-full disabled:opacity-60">
-                <UserPlus className="h-4 w-4" /> {busy ? "Creating your account..." : "Create Account"} <ArrowRight className="h-4 w-4" />
+                <UserPlus className="h-4 w-4" /> {busy ? "Unlocking your Maldives Pass..." : "Create Free Account & Unlock Pass"} <ArrowRight className="h-4 w-4" />
               </button>
             </form>
 
