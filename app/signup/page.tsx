@@ -82,6 +82,7 @@ export default function SignupPage() {
             <h1 className="font-display mt-4 text-4xl leading-tight">Your free member pass to a smarter Maldives trip.</h1>
             <div className="mt-8 space-y-5">
               {[
+                "Receive 100 Tripelor welcome points when your member rewards account is created",
                 "Unlock private Tripelor price checks and Secret Deals",
                 "Save stays, quotes and trip plans in one place",
                 "Earn Tripelor Points and unlock referral rewards",
