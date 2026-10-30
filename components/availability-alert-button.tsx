@@ -33,6 +33,9 @@ export default function AvailabilityAlertButton({ selection, light = false }: { 
         {message && <p role="status" className="mt-3 text-sm">{message}</p>}</>}
     {bookingHref && <Link href={bookingHref} className="mt-3 inline-block min-h-11 py-2 text-sm font-semibold underline">{copy.book}</Link>}
     <p className="mt-3 text-xs leading-5">{copy.note}</p>
-    <Link href="/account/availability-alerts" className="mt-2 inline-block min-h-11 py-2 text-xs underline underline-offset-4">{copy.manage}</Link>
+    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+      <Link href="/account/availability-alerts" className="inline-block min-h-11 py-2 text-xs underline underline-offset-4">{copy.manage}</Link>
+      <Link href="/maldives-matchmaker?source=room-unavailable" className="inline-block min-h-11 py-2 text-xs font-semibold underline underline-offset-4">Find a similar stay →</Link>
+    </div>
   </div>;
 }
