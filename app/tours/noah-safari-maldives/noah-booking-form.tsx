@@ -10,7 +10,14 @@ function calculatePrice(tripType:string,adults:number,children:number,nights:num
   const people=adults+children;
   const perNight=tripType==="Private Whole-Boat Charter"
     ?1200+Math.max(0,adults-4)*75+Math.max(0,children-Math.max(0,4-adults))*37.5
-    :(adults===1&&children===0?225:adults*175+children*87.5);
+    :(()=>{
+      // Shared cabins hold up to 3 people. Two sharing adults pay 175 each;
+      // a third adult on the day bed pays 125; a solo cabin costs 225.
+      const triples=Math.floor(adults/3);
+      const remainder=adults%3;
+      const adultRate=triples*475+(remainder===2?350:remainder===1?(triples>0?225:225):0);
+      return adultRate+children*87.5;
+    })();
   const base=perNight*nights;
   const service=base*0.10;
   const tgst=(base+service)*0.17;
