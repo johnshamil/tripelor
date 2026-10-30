@@ -2,14 +2,14 @@
 import { FormEvent, useMemo, useState } from "react";
 import { CalendarDays, Mail, Ship, Users } from "lucide-react";
 
-function addDays(value:string,n:number){if(!value)return"";const d=new Date(value+"T00:00:00");d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+function addDays(value:string,n:number){if(!value)return"";const d=new Date(value+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);}
 function pretty(value:string){if(!value)return"";return new Intl.DateTimeFormat("en-GB",{day:"numeric",month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(value+"T00:00:00Z"));}
 function money(value:number){return "USD "+value.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function calculatePrice(tripType:string,adults:number,children:number,nights:number){
   // Published NOAH prices, not Tripelor's confidential agent net rates.
   const people=adults+children;
   const perNight=tripType==="Private Whole-Boat Charter"
-    ?1200+Math.max(0,adults-Math.max(0,4-children))*75+Math.max(0,children-4)*37.5
+    ?1200+Math.max(0,adults-4)*75+Math.max(0,children-Math.max(0,4-adults))*37.5
     :(adults===1&&children===0?225:adults*175+children*87.5);
   const base=perNight*nights;
   const service=base*0.10;
@@ -33,7 +33,6 @@ export default function NoahBookingForm(){
   const endDate=useMemo(()=>addDays(startDate,nights),[startDate,nights]);
   const price=useMemo(()=>calculatePrice(tripType,adults,children,nights),[tripType,adults,children,nights]);
   const validGuests=adults+children<=18;
-  const isShared=tripType==="Shared Safari Cabin";
 
   async function submit(e:FormEvent){
     e.preventDefault(); setStatus("");
