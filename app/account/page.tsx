@@ -15,6 +15,7 @@ import {
   Ship,
   Star,
   Waves,
+  WalletCards,
 } from "lucide-react";
 import ReferralRewardsCard from "@/components/referral-rewards-card";
 import Rewards2Card from "@/components/rewards-2-card";
@@ -119,6 +120,20 @@ export default function AccountPage() {
           </button>
         </div>
       </header>
+
+      <Link href="/maldives-pass" className="mt-7 flex min-h-20 items-center justify-between gap-5 rounded-[1.5rem] border border-[#d9bd7b]/40 bg-[radial-gradient(circle_at_right,rgba(217,189,123,.16),transparent_35%),linear-gradient(135deg,#0b2731,#071922)] p-5 text-white transition hover:border-[#e3ca91]/70">
+        <span className="flex items-start gap-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#d9bd7b]/35 bg-[#d9bd7b]/10">
+            <WalletCards className="h-5 w-5 text-[#e3ca91]" />
+          </span>
+          <span>
+            <span className="text-[10px] font-semibold uppercase tracking-[.24em] text-[#e3ca91]">Tripelor Maldives Pass</span>
+            <strong className="mt-1 block text-xl">Your member travel advantage.</strong>
+            <span className="mt-1 block text-sm text-white/50">Private price checks, Secret Deals, alerts, points and your saved Maldives journey.</span>
+          </span>
+        </span>
+        <span className="shrink-0 text-[#e3ca91]">Open →</span>
+      </Link>
 
       <Link href="/account/trip-requests" className="mt-4 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>My Trip Requests</strong><span className="mt-1 block text-sm text-gray-400">Follow up on the stays and experiences in your trip plan.</span></span><span className="text-gold">View →</span></Link>
       <Link href="/account/host-questions" className="mt-7 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>Host Messages</strong><span className="mt-1 block text-sm text-gray-400">Your questions and personal replies from the island.</span></span><span className="text-gold">Open →</span></Link>
