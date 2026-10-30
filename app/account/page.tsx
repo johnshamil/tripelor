@@ -135,6 +135,8 @@ export default function AccountPage() {
         <span className="shrink-0 text-[#e3ca91]">Open →</span>
       </Link>
 
+      <Link href="/member-tools" className="mt-4 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-[#d9bd7b]/35 bg-[#d9bd7b]/10 p-5"><span><strong>Member Travel Tools</strong><span className="mt-1 block text-sm text-gray-400">Budget calculator, Match Score, occasion offers, transfer checker, deal-hold requests and group planning.</span></span><span className="text-gold">Open →</span></Link>
+      <Link href="/account/price-alerts" className="mt-4 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>Price-Drop Alerts</strong><span className="mt-1 block text-sm text-gray-400">Watch published Tripelor starting prices and get an email when one drops.</span></span><span className="text-gold">Manage →</span></Link>
       <Link href="/account/trip-requests" className="mt-4 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>My Trip Requests</strong><span className="mt-1 block text-sm text-gray-400">Follow up on the stays and experiences in your trip plan.</span></span><span className="text-gold">View →</span></Link>
       <Link href="/account/host-questions" className="mt-7 flex min-h-14 items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 p-5"><span><strong>Host Messages</strong><span className="mt-1 block text-sm text-gray-400">Your questions and personal replies from the island.</span></span><span className="text-gold">Open →</span></Link>
       <Rewards2Card user={user} loyalty={loyalty} />
