@@ -4,6 +4,7 @@ import { ArrowDown, ArrowRight, ArrowUpRight, Check, Compass, Ship, Star, Waves 
 import { cookies } from "next/headers";
 import HomeSearch from "@/components/home-search";
 import HomeReferralRewards from "@/components/home-referral-rewards";
+import MaldivesPass from "@/components/maldives-pass";
 import HomeStoryPreview from "@/components/home-story-preview";
 import PropertyCards from "@/components/room-first-booking-cards";
 import TripelorMark from "@/components/tripelor-mark";
@@ -102,6 +103,9 @@ export default async function Home() {
       <article className="coastal-personal-card is-blue"><Compass className="coastal-card-star" /><p className="coastal-eyebrow">{copy.lessPlanning}</p><h2>{copy.secretTitle}</h2><p>{copy.secretBody}</p><Link href="/secret-deals" className="coastal-text-link">{copy.secretCta}<ArrowRight /></Link></article>
     </section>
 
+    <section className="container py-10 md:py-14">
+      <MaldivesPass compact />
+    </section>
     <HomeReferralRewards locale={locale} />
     <section className="container coastal-members"><div><p className="coastal-eyebrow">{copy.joinEyebrow}</p><h2>{copy.joinTitle}</h2><p>{copy.joinBody}</p></div><Link href="/signup?next=%2Faccount" className="coastal-button">{copy.joinCta}<ArrowUpRight /></Link></section>
 
