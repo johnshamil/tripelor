@@ -44,6 +44,9 @@ type Story = {
   favorite_moment: string;
   badges: string[];
   is_public: boolean;
+  visibility?: "private" | "unlisted" | "public";
+  public_name?: string;
+  published_at?: string | null;
   share_token: string;
   updated_at: string;
 };
@@ -229,6 +232,8 @@ export default function MaldivesStoryPage() {
   const [storyText, setStoryText] = useState("");
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
   const [isPublic, setIsPublic] = useState(false);
+  const [visibility, setVisibility] = useState<"private" | "unlisted" | "public">("private");
+  const [publicName, setPublicName] = useState("");
   const [shareUrl, setShareUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [storyLoading, setStoryLoading] = useState(false);
@@ -291,6 +296,8 @@ export default function MaldivesStoryPage() {
         setStoryText(existing?.story_text || "");
         setSelectedBadges(existing?.badges || []);
         setIsPublic(Boolean(existing?.is_public));
+        setVisibility(existing?.visibility || (existing?.is_public ? "unlisted" : "private"));
+        setPublicName(existing?.public_name || "");
       })
       .catch(reason => active && setError(reason instanceof Error ? reason.message : copy.error))
       .finally(() => active && setStoryLoading(false));
@@ -317,6 +324,8 @@ export default function MaldivesStoryPage() {
           storyText,
           badges: selectedBadges,
           isPublic: publicValue,
+          visibility,
+          publicName,
         }),
       });
       const data = await response.json();
@@ -324,6 +333,8 @@ export default function MaldivesStoryPage() {
       setStory(data.story);
       setPhotos(data.photos || photos);
       setIsPublic(Boolean(data.story?.is_public));
+      setVisibility(data.story?.visibility || (data.story?.is_public ? "unlisted" : "private"));
+      setPublicName(data.story?.public_name || "");
       setShareUrl(data.shareUrl || "");
       setStatus(copy.saved);
       return data;
@@ -376,7 +387,38 @@ export default function MaldivesStoryPage() {
   }
 
   async function shareStory() {
-    const data = await save(true);
+    setVisibility("unlisted");
+    const data = await (async () => {
+      if (!selected?.id) return null;
+      setSaving(true);
+      setStatus("");
+      setError("");
+      try {
+        const response = await fetch("/api/account/story", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            reservationId: selected.id,
+            title,
+            favoriteMoment,
+            storyText,
+            badges: selectedBadges,
+            isPublic: true,
+            visibility: "unlisted",
+            publicName,
+          }),
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || copy.error);
+        setStory(payload.story);
+        setIsPublic(true);
+        setVisibility("unlisted");
+        setShareUrl(payload.shareUrl || "");
+        return payload;
+      } finally {
+        setSaving(false);
+      }
+    })();
     if (!data?.shareUrl) return;
     const absolute = `${window.location.origin}${data.shareUrl}`;
     try {
@@ -393,7 +435,40 @@ export default function MaldivesStoryPage() {
   }
 
   async function makePrivate() {
-    await save(false);
+    setVisibility("private");
+    if (!selected?.id) return;
+    setSaving(true);
+    try {
+      const response = await fetch("/api/account/story", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reservationId: selected.id, title, favoriteMoment, storyText, badges: selectedBadges, isPublic: false, visibility: "private", publicName }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || copy.error);
+      setStory(data.story); setIsPublic(false); setVisibility("private"); setShareUrl("");
+      setStatus(copy.saved);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : copy.error);
+    } finally { setSaving(false); }
+  }
+
+  async function publishStory() {
+    if (!selected?.id) return;
+    setSaving(true); setStatus(""); setError("");
+    try {
+      const response = await fetch("/api/account/story", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reservationId: selected.id, title, favoriteMoment, storyText, badges: selectedBadges, isPublic: true, visibility: "public", publicName }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || copy.error);
+      setStory(data.story); setIsPublic(true); setVisibility("public"); setShareUrl(data.shareUrl || "");
+      setStatus("Published to Tripelor Stories.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : copy.error);
+    } finally { setSaving(false); }
   }
 
   if (loading) return <main className="container py-20 text-gray-400">{copy.loading}</main>;
@@ -467,6 +542,28 @@ export default function MaldivesStoryPage() {
           <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold ${isPublic ? "border-emerald-600/25 bg-emerald-50 text-emerald-700" : "border-[#c9a86a]/30 bg-[#f3ead9] text-[#745b2e]"}`}>
             <Check className="h-4 w-4" /> {isPublic ? copy.publicLabel : copy.privateLabel}
           </span>
+        </div>
+      </section>
+
+      <section className="story-no-print container pb-2">
+        <div className="rounded-2xl border border-[#d0c5b0] bg-[#fffdf8] p-5 md:p-6">
+          <div className="grid gap-5 md:grid-cols-[1fr_auto] md:items-end">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#8d7037]">Story privacy & publishing</p>
+              <h2 className="font-display mt-2 text-3xl">Choose how your story is shared.</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#687377]">Private keeps it only in your account. Share by link keeps it unlisted. Publish adds it to Tripelor Stories for other travellers to discover.</p>
+              <label className="mt-4 block max-w-md text-sm font-semibold text-[#40505a]">
+                Public display name
+                <input value={publicName} onChange={event => setPublicName(event.target.value)} maxLength={80} placeholder="First name, nickname or leave blank" className="mt-2 min-h-12 w-full border border-[#d0c5b0] bg-white px-4 text-[#071922]" />
+              </label>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button type="button" onClick={makePrivate} disabled={saving} className="btn-outline">Private</button>
+              <button type="button" onClick={shareStory} disabled={saving} className="btn-outline"><Share2 className="h-4 w-4" /> Share by link</button>
+              <button type="button" onClick={publishStory} disabled={saving || !title.trim()} className="btn-gold"><Sparkles className="h-4 w-4" /> Publish to Tripelor Stories</button>
+            </div>
+          </div>
+          <p className="mt-4 text-xs text-[#7a8589]">Current visibility: <strong>{visibility === "public" ? "Published on Tripelor Stories" : visibility === "unlisted" ? "Share-link only" : "Private"}</strong></p>
         </div>
       </section>
 
