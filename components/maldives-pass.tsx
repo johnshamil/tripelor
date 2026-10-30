@@ -91,7 +91,7 @@ export default function MaldivesPass({ compact = false }: { compact?: boolean })
 
   if (compact) {
     return (
-      <section className="rounded-3xl border border-[#c8aa67]/35 bg-[linear-gradient(135deg,#071922,#0b2731)] p-6 text-white shadow-[0_20px_70px_rgba(7,25,34,.18)]">
+      <section className="maldives-pass-dark rounded-3xl border border-[#c8aa67]/35 bg-[linear-gradient(135deg,#071922,#0b2731)] p-6 text-white shadow-[0_20px_70px_rgba(7,25,34,.18)]">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.22em] text-[#e2bd68]">
@@ -114,7 +114,7 @@ export default function MaldivesPass({ compact = false }: { compact?: boolean })
   }
 
   return (
-    <section className="overflow-hidden rounded-[2rem] border border-[#d9bd7b]/35 bg-[radial-gradient(circle_at_top_right,rgba(217,189,123,.22),transparent_30%),linear-gradient(145deg,#0b2731,#06151c_62%,#03090d)] text-white shadow-[0_35px_100px_rgba(7,25,34,.25)]">
+    <section className="maldives-pass-dark overflow-hidden rounded-[2rem] border border-[#d9bd7b]/35 bg-[radial-gradient(circle_at_top_right,rgba(217,189,123,.22),transparent_30%),linear-gradient(145deg,#0b2731,#06151c_62%,#03090d)] text-white shadow-[0_35px_100px_rgba(7,25,34,.25)]">
       <div className="grid gap-0 lg:grid-cols-[1.05fr_.95fr]">
         <div className="p-7 md:p-10">
           <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.24em] text-[#e2bd68]">
