@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ArrowDown, ArrowRight, ArrowUpRight, Check, Compass, Ship, Star, Waves } from "lucide-react";
 import { cookies } from "next/headers";
 import HomeSearch from "@/components/home-search";
@@ -11,6 +12,22 @@ import { publishedProperties } from "@/lib/property-store";
 import { properties as defaultProperties } from "@/lib/properties";
 import { propertyPhotoUrl } from "@/lib/property-model";
 import { professionalLocale, translations } from "@/lib/professional-translations";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "https://tripelor.com",
+    languages: {
+      "x-default": "https://tripelor.com",
+      en: "https://tripelor.com",
+      it: "https://tripelor.com/it",
+      de: "https://tripelor.com/de",
+      ru: "https://tripelor.com/ru",
+      "zh-CN": "https://tripelor.com/zh",
+      fr: "https://tripelor.com/fr",
+      es: "https://tripelor.com/es",
+    },
+  },
+};
 import { coastalCopy } from "@/lib/coastal-copy";
 import { maldivesToday } from "@/lib/manual-booking";
 import { VAAVU_BLUE_ESCAPE } from "@/lib/vaavu-blue-escape";
