@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Globe2, Headphones, Hotel, Ship, Sparkles, UserPlus, Waves } from "lucide-react";
 import type { GlobalMarketPage } from "@/lib/global-market-pages";
+import MarketLanguageSync from "@/components/market-language-sync";
 
 export default function GlobalMarketLanding({ market }: { market: GlobalMarketPage }) {
   return (
     <main lang={market.hreflang} className="bg-[#06151c] text-white">
+      <MarketLanguageSync code={market.hreflang} />
       <section className="relative overflow-hidden border-b border-white/10">
         <img
           src="/properties/rivethi-beach-hotel/1719713475.jpeg"
