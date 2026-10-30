@@ -68,8 +68,10 @@ const organization = {
   "@type": "TravelAgency",
   "@id": "https://tripelor.com/#organization",
   name: "Tripelor",
+  legalName: "Nexus Gaming Pvt Ltd",
   url: "https://tripelor.com",
   logo: "https://tripelor.com/brand/tripelor-globe-gold.webp",
+  sameAs: ["https://www.tourism.gov.mv/en/registered/travel_agencies/6ac89beb575a7/travelagencies.print"],
   email: "bookings@tripelor.com",
   telephone: "+9609429403",
   description:
