@@ -53,6 +53,7 @@ export default function ManagedPropertyView({ property, preview = false }: { pro
   const startingFrom = amounts.length ? Math.min(...amounts) : 0;
 
   return <><LuxuryPropertyPage
+    propertySlug={property.slug}
     eyebrow="A Tripelor partner stay"
     name={property.name}
     location={property.island}
