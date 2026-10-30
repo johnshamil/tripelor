@@ -1,11 +1,10 @@
-import TripelorEmblem from "@/components/tripelor-emblem";
-
 export default function TripelorWordmark() {
-  return <span className="tripelor-wordmark">
-    <TripelorEmblem className="tripelor-wordmark-emblem" />
-    <span className="tripelor-wordmark-copy">
-      <span className="tripelor-wordmark-name">TRIPELOR</span>
-      <span className="tripelor-wordmark-tagline">The Art of Exploring</span>
+  return (
+    <span className="tripelor-wordmark" aria-label="Tripelor">
+      <span className="tripelor-wordmark-name" aria-hidden="true">
+        TRIPEL<span className="tripelor-wordmark-wave">O</span>R
+      </span>
+      <span className="tripelor-wordmark-tagline">Your Maldives, Our Expertise</span>
     </span>
-  </span>;
+  );
 }
