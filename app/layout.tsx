@@ -8,6 +8,7 @@ import Footer from "@/components/footer";
 import WhatsAppFloat from "@/components/whatsapp-float";
 import SmoothExperience from "@/components/smooth-experience";
 import AnalyticsTracker from "@/components/analytics-tracker";
+import SignupExitPrompt from "@/components/signup-exit-prompt";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tripelor.com"),
@@ -117,6 +118,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Footer />
         <WhatsAppFloat />
         <AnalyticsTracker />
+        <SignupExitPrompt />
         </CartProvider>
       </body>
     </html>
