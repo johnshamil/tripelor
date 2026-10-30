@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowDown, ArrowRight, ArrowUpRight, Check, Compass, Ship, Star, Waves } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, Compass, Headphones, ShieldCheck, Ship, Star, Waves } from "lucide-react";
 import { cookies } from "next/headers";
 import HomeSearch from "@/components/home-search";
 import HomeReferralRewards from "@/components/home-referral-rewards";
@@ -55,21 +55,48 @@ export default async function Home() {
   const experiences = managedProperties.flatMap(property => (property.experiences || []).filter(item => item.enabled && item.photos.length).map(item => ({ item, propertyName: property.name, island: property.island, slug: property.slug }))).slice(0, 3);
   const icons = [Compass, Waves, Ship, Check];
   return <div className="coastal-home" data-locale={locale}>
-    <section className="container coastal-hero" aria-labelledby="coastal-hero-title">
-      <div className="coastal-hero-copy">
-        <p className="coastal-eyebrow"><TripelorMark className="coastal-small-star" />{copy.small}</p>
-        <h1 id="coastal-hero-title"><span>{copy.less}</span><span>{copy.ordinary}</span><span>{copy.more}</span><span>{copy.maldives}</span></h1>
-        <div className="coastal-hero-bottom"><p>{copy.intro}</p><a href="#properties" aria-label={copy.scroll}><ArrowDown /></a></div>
-      </div>
-      <div className="coastal-hero-photo" data-photo-surface>
-        <img src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=1600&q=88" alt="Turquoise Maldives lagoon and overwater villas, an island inspiration" loading="eager" decoding="async" fetchPriority="high" width={1200} height={1500} />
-        <p className="coastal-photo-location">{copy.ocean}</p>
-        <div className="coastal-photo-caption"><p>{copy.somewhere}</p><TripelorMark className="coastal-photo-star" /><span>{copy.inspiration}</span></div>
+    <section className="coastal-premium-hero" aria-labelledby="coastal-hero-title">
+      <img
+        src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=2200&q=90"
+        alt="Turquoise Maldives lagoon with tropical island and overwater villas"
+        className="coastal-premium-hero-image"
+        loading="eager"
+        decoding="async"
+        fetchPriority="high"
+        width={2200}
+        height={1400}
+      />
+      <div className="coastal-premium-hero-shade" />
+      <div className="container coastal-premium-hero-content">
+        <p className="coastal-premium-kicker">Small islands. Big feelings.</p>
+        <h1 id="coastal-hero-title">
+          <span>Your Maldives.</span>
+          <strong>Your Way.</strong>
+        </h1>
+        <p className="coastal-premium-intro">Handpicked stays, island experiences &amp; transfers — all in one place.</p>
+        <div className="coastal-premium-actions">
+          <Link href="/stays" className="coastal-premium-primary">Explore Stays <ArrowRight /></Link>
+          <Link href="/build-your-trip" className="coastal-premium-secondary">Build My Trip <ArrowRight /></Link>
+        </div>
+        <div className="coastal-premium-trust">
+          <p><ShieldCheck />Registered Maldives Travel Agency</p>
+          <p><Headphones />Local Support in Maldives</p>
+          <p><Star />Trusted by Travellers Worldwide</p>
+        </div>
       </div>
     </section>
-    <div className="container"><HomeSearch islands={islands.length ? islands : ["Felidhoo", "Hulhumalé"]} locale={locale} today={maldivesToday()} />
-      <div className="coastal-promises">{copy.promises.map((promise, index) => { const Icon = icons[index]; return <p key={promise}><Icon aria-hidden="true" />{promise}</p>; })}</div>
+    <div className="container coastal-premium-search-wrap">
+      <HomeSearch islands={islands.length ? islands : ["Felidhoo", "Hulhumalé"]} locale={locale} today={maldivesToday()} />
+      <div className="coastal-premium-feature-row">
+        <p><Compass /> <span><strong>Member Deals</strong><small>Better rates</small></span></p>
+        <p><TripelorMark /> <span><strong>Handpicked Stays</strong><small>Local islands</small></span></p>
+        <p><Waves /> <span><strong>Amazing Experiences</strong><small>Ocean adventures</small></span></p>
+        <p><Ship /> <span><strong>Seamless Transfers</strong><small>Island to island</small></span></p>
+      </div>
     </div>
+    <section className="container coastal-home-pass">
+      <MaldivesPass compact />
+    </section>
 
     <PropertyCards managedProperties={managedProperties} featured locale={locale} />
 
@@ -103,9 +130,6 @@ export default async function Home() {
       <article className="coastal-personal-card is-blue"><Compass className="coastal-card-star" /><p className="coastal-eyebrow">{copy.lessPlanning}</p><h2>{copy.secretTitle}</h2><p>{copy.secretBody}</p><Link href="/secret-deals" className="coastal-text-link">{copy.secretCta}<ArrowRight /></Link></article>
     </section>
 
-    <section className="container py-10 md:py-14">
-      <MaldivesPass compact />
-    </section>
     <HomeReferralRewards locale={locale} />
     <section className="container coastal-members"><div><p className="coastal-eyebrow">{copy.joinEyebrow}</p><h2>{copy.joinTitle}</h2><p>{copy.joinBody}</p></div><Link href="/signup?next=%2Faccount" className="coastal-button">{copy.joinCta}<ArrowUpRight /></Link></section>
 
