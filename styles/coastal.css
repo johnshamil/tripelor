@@ -78,11 +78,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .coastal-content .eyebrow { letter-spacing: .18em; }
 
 /* Wordmark and shared navigation. */
-.tripelor-wordmark { display: inline-flex; flex: none; align-items: center; gap: 9px; padding: 7px 11px; border: 1px solid #c7a851; border-radius: 4px; background: #061d3b; color: #f1d27d; vertical-align: middle; }
-.tripelor-wordmark-emblem { display: block; width: 48px; height: 48px; flex: none; object-fit: contain; }
-.tripelor-wordmark-copy { display: flex; min-width: 0; flex-direction: column; }
-.tripelor-wordmark-name { display: block; font-family: Georgia, "Times New Roman", serif; font-size: 27px; font-weight: 500; letter-spacing: .015em; line-height: 1; color: #f1d27d; background: linear-gradient(110deg, #d6a82f, #fff1bb 35%, #e2b83f 70%, #fff1bb); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.tripelor-wordmark-tagline { display: block; margin-top: 5px; font-family: Georgia, "Times New Roman", serif; font-size: 10px; font-weight: 400; line-height: 1.25; letter-spacing: .015em; color: #fff5dd; white-space: nowrap; }
+.tripelor-wordmark { display: inline-flex; flex: none; flex-direction: column; align-items: flex-start; gap: 4px; padding: 0; border: 0; background: transparent; color: #071b3f; vertical-align: middle; }
+.tripelor-wordmark-name { display: block; font-family: Arial, Helvetica, sans-serif; font-size: 31px; font-weight: 500; letter-spacing: .13em; line-height: .9; color: #071b3f; white-space: nowrap; }
+.tripelor-wordmark-wave { position: relative; display: inline-grid; width: .94em; place-items: center; color: transparent; }
+.tripelor-wordmark-wave::before { content: ""; width: .72em; height: .72em; border: 2px solid #071b3f; border-radius: 50%; }
+.tripelor-wordmark-wave::after { position: absolute; content: "≈"; top: 50%; left: 50%; transform: translate(-50%,-53%); color: #10a7bd; font-size: .64em; font-weight: 800; letter-spacing: -.2em; }
+.tripelor-wordmark-tagline { display: block; margin-left: 2px; font-family: Arial, Helvetica, sans-serif; font-size: 7px; font-weight: 600; line-height: 1.2; letter-spacing: .32em; color: #395173; text-transform: uppercase; white-space: nowrap; }
 .brand-header { --brand-header-height: 114px; position: sticky; top: 0; z-index: 80; background: var(--brand-cream); border-bottom: 1px solid var(--brand-line); color: var(--brand-ink); }
 .brand-announcement { min-height: 29px; background: var(--brand-blue); color: #fff; }
 .brand-announcement > div { display: flex; min-height: 29px; align-items: center; justify-content: space-between; gap: 12px; }
@@ -122,6 +123,43 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .brand-menu-bottom label { width: auto; min-width: 170px; }
 .brand-menu-bottom button { display: inline-flex; gap: 10px; min-height: 44px; align-items: center; color: #a32838; }
 .brand-menu-bottom button svg { width: 17px; }
+
+/* Premium homepage direction approved from the mobile mockup. */
+.coastal-premium-hero { position: relative; min-height: min(760px, 76vw); overflow: hidden; background: #07334a; color: #fff; }
+.coastal-premium-hero-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 58%; }
+.coastal-premium-hero-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgb(1 30 48 / .84) 0%, rgb(1 30 48 / .66) 38%, rgb(1 30 48 / .18) 73%, rgb(1 30 48 / .06) 100%), linear-gradient(0deg, rgb(0 22 37 / .36), transparent 45%); }
+.coastal-premium-hero-content { position: relative; z-index: 2; display: flex; min-height: inherit; flex-direction: column; justify-content: center; align-items: flex-start; padding-top: 80px; padding-bottom: 110px; }
+.coastal-premium-kicker { position: relative; padding-bottom: 16px; font-size: 11px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; }
+.coastal-premium-kicker::after { position: absolute; content: ""; left: 0; bottom: 0; width: 72px; height: 3px; background: #f3c961; }
+.coastal-premium-hero h1 { margin-top: 24px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(56px, 7vw, 94px); font-weight: 500; line-height: .93; letter-spacing: -.055em; }
+.coastal-premium-hero h1 span, .coastal-premium-hero h1 strong { display: block; }
+.coastal-premium-hero h1 strong { color: #f2c55f; font-weight: 500; }
+.coastal-premium-intro { max-width: 590px; margin-top: 24px; font-size: 18px; line-height: 1.6; color: rgb(255 255 255 / .9); }
+.coastal-premium-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; }
+.coastal-premium-primary, .coastal-premium-secondary { display: inline-flex; min-height: 58px; align-items: center; justify-content: center; gap: 18px; padding: 0 28px; border-radius: 11px; font-size: 15px; font-weight: 700; transition: transform 180ms ease, background 180ms ease; }
+.coastal-premium-primary { background: #f2c55f; color: #071b3f; }
+.coastal-premium-secondary { border: 2px solid #fff; background: rgb(0 53 67 / .34); color: #fff; backdrop-filter: blur(6px); }
+.coastal-premium-primary:hover, .coastal-premium-secondary:hover { transform: translateY(-1px); }
+.coastal-premium-actions svg { width: 21px; height: 21px; }
+.coastal-premium-trust { display: flex; flex-wrap: wrap; gap: 0; margin-top: 32px; color: rgb(255 255 255 / .94); }
+.coastal-premium-trust p { display: flex; max-width: 220px; align-items: center; gap: 11px; padding: 0 24px; border-left: 1px solid rgb(255 255 255 / .35); font-size: 12px; line-height: 1.5; }
+.coastal-premium-trust p:first-child { padding-left: 0; border-left: 0; }
+.coastal-premium-trust svg { width: 23px; height: 23px; flex: none; color: #fff; stroke-width: 1.7; }
+.coastal-premium-search-wrap { position: relative; z-index: 5; margin-top: -68px; }
+.coastal-premium-search-wrap .coastal-search { overflow: hidden; border: 0; border-radius: 24px; box-shadow: 0 18px 60px rgb(10 25 38 / .16); }
+.coastal-premium-search-wrap .coastal-search-heading { padding-inline: 28px; }
+.coastal-premium-search-wrap .coastal-search-form { padding: 24px 28px 26px; }
+.coastal-premium-search-wrap .coastal-search-submit { border-radius: 10px; background: #244be8; }
+.coastal-premium-feature-row { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0; padding: 28px 0 12px; }
+.coastal-premium-feature-row p { display: flex; min-width: 0; align-items: center; justify-content: center; gap: 12px; padding: 0 18px; border-left: 1px solid var(--brand-line); }
+.coastal-premium-feature-row p:first-child { border-left: 0; }
+.coastal-premium-feature-row svg { width: 26px; height: 26px; flex: none; color: #244be8; }
+.coastal-premium-feature-row .tripelor-mark { width: 28px; height: 28px; flex: none; color: #244be8; }
+.coastal-premium-feature-row span { min-width: 0; }
+.coastal-premium-feature-row strong { display: block; font-family: Georgia, "Times New Roman", serif; font-size: 13px; font-weight: 600; }
+.coastal-premium-feature-row small { display: block; margin-top: 3px; color: var(--brand-muted); font-size: 8px; line-height: 1.35; letter-spacing: .12em; text-transform: uppercase; }
+.coastal-home-pass { padding-top: 18px; padding-bottom: 24px; }
+.coastal-home-pass > * { border-radius: 18px; }
 
 /* The reference's split hero. */
 .coastal-home { overflow: clip; background: var(--brand-cream); color: var(--brand-ink); }
@@ -384,6 +422,41 @@ body:has(.coastal-home) { padding-bottom: 0; }
   .brand-footer-grid > div:last-child { grid-column: 1 / -1; }
   .brand-footer-grid h3 { margin-bottom: 15px; }
   .brand-footer-legal { flex-direction: column; gap: 10px; padding-bottom: 30px; }
+  .tripelor-wordmark { gap: 3px; padding: 0; }
+  .tripelor-wordmark-name { font-size: 24px; letter-spacing: .11em; }
+  .tripelor-wordmark-tagline { margin-left: 1px; font-size: 5.6px; letter-spacing: .26em; }
+  .brand-footer .tripelor-wordmark-name { font-size: 28px; }
+  .brand-footer .tripelor-wordmark-tagline { font-size: 6.5px; }
+  .brand-signin { display: none; }
+  .brand-navigation { height: 78px; }
+  .brand-header { --brand-header-height: 107px; }
+  .coastal-premium-hero { min-height: 570px; }
+  .coastal-premium-hero-image { object-position: 63% center; }
+  .coastal-premium-hero-shade { background: linear-gradient(90deg, rgb(0 29 47 / .84) 0%, rgb(0 29 47 / .62) 52%, rgb(0 29 47 / .12) 100%), linear-gradient(0deg, rgb(0 22 37 / .4), transparent 55%); }
+  .coastal-premium-hero-content { justify-content: flex-start; padding-top: 66px; padding-bottom: 90px; }
+  .coastal-premium-kicker { font-size: 8px; letter-spacing: .23em; }
+  .coastal-premium-kicker::after { width: 45px; height: 2px; }
+  .coastal-premium-hero h1 { margin-top: 18px; max-width: 330px; font-size: clamp(48px, 13.5vw, 69px); line-height: .92; }
+  .coastal-premium-intro { max-width: 330px; margin-top: 17px; font-size: 15px; line-height: 1.45; }
+  .coastal-premium-actions { width: 100%; gap: 10px; margin-top: 20px; }
+  .coastal-premium-primary, .coastal-premium-secondary { min-height: 50px; flex: 1 1 0; min-width: 145px; padding: 0 15px; border-radius: 9px; font-size: 13px; }
+  .coastal-premium-actions svg { width: 17px; height: 17px; }
+  .coastal-premium-trust { width: 100%; gap: 10px; margin-top: 22px; }
+  .coastal-premium-trust p { flex: 1 1 30%; min-width: 0; padding: 0 9px; font-size: 8px; line-height: 1.35; }
+  .coastal-premium-trust p:first-child { padding-left: 0; }
+  .coastal-premium-trust svg { width: 17px; height: 17px; }
+  .coastal-premium-search-wrap { margin-top: -58px; padding-inline: 12px; }
+  .coastal-premium-search-wrap .coastal-search { border-radius: 17px; }
+  .coastal-premium-search-wrap .coastal-search-heading { padding-inline: 13px; }
+  .coastal-premium-search-wrap .coastal-search-form { gap: 14px 12px; padding: 17px 14px 16px; }
+  .coastal-premium-search-wrap .coastal-search-submit { border-radius: 8px; }
+  .coastal-premium-feature-row { grid-template-columns: repeat(4,minmax(0,1fr)); padding: 22px 0 8px; }
+  .coastal-premium-feature-row p { flex-direction: column; gap: 6px; padding: 0 6px; text-align: center; }
+  .coastal-premium-feature-row svg, .coastal-premium-feature-row .tripelor-mark { width: 21px; height: 21px; }
+  .coastal-premium-feature-row strong { font-size: 9px; line-height: 1.2; }
+  .coastal-premium-feature-row small { font-size: 6px; letter-spacing: .08em; }
+  .coastal-home-pass { padding: 14px 12px 22px; }
+
 }
 @media (max-width: 500px) { .brand-announcement a { font-size: 0; } .brand-announcement a svg { width: 15px; height: 15px; } }
 @media (max-width: 360px) {
