@@ -27,7 +27,7 @@ export default function Navbar() {
     if (node) node.inert = !open;
   }, [open]);
   const primaryLinks = primaryRoutes.map(([href, key]) => [href, copy[key]] as const);
-  const menuLinks = [["/", copy.home], ...primaryLinks, ["/maldives-matchmaker", copy.helpMeChoose], ["/secret-deals", brand.secretCta], ["/island-story", translations[locale].home.islandStoryCta], ["/couple-match", translations[locale].home.coupleCta], ["/wishlist", translations[locale].home.wishlistCta], ["/holiday-shortlist", copy.holidayShortlist], ["/my-trip", copy.myTripPlan], ["/account#referral-rewards", copy.referralEarn], ["/reviews", copy.reviews], ["/contact", copy.contact]];
+  const menuLinks = [["/", copy.home], ...primaryLinks, ["/stories", "Tripelor Stories"], ["/maldives-matchmaker", copy.helpMeChoose], ["/secret-deals", brand.secretCta], ["/island-story", translations[locale].home.islandStoryCta], ["/couple-match", translations[locale].home.coupleCta], ["/wishlist", translations[locale].home.wishlistCta], ["/holiday-shortlist", copy.holidayShortlist], ["/my-trip", copy.myTripPlan], ["/account#referral-rewards", copy.referralEarn], ["/reviews", copy.reviews], ["/contact", copy.contact]];
 
   useEffect(() => {
     const controller = new AbortController();
