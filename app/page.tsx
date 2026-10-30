@@ -66,6 +66,18 @@ export default async function Home() {
       </div>
     </section>
 
+    <section className="container py-10 md:py-14">
+      <Link href="/tours/noah-safari-maldives" className="group grid overflow-hidden rounded-3xl border border-white/10 bg-[#071922] md:grid-cols-[1.1fr_.9fr]">
+        <div className="p-7 md:p-10">
+          <p className="coastal-eyebrow">New safari experience</p>
+          <h2 className="font-display mt-3 text-4xl text-white md:text-5xl">NOAH Maldives Safari Boat</h2>
+          <p className="mt-4 max-w-2xl leading-7 text-white/55">Shared safari departures and private charters for 3–14 nights, with six en-suite cabins and curated Maldives routes.</p>
+          <span className="coastal-text-link mt-6">Explore NOAH Safari <ArrowUpRight /></span>
+        </div>
+        <img src="https://noahmaldives.com/wp-content/uploads/2026/07/NOAH-safari-boat-for-rent-MALDIVES-41-1080.jpg" alt="NOAH Maldives safari boat" className="h-72 w-full object-cover md:h-full" loading="lazy" decoding="async" />
+      </Link>
+    </section>
+
     <HomeStoryPreview properties={managedProperties} locale={locale} copy={{ title: original.islandStoryTitle, body: original.islandStoryBody, cta: original.islandStoryCta }} />
 
     <section className="container coastal-personal-grid">
