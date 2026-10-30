@@ -160,6 +160,28 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .coastal-premium-feature-row small { display: block; margin-top: 3px; color: var(--brand-muted); font-size: 8px; line-height: 1.35; letter-spacing: .12em; text-transform: uppercase; }
 .coastal-home-pass { padding-top: 18px; padding-bottom: 24px; }
 .coastal-home-pass > * { border-radius: 18px; }
+.coastal-content .maldives-pass-dark {
+  --tone-rgb: 255 255 255;
+  --tone-paper: #071922;
+  --tone-base: #071922;
+  --tone-line: #ffffff2a;
+  --brand-accent-rgb: 226 189 104;
+  color: #fff;
+}
+.coastal-content .maldives-pass-dark .font-display,
+.coastal-content .maldives-pass-dark h1,
+.coastal-content .maldives-pass-dark h2,
+.coastal-content .maldives-pass-dark .text-white {
+  color: #fff;
+}
+.coastal-content .maldives-pass-dark [class*="text-white/"] { color: rgb(255 255 255 / .72); }
+.coastal-content .maldives-pass-dark [class*="text-[#e2bd68]"],
+.coastal-content .maldives-pass-dark [class*="text-[#f3dfaa]"] { color: #f2cf7a; }
+.coastal-content .maldives-pass-dark [class*="border-white/"] { border-color: rgb(255 255 255 / .24); }
+.coastal-content .maldives-pass-dark [class*="bg-white/"] { background-color: rgb(255 255 255 / .06); }
+.coastal-content .maldives-pass-dark .btn-gold { background: #3049df; color: #fff; }
+.coastal-content .maldives-pass-dark .btn-outline { border-color: rgb(255 255 255 / .55); color: #fff; }
+
 
 /* The reference's split hero. */
 .coastal-home { overflow: clip; background: var(--brand-cream); color: var(--brand-ink); }
