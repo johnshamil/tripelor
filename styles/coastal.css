@@ -266,6 +266,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-blue); ou
 .brand-footer-grid svg { width: 15px; height: 15px; flex: none; }
 .brand-footer-intro { max-width: 260px; margin-top: 25px; color: #687062; font-size: 12px; line-height: 1.9; }
 .brand-footer-contact { margin-top: 12px; color: var(--brand-blue); }
+.brand-footer-trust { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; border-top: 1px solid #d7d9ce; padding: 20px 0; color: #4f5d52; }
+.brand-footer-trust span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; }
+.brand-footer-trust a { display: inline-flex; align-items: center; gap: 7px; color: var(--brand-blue); font-size: 11px; font-weight: 600; }
+.brand-footer-trust svg { width: 14px; height: 14px; }
 .brand-footer-worldwide { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; border-top: 1px solid #d7d9ce; padding: 22px 0; }
 .brand-footer-worldwide span { margin-right: 6px; color: #6d7568; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .15em; }
 .brand-footer-worldwide a { color: #4f5d52; font-size: 11px; text-decoration: underline; text-underline-offset: 4px; }
