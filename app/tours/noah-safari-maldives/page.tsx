@@ -19,33 +19,38 @@ const rates = [
 
 export default function NoahSafariPage() {
   const whatsapp = "https://wa.me/9609429403?text=" + encodeURIComponent("Hello Tripelor, I would like a quote for the NOAH Maldives Safari Boat.");
-  return <main className="bg-[#06151c] text-white">
-    <section className="relative min-h-[70vh] overflow-hidden border-b border-white/10">
-      <img src="https://noahmaldives.com/wp-content/uploads/2026/07/NOAH-safari-boat-for-rent-MALDIVES-41-1080.jpg" alt="NOAH Maldives safari boat" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#031018]/95 via-[#031018]/75 to-[#031018]/30" />
-      <div className="container relative flex min-h-[70vh] items-end py-20 md:py-28">
-        <p className="eyebrow">Tripelor Safari Partner</p>
-        <h1 className="font-display mt-4 max-w-5xl text-5xl leading-tight md:text-7xl">NOAH Maldives Safari Boat</h1>
-        <p className="mt-5 max-w-3xl text-lg leading-8 text-white/60">Explore the Maldives by liveaboard with shared departures or a private whole-boat charter. Trips can run from 3 to 14 nights, with a sample route through North Malé, Goidhoo Atoll, Baa Atoll and Gaafaru.</p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <a href={whatsapp} target="_blank" rel="noreferrer" className="btn-gold">Request a Tripelor Quote</a>
-          <Link href="/contact" className="btn-outline">Send an Enquiry</Link>
+  return <main className="bg-[#06151c] pb-24 text-white md:pb-0">
+    <section className="relative overflow-hidden border-b border-white/10 bg-[#06151c]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_15%,rgba(55,179,197,.20),transparent_32%),radial-gradient(circle_at_12%_35%,rgba(217,189,123,.16),transparent_30%),linear-gradient(160deg,#041117_0%,#0b3440_55%,#071922_100%)]" />
+      <div className="absolute -right-24 top-20 h-72 w-72 rounded-full border border-white/5 md:h-96 md:w-96" />
+      <div className="absolute -left-28 bottom-[-7rem] h-80 w-80 rounded-full border border-gold/10 md:h-[28rem] md:w-[28rem]" />
+      <div className="container relative flex min-h-[72vh] flex-col items-start justify-end pb-28 pt-16 md:min-h-[68vh] md:pb-20 md:pt-24">
+        <div className="max-w-3xl">
+          <div className="inline-flex items-center gap-2 rounded-full border border-gold/25 bg-gold/10 px-3 py-2 text-[10px] font-semibold uppercase tracking-[.22em] text-gold">
+            <Ship className="h-3.5 w-3.5" /> Tripelor Safari Partner
+          </div>
+          <h1 className="font-display mt-6 text-[2.8rem] leading-[.95] tracking-[-.02em] text-white sm:text-6xl md:text-7xl">
+            NOAH Maldives
+            <span className="block italic text-gold">Safari Boat</span>
+          </h1>
+          <p className="mt-6 max-w-2xl text-base leading-7 text-white/65 md:text-lg md:leading-8">
+            Sail the Maldives on a 23 m liveaboard with six en-suite cabins. Choose a shared departure or charter the whole boat for a private 3-14 night island-hopping journey.
+          </p>
+          <div className="mt-8 grid w-full gap-3 sm:flex sm:flex-wrap">
+            <a href={whatsapp} target="_blank" rel="noreferrer" className="btn-gold min-h-12 w-full justify-center sm:w-auto">
+              Request a Tripelor Quote
+            </a>
+            <Link href="/contact" className="btn-outline min-h-12 w-full justify-center sm:w-auto">
+              Ask About Dates
+            </Link>
+          </div>
+          <div className="mt-8 grid w-full grid-cols-3 gap-2 border-t border-white/10 pt-6 text-center sm:max-w-xl sm:text-left">
+            <div><p className="font-display text-2xl text-white">18</p><p className="mt-1 text-[10px] uppercase tracking-[.14em] text-white/40">Guests</p></div>
+            <div><p className="font-display text-2xl text-white">6</p><p className="mt-1 text-[10px] uppercase tracking-[.14em] text-white/40">Cabins</p></div>
+            <div><p className="font-display text-2xl text-white">3-14</p><p className="mt-1 text-[10px] uppercase tracking-[.14em] text-white/40">Nights</p></div>
+          </div>
         </div>
       </div>
-    </section>
-
-    <section className="container py-12 md:py-16">
-      <div className="grid gap-5 md:grid-cols-2">
-        <figure className="overflow-hidden rounded-3xl border border-white/10 bg-white/[.025]">
-          <img src="https://noahmaldives.com/wp-content/uploads/2026/07/NOAH-safari-boat-for-rent-MALDIVES-41-1080.jpg" alt="NOAH safari boat after its 2026 refurbishment" className="h-80 w-full object-cover md:h-96" loading="lazy" />
-          <figcaption className="p-4 text-xs text-white/45">NOAH safari boat · official 2026 refurbishment photo</figcaption>
-        </figure>
-        <figure className="overflow-hidden rounded-3xl border border-white/10 bg-white/[.025]">
-          <img src="https://noahmaldives.com/wp-content/uploads/2026/07/NOAH-safari-boat-for-rent-MALDIVES-42-1080.jpg" alt="NOAH Maldives safari boat" className="h-80 w-full object-cover md:h-96" loading="lazy" />
-          <figcaption className="p-4 text-xs text-white/45">NOAH Maldives · official supplier photo</figcaption>
-        </figure>
-      </div>
-      <p className="mt-4 text-xs text-white/35">Photos used with permission from NOAH for Tripelor marketing.</p>
     </section>
 
     <section className="container py-14 md:py-18">
