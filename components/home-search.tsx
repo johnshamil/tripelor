@@ -51,7 +51,7 @@ export default function HomeSearch({ islands, locale, today }: { islands: string
           <label><span><MapPin />{copy.where}</span><select name="island" defaultValue=""><option value="">{copy.allIslands}</option>{islands.map(island => <option key={island}>{island}</option>)}</select></label>
           <label><span><CalendarDays />{copy.checkIn}</span><input name="checkIn" type="date" min={today} required={Boolean(checkIn || checkOut)} value={checkIn} onChange={event => { setCheckIn(event.target.value); if (checkOut && event.target.value >= checkOut) setCheckOut(""); }} /></label>
           <label><span><CalendarDays />{copy.checkOut}</span><input name="checkOut" type="date" min={nextDay} required={Boolean(checkIn || checkOut)} value={checkOut} onChange={event => setCheckOut(event.target.value)} /></label>
-          <label><span><UsersRound />{copy.travellers}</span><select name="guests" defaultValue="2">{[1, 2, 3, 4].map(number => <option key={number} value={number}>{number} {number === 1 ? copy.guest : copy.guests}</option>)}</select></label>
+          <label><span><UsersRound />{copy.travellers}</span><select name="guests" defaultValue="2">{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(number => <option key={number} value={number}>{number} {number === 1 ? copy.guest : copy.guests}</option>)}</select></label>
           <button className="coastal-button coastal-search-submit" type="submit">{copy.search}<ArrowRight /></button>
         </form>
       </div>
