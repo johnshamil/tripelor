@@ -17,7 +17,9 @@ export default function AvailabilityAlertManager() {
     setAlerts(result.alerts); setRooms(result.rooms); setEmail(result.email);
     if (initial) {
       const params = new URLSearchParams(window.location.search);
-      const selected = result.rooms.find((room: AlertRoom) => room.propertyName === params.get('property') && room.roomType === params.get('roomType')) || result.rooms[0];
+      const selected = result.rooms.find((room: AlertRoom) => room.propertyName === params.get('property') && room.roomType === params.get('roomType'))
+        || result.rooms.find((room: AlertRoom) => room.propertyName === params.get('property'))
+        || result.rooms[0];
       if (selected) { setProperty(selected.propertyName); setRoom(selected.roomType); }
       setCheckIn(params.get('checkIn') || ''); setCheckOut(params.get('checkOut') || '');
     }
