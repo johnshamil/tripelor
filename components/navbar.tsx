@@ -12,7 +12,7 @@ import { translations } from "@/lib/professional-translations";
 import { coastalCopy } from "@/lib/coastal-copy";
 
 type User = { email: string; fullName: string; isAdmin?: boolean };
-const primaryRoutes = [["/stays", "stays"], ["/island-adventures", "packages"], ["/excursions", "sharedExcursions"], ["/experience-bundles", "experiences"], ["/speedboat", "transfers"]] as const;
+const primaryRoutes = [["/stays", "stays"], ["/island-adventures", "packages"], ["/tours", "experiences"], ["/excursions", "sharedExcursions"], ["/speedboat", "transfers"]] as const;
 
 export default function Navbar() {
   const pathname = usePathname();
