@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, Eye, EyeOff, LockKeyhole, LogIn, ShieldCheck, Sparkles } from "lucide-react";
 import TripelorEmblem from "@/components/tripelor-emblem";
 import { reportGoogleAdsConversion } from "@/lib/google-ads-conversions";
+import SocialAuthButtons from "@/components/social-auth-buttons";
 
 function safeNextPath(value: string | null) {
   return value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\") ? value : "";
@@ -121,7 +122,8 @@ export default function LoginPage() {
               {partnerAccess ? "Sign in with the partner email Tripelor has assigned to your property." : "Sign in so your request, preferences and concierge support remain connected to your Tripelor account."}
             </p>
 
-            <form onSubmit={submit} className="mt-8 grid gap-5">
+            <SocialAuthButtons nextPath={nextPath || "/account"} />
+            <form onSubmit={submit} className="grid gap-5">
               <label className="premium-label">
                 <span>Email address</span>
                 <input
