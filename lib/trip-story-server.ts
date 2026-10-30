@@ -27,6 +27,9 @@ export type TripStory = {
   favorite_moment: string;
   badges: string[];
   is_public: boolean;
+  visibility: "private" | "unlisted" | "public";
+  public_name: string;
+  published_at: string | null;
   share_token: string;
   created_at: string;
   updated_at: string;
@@ -281,4 +284,27 @@ export async function publicStoryByToken(token: string) {
 
   const photos = await signedPhotosForStory(story.id, 3600);
   return { story, reservation, photos };
+}
+
+
+export async function publicStories(limit = 24) {
+  const { url } = cfg();
+  const response = await fetch(
+    `${url}/rest/v1/trip_stories?select=id,reservation_id,title,story_text,favorite_moment,badges,public_name,published_at,share_token&visibility=eq.public&order=published_at.desc.nullslast,updated_at.desc&limit=${Math.max(1, Math.min(50, limit))}`,
+    { headers: headers(false), cache: "no-store" },
+  );
+  const stories = await jsonResponse(response, "Unable to load Tripelor Stories.");
+  if (!Array.isArray(stories) || !stories.length) return [];
+
+  return Promise.all(stories.map(async (story: any) => {
+    const reservationResponse = await fetch(
+      `${url}/rest/v1/reservations?select=id,property_name,check_in,check_out,package_name,activities&id=eq.${encodeURIComponent(story.reservation_id)}&limit=1`,
+      { headers: headers(false), cache: "no-store" },
+    );
+    const reservations = await jsonResponse(reservationResponse, "Unable to load story journey.");
+    const reservation = reservations?.[0] || null;
+    if (!reservation) return null;
+    const photos = await signedPhotosForStory(story.id, 3600);
+    return { story, reservation, cover: photos.find(photo => photo.signed_url)?.signed_url || "" };
+  })).then(items => items.filter(Boolean));
 }
