@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Anchor, BadgeCheck, BedDouble, CalendarDays, CircleDollarSign, Ship, Users, Waves } from "lucide-react";
+import NoahBookingForm from "./noah-booking-form";
 
 export const metadata = {
   title: "NOAH Maldives Safari Boat | Tripelor",
@@ -37,8 +38,8 @@ export default function NoahSafariPage() {
             Sail the Maldives on a 23 m liveaboard with six en-suite cabins. Choose a shared departure or charter the whole boat for a private 3-14 night island-hopping journey.
           </p>
           <div className="mt-8 grid w-full gap-3 sm:flex sm:flex-wrap">
-            <a href={whatsapp} target="_blank" rel="noreferrer" className="btn-gold min-h-12 w-full justify-center sm:w-auto">
-              Request a Tripelor Quote
+            <a href="#book-noah" className="btn-gold min-h-12 w-full justify-center sm:w-auto">
+              Book NOAH Safari
             </a>
             <Link href="/contact" className="btn-outline min-h-12 w-full justify-center sm:w-auto">
               Ask About Dates
@@ -95,6 +96,8 @@ export default function NoahSafariPage() {
         </article>
       </div>
     </section>
+
+    <NoahBookingForm />
 
     <section className="bg-[#f1ebdf] text-[#071922]">
       <div className="container py-14 md:py-18">
