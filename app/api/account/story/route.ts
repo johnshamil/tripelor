@@ -1,6 +1,8 @@
 import { requireUser } from "@/lib/auth-server";
 import {
+  daysForStory,
   ensureStory,
+  replaceStoryDays,
   reservationForStoryUser,
   signedPhotosForStory,
   storyForUser,
@@ -32,6 +34,19 @@ function cleanBadges(value: unknown) {
     : [];
 }
 
+function cleanDays(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 60).flatMap((entry: any, index) => {
+    const dayNumber = Number(entry?.dayNumber ?? index + 1);
+    if (!Number.isInteger(dayNumber) || dayNumber < 1 || dayNumber > 60) return [];
+    const title = cleanText(entry?.title, 160);
+    const body = cleanText(entry?.body, 3000);
+    const locationLabel = cleanText(entry?.locationLabel, 160);
+    if (!title && !body && !locationLabel) return [];
+    return [{ day_number: dayNumber, title, body, location_label: locationLabel }];
+  });
+}
+
 function shareUrl(story: any) {
   return story?.visibility !== "private" && story?.share_token ? `/story/${story.share_token}` : "";
 }
@@ -46,9 +61,11 @@ export async function GET(request: Request) {
     if (!reservation) return Response.json({ error: "Journey not found." }, { status: 404 });
 
     const story = await storyForUser(user.id, reservationId);
-    const photos = story ? await signedPhotosForStory(story.id) : [];
+    const [photos, days] = story
+      ? await Promise.all([signedPhotosForStory(story.id), daysForStory(story.id)])
+      : [[], []];
     return Response.json(
-      { reservation, story, photos, shareUrl: shareUrl(story) },
+      { reservation, story, photos, days, shareUrl: shareUrl(story) },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
@@ -86,10 +103,12 @@ export async function POST(request: Request) {
       public_name: cleanText(body?.publicName, 80),
       published_at: requestedVisibility === "public" ? (current.published_at || new Date().toISOString()) : null,
     } as any);
+    const days = cleanDays(body?.days);
+    await replaceStoryDays(story.id, days);
     const photos = await signedPhotosForStory(story.id);
 
     return Response.json(
-      { reservation, story, photos, shareUrl: shareUrl(story) },
+      { reservation, story, photos, days: await daysForStory(story.id), shareUrl: shareUrl(story) },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
