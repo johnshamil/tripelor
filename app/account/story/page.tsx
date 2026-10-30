@@ -55,6 +55,15 @@ type Photo = {
   id: string;
   signed_url?: string;
   caption?: string;
+  media_type?: "photo" | "video";
+  day_number?: number | null;
+};
+
+type StoryDay = {
+  day_number: number;
+  title: string;
+  body: string;
+  location_label: string;
 };
 
 const badges = [
@@ -195,7 +204,7 @@ export default function MaldivesStoryPage() {
           stamps: "Memory stamps",
           stampsBody: "Choose the moments that became part of your story.",
           photos: "Memory album",
-          photosBody: "Add up to 12 photos. JPG, PNG or WebP · maximum 10 MB each.",
+          photosBody: "Add photos or short videos. Photos up to 10 MB; MP4, WebM or MOV videos up to 50 MB.",
           upload: "Add Photos",
           uploading: "Uploading...",
           remove: "Remove photo",
@@ -231,6 +240,7 @@ export default function MaldivesStoryPage() {
   const [favoriteMoment, setFavoriteMoment] = useState("");
   const [storyText, setStoryText] = useState("");
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+  const [days, setDays] = useState<StoryDay[]>([]);
   const [isPublic, setIsPublic] = useState(false);
   const [visibility, setVisibility] = useState<"private" | "unlisted" | "public">("private");
   const [publicName, setPublicName] = useState("");
@@ -295,6 +305,12 @@ export default function MaldivesStoryPage() {
         setFavoriteMoment(existing?.favorite_moment || "");
         setStoryText(existing?.story_text || "");
         setSelectedBadges(existing?.badges || []);
+        setDays((data.days || []).map((day: any) => ({
+          day_number: Number(day.day_number),
+          title: day.title || "",
+          body: day.body || "",
+          location_label: day.location_label || "",
+        })));
         setIsPublic(Boolean(existing?.is_public));
         setVisibility(existing?.visibility || (existing?.is_public ? "unlisted" : "private"));
         setPublicName(existing?.public_name || "");
@@ -306,6 +322,19 @@ export default function MaldivesStoryPage() {
 
   function toggleBadge(key: string) {
     setSelectedBadges(current => current.includes(key) ? current.filter(item => item !== key) : [...current, key]);
+  }
+
+  function updateDay(dayNumber: number, patch: Partial<StoryDay>) {
+    setDays(current => {
+      const existing = current.find(day => day.day_number === dayNumber) || {
+        day_number: dayNumber,
+        title: "",
+        body: "",
+        location_label: "",
+      };
+      return [...current.filter(day => day.day_number !== dayNumber), { ...existing, ...patch }]
+        .sort((a, b) => a.day_number - b.day_number);
+    });
   }
 
   async function save(publicValue = isPublic) {
@@ -326,6 +355,7 @@ export default function MaldivesStoryPage() {
           isPublic: publicValue,
           visibility,
           publicName,
+          days: days.map(day => ({ dayNumber: day.day_number, title: day.title, body: day.body, locationLabel: day.location_label })),
         }),
       });
       const data = await response.json();
@@ -406,6 +436,7 @@ export default function MaldivesStoryPage() {
             isPublic: true,
             visibility: "unlisted",
             publicName,
+          days: days.map(day => ({ dayNumber: day.day_number, title: day.title, body: day.body, locationLabel: day.location_label })),
           }),
         });
         const payload = await response.json();
@@ -604,6 +635,28 @@ export default function MaldivesStoryPage() {
           </section>
 
           <section className="story-print-card border border-[#d0c5b0] bg-[#fffdf8] p-6 shadow-sm md:p-8">
+            <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#8d7037]">Day-by-day Story</p>
+            <h2 className="font-display mt-2 text-3xl">Tell the journey one day at a time.</h2>
+            <p className="mt-2 text-sm leading-6 text-[#687377]">Add only the days you want to share. Empty days stay hidden.</p>
+            <div className="mt-6 space-y-4">
+              {Array.from({ length: Math.min(14, tripNights) }, (_, index) => {
+                const dayNumber = index + 1;
+                const day = days.find(item => item.day_number === dayNumber) || { day_number: dayNumber, title: "", body: "", location_label: "" };
+                return (
+                  <details key={dayNumber} className="rounded-2xl border border-[#d8cdb8] bg-white p-4" open={Boolean(day.title || day.body || day.location_label)}>
+                    <summary className="cursor-pointer font-semibold">Day {dayNumber}{day.title ? " · " + day.title : ""}</summary>
+                    <div className="mt-4 grid gap-3">
+                      <input value={day.title} onChange={event => updateDay(dayNumber, { title: event.target.value })} maxLength={160} placeholder="Day title — e.g. Sharks, turtles & sunset" className="min-h-12 w-full border border-[#d0c5b0] bg-white px-4 text-[#071922]" />
+                      <input value={day.location_label} onChange={event => updateDay(dayNumber, { location_label: event.target.value })} maxLength={160} placeholder="Location — e.g. Felidhoo / Shark Bay" className="min-h-12 w-full border border-[#d0c5b0] bg-white px-4 text-[#071922]" />
+                      <textarea value={day.body} onChange={event => updateDay(dayNumber, { body: event.target.value })} maxLength={3000} rows={4} placeholder="What happened today?" className="w-full border border-[#d0c5b0] bg-white p-4 text-[#071922]" />
+                    </div>
+                  </details>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="story-print-card border border-[#d0c5b0] bg-[#fffdf8] p-6 shadow-sm md:p-8">
             <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#8d7037]">{copy.stamps}</p>
             <h2 className="font-display mt-2 text-3xl">{copy.stamps}</h2>
             <p className="mt-2 text-sm leading-6 text-[#687377]">{copy.stampsBody}</p>
@@ -645,7 +698,7 @@ export default function MaldivesStoryPage() {
                 <input
                   type="file"
                   multiple
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
                   disabled={uploading || photos.length >= 12}
                   onChange={uploadPhotos}
                   className="sr-only"
