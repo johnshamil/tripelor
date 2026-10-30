@@ -46,18 +46,25 @@ export default function PropertyCards({ managedProperties = [], featured = false
         {featured && <Link href="/stays" className="coastal-text-link">{copy.viewAll}<ArrowRight /></Link>}
       </div>
       {visible.length ? <div className="coastal-property-grid">
-        {visible.map(property => <Link key={property.slug} href={`/stays/${property.slug}${query ? `?${query}` : ""}`} className="coastal-property-card">
-          <div className="coastal-property-image"><img src={property.image} alt={property.name} loading="lazy" decoding="async" width={600} height={480} /></div>
-          <div className="coastal-property-info">
-            <p className="coastal-property-location"><MapPin aria-hidden="true" />{property.location}</p>
-            <h3>{property.name}</h3>
-            <p className="coastal-property-description">{localizedDescriptions[property.slug] || property.description}</p>
-            <div className="coastal-property-bottom">
-              <p>{property.startingFrom > 0 ? <>{copy.from}{" "}<strong>USD {property.startingFrom}</strong><small>{copy.perNight.replace(/^USD\s*\/?\s*/i, "")}</small></> : copy.ratesRequest}</p>
-              <span aria-label={copy.exploreRooms}><ArrowUpRight aria-hidden="true" /></span>
+        {visible.map(property => <article key={property.slug} className="coastal-property-card">
+          <Link href={`/stays/${property.slug}${query ? `?${query}` : ""}`} className="block">
+            <div className="coastal-property-image"><img src={property.image} alt={property.name} loading="lazy" decoding="async" width={600} height={480} /></div>
+            <div className="coastal-property-info">
+              <p className="coastal-property-location"><MapPin aria-hidden="true" />{property.location}</p>
+              <h3>{property.name}</h3>
+              <p className="coastal-property-description">{localizedDescriptions[property.slug] || property.description}</p>
+              <div className="coastal-property-bottom">
+                <p>{property.startingFrom > 0 ? <>{copy.from}{" "}<strong>USD {property.startingFrom}</strong><small>{copy.perNight.replace(/^USD\s*\/?\s*/i, "")}</small></> : copy.ratesRequest}</p>
+                <span aria-label={copy.exploreRooms}><ArrowUpRight aria-hidden="true" /></span>
+              </div>
             </div>
+          </Link>
+          <div className="border-t border-[#d7d9ce] px-5 py-4">
+            <Link href={`/maldives-pass?stay=${encodeURIComponent(property.slug)}&source=property-card`} className="coastal-text-link">
+              Unlock My Maldives Price <ArrowRight aria-hidden="true" />
+            </Link>
           </div>
-        </Link>)}
+        </article>)}
       </div> : <div className="coastal-search-summary"><p role="status">{brand.noStays}</p><Link href="/stays" className="coastal-text-link">{brand.allStays}<ArrowRight /></Link></div>}
       <div className="coastal-property-shortlist"><p className="coastal-property-note">{copy.note}</p><Link href="/holiday-shortlist" className="coastal-text-link">{copy.shortlist}<ArrowRight /></Link></div>
     </div>
