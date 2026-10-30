@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, LockKeyhole, UserPlus } from "lucide-react";
 import TripelorEmblem from "@/components/tripelor-emblem";
 import { reportGoogleAdsConversion } from "@/lib/google-ads-conversions";
+import SocialAuthButtons from "@/components/social-auth-buttons";
 
 function safeNextPath(value: string | null) {
   return value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\") ? value : "";
@@ -99,7 +100,8 @@ export default function SignupPage() {
             <h2 className="font-display mt-3 text-4xl md:text-5xl">Unlock My Maldives Pass.</h2>
             <p className="mt-4 text-sm leading-7 text-[#687377]">Create your free Tripelor account to keep your private price checks, Secret Deals, saved plans, alerts, points and Maldives concierge support together.</p>
 
-            <form onSubmit={submit} className="mt-8 grid gap-5">
+            <SocialAuthButtons nextPath={nextPath || "/account"} />
+            <form onSubmit={submit} className="grid gap-5">
               <label className="premium-label">
                 <span>Full name</span>
                 <input required value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Your full name" autoComplete="name" className="premium-control" />
