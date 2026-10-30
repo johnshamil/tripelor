@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CalendarDays, Heart, MapPin, Plane, Ship, Sparkles, Star, Waves } from "lucide-react";
 import { cookies } from "next/headers";
 import StoryPublicActions from "@/components/story-public-actions";
+import CopyStoryTripButton from "@/components/copy-story-trip-button";
 import { professionalLocale } from "@/lib/professional-translations";
 import { publicStoryByToken } from "@/lib/trip-story-server";
 
@@ -148,7 +149,7 @@ export default async function PublicStoryPage({ params }: { params: { token: str
     );
   }
 
-  const { story, reservation, photos } = bundle;
+  const { story, reservation, photos, days } = bundle;
   const image = heroImage(reservation.property_name);
   const experiences = reservation.activities || reservation.package_name || "";
   const nights = nightCount(reservation.check_in, reservation.check_out);
@@ -205,17 +206,45 @@ export default async function PublicStoryPage({ params }: { params: { token: str
             </section>
           )}
 
+          {days?.length > 0 && (
+            <section className="story-card border border-[#d0c5b0] bg-[#fffdf8] p-7 shadow-sm md:p-9">
+              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#8d7037]">Day-by-day journey</p>
+              <div className="mt-6 space-y-7">
+                {days.map((day: any) => (
+                  <article key={day.id || day.day_number} className="grid grid-cols-[54px_1fr] gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#071922] font-semibold text-[#e3ca91]">{day.day_number}</div>
+                    <div>
+                      {day.location_label && <p className="text-xs font-semibold uppercase tracking-[.14em] text-[#8d7037]">{day.location_label}</p>}
+                      <h2 className="font-display mt-1 text-3xl">{day.title || "Day " + day.day_number}</h2>
+                      {day.body && <p className="mt-3 whitespace-pre-wrap text-base leading-8 text-[#58656c]">{day.body}</p>}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+
           {photos.length > 0 && (
             <section className="story-card border border-[#d0c5b0] bg-[#fffdf8] p-5 shadow-sm md:p-7">
               <p className="px-2 text-[10px] font-bold uppercase tracking-[.2em] text-[#8d7037]">{copy.memories}</p>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {photos.filter(photo => photo.signed_url).map((photo, index) => (
                   <figure key={photo.id} className={index === 0 ? "sm:col-span-2" : ""}>
-                    <img
-                      src={photo.signed_url}
-                      alt={photo.caption || `Maldives travel memory ${index + 1}`}
-                      className={`w-full object-cover ${index === 0 ? "aspect-[16/9]" : "aspect-square"}`}
-                    />
+                    {photo.media_type === "video" ? (
+                      <video
+                        src={photo.signed_url}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className={`w-full bg-black object-cover ${index === 0 ? "aspect-[16/9]" : "aspect-square"}`}
+                      />
+                    ) : (
+                      <img
+                        src={photo.signed_url}
+                        alt={photo.caption || `Maldives travel memory ${index + 1}`}
+                        className={`w-full object-cover ${index === 0 ? "aspect-[16/9]" : "aspect-square"}`}
+                      />
+                    )}
                     {photo.caption && <figcaption className="mt-2 text-sm text-[#687377]">{photo.caption}</figcaption>}
                   </figure>
                 ))}
@@ -259,7 +288,10 @@ export default async function PublicStoryPage({ params }: { params: { token: str
             <p className="mt-4 text-[10px] font-bold uppercase tracking-[.2em] text-[#8d7037]">{copy.created}</p>
             <p className="font-display mt-3 text-3xl">TRIPELOR</p>
             <p className="mt-3 text-sm leading-6 text-[#687377]">{copy.createdBody}</p>
-            <Link href={"/build-your-trip?source=tripelor-story&property=" + encodeURIComponent(reservation.property_name)} className="btn-gold mt-6">Plan a trip like this</Link>
+            <div className="mt-6">
+              <CopyStoryTripButton token={story.share_token} propertyName={reservation.property_name} title={story.title || copy.eyebrow} nights={nights} />
+            </div>
+            <Link href={"/build-your-trip?source=tripelor-story&property=" + encodeURIComponent(reservation.property_name)} className="btn-outline mt-3">Plan a trip like this</Link>
             <Link href="/stories" className="btn-outline mt-3">Explore Tripelor Stories</Link>
           </section>
         </aside>
