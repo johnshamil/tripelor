@@ -41,8 +41,22 @@ export type StoryPhoto = {
   storage_path: string;
   caption: string;
   sort_order: number;
+  media_type: "photo" | "video";
+  day_number?: number | null;
+  duration_seconds?: number | null;
   created_at: string;
   signed_url?: string;
+};
+
+export type StoryDay = {
+  id: string;
+  story_id: string;
+  day_number: number;
+  title: string;
+  body: string;
+  location_label: string;
+  created_at: string;
+  updated_at: string;
 };
 
 function cfg() {
@@ -197,6 +211,40 @@ export async function signedPhotosForStory(storyId: string, expiresIn = 3600): P
   );
 }
 
+export async function daysForStory(storyId: string): Promise<StoryDay[]> {
+  const { url } = cfg();
+  const response = await fetch(
+    `${url}/rest/v1/trip_story_days?select=*&story_id=eq.${encodeURIComponent(storyId)}&order=day_number.asc`,
+    { headers: headers(false), cache: "no-store" },
+  );
+  const data = await jsonResponse(response, "Unable to load story days.");
+  return Array.isArray(data) ? data : [];
+}
+
+export async function replaceStoryDays(storyId: string, days: Array<Pick<StoryDay, "day_number" | "title" | "body" | "location_label">>) {
+  const { url } = cfg();
+  const clear = await fetch(
+    `${url}/rest/v1/trip_story_days?story_id=eq.${encodeURIComponent(storyId)}`,
+    { method: "DELETE", headers: headers(false), cache: "no-store" },
+  );
+  if (!clear.ok) throw new Error("Unable to update story days.");
+  if (!days.length) return [];
+  const response = await fetch(`${url}/rest/v1/trip_story_days`, {
+    method: "POST",
+    headers: { ...headers(), Prefer: "return=representation" },
+    body: JSON.stringify(days.map(day => ({
+      story_id: storyId,
+      day_number: day.day_number,
+      title: day.title,
+      body: day.body,
+      location_label: day.location_label,
+      updated_at: new Date().toISOString(),
+    }))),
+    cache: "no-store",
+  });
+  return jsonResponse(response, "Unable to save story days.");
+}
+
 export async function uploadStoryObject(path: string, file: File) {
   const { url, key } = cfg();
   const response = await fetch(
@@ -218,7 +266,13 @@ export async function uploadStoryObject(path: string, file: File) {
   }
 }
 
-export async function insertStoryPhoto(storyId: string, storagePath: string, caption = ""): Promise<StoryPhoto> {
+export async function insertStoryPhoto(
+  storyId: string,
+  storagePath: string,
+  caption = "",
+  mediaType: "photo" | "video" = "photo",
+  dayNumber?: number | null,
+): Promise<StoryPhoto> {
   const { url } = cfg();
   const current = await photosForStory(storyId);
   const response = await fetch(`${url}/rest/v1/trip_story_photos`, {
@@ -229,6 +283,8 @@ export async function insertStoryPhoto(storyId: string, storagePath: string, cap
       storage_path: storagePath,
       caption,
       sort_order: current.length,
+      media_type: mediaType,
+      day_number: dayNumber || null,
     }),
     cache: "no-store",
   });
@@ -282,8 +338,11 @@ export async function publicStoryByToken(token: string) {
   const reservation = reservations?.[0] || null;
   if (!reservation) return null;
 
-  const photos = await signedPhotosForStory(story.id, 3600);
-  return { story, reservation, photos };
+  const [photos, days] = await Promise.all([
+    signedPhotosForStory(story.id, 3600),
+    daysForStory(story.id),
+  ]);
+  return { story, reservation, photos, days };
 }
 
 
