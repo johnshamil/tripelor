@@ -6,7 +6,33 @@ import { professionalLocale } from "@/lib/professional-translations";
 import { publicStoryByToken } from "@/lib/trip-story-server";
 
 export const dynamic = "force-dynamic";
-export const metadata = { robots: { index: false, follow: true } };
+
+export async function generateMetadata({ params }: { params: { token: string } }) {
+  try {
+    if (!/^[0-9a-f-]{36}$/i.test(params.token)) throw new Error("Invalid story link");
+    const bundle = await publicStoryByToken(params.token);
+    if (!bundle) return { title: "Tripelor Story", robots: { index: false, follow: true } };
+    const { story, reservation } = bundle;
+    const isPublished = story.visibility === "public";
+    const title = story.title || "My Maldives Story";
+    const description = story.favorite_moment || `A real Maldives journey at ${reservation.property_name}, shared through Tripelor Stories.`;
+    return {
+      title,
+      description,
+      alternates: { canonical: `https://tripelor.com/story/${story.share_token}` },
+      robots: { index: isPublished, follow: true },
+      openGraph: {
+        type: "article",
+        url: `https://tripelor.com/story/${story.share_token}`,
+        siteName: "Tripelor",
+        title,
+        description,
+      },
+    };
+  } catch {
+    return { title: "Tripelor Story", robots: { index: false, follow: true } };
+  }
+}
 
 const badgeMeta: Record<string, [string, string]> = {
   "first-turtle": ["🐢", "First Turtle"],
@@ -148,6 +174,7 @@ export default async function PublicStoryPage({ params }: { params: { token: str
 
           <div className="max-w-4xl">
             <p className="eyebrow">{copy.eyebrow}</p>
+            {story.public_name && <p className="mt-3 text-sm font-semibold text-[#f3dfaa]">Shared by {story.public_name}</p>}
             <h1 className="font-display mt-4 text-5xl leading-[1.02] md:text-7xl">{story.title || copy.eyebrow}</h1>
             <div className="mt-7 flex flex-wrap gap-3 text-sm">
               <span className="border border-white/15 bg-black/25 px-4 py-3 backdrop-blur"><MapPin className="mr-2 inline h-4 w-4 text-[#e3ca91]" />{reservation.property_name}</span>
@@ -232,7 +259,8 @@ export default async function PublicStoryPage({ params }: { params: { token: str
             <p className="mt-4 text-[10px] font-bold uppercase tracking-[.2em] text-[#8d7037]">{copy.created}</p>
             <p className="font-display mt-3 text-3xl">TRIPELOR</p>
             <p className="mt-3 text-sm leading-6 text-[#687377]">{copy.createdBody}</p>
-            <Link href="/build-your-trip" className="btn-gold mt-6">{copy.cta}</Link>
+            <Link href={"/build-your-trip?source=tripelor-story&property=" + encodeURIComponent(reservation.property_name)} className="btn-gold mt-6">Plan a trip like this</Link>
+            <Link href="/stories" className="btn-outline mt-3">Explore Tripelor Stories</Link>
           </section>
         </aside>
       </section>
