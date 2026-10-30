@@ -6,7 +6,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const managed = await publishedProperties();
   return [
-    { url: base, lastModified: now, changeFrequency: "weekly", priority: 1 },
+    {
+      url: base,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 1,
+      alternates: {
+        languages: {
+          en: base,
+          it: `${base}/it`,
+          de: `${base}/de`,
+          ru: `${base}/ru`,
+          "zh-CN": `${base}/zh`,
+          fr: `${base}/fr`,
+          es: `${base}/es`,
+        },
+      },
+    },
+    { url: `${base}/it`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/de`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/ru`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/zh`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/fr`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${base}/es`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${base}/stays/uhoos-lavish-oasis`, lastModified: now, changeFrequency: "weekly", priority: 0.95 },
     { url: `${base}/stays/uhoos-lavish-oasis/room-101`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${base}/stays/uhoos-lavish-oasis/room-102`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
