@@ -1,4 +1,5 @@
 import { setSession, supabaseAuth } from "@/lib/auth-server";
+import { notifyCustomerSignIn } from "@/lib/signin-notifications";
 
 export async function POST(request: Request) {
   try {
@@ -23,8 +24,13 @@ export async function POST(request: Request) {
     if (!userResponse.ok) {
       return Response.json({ error: "Unable to verify social login." }, { status: 401 });
     }
+    const user = await userResponse.json();
+    if (!user?.id) {
+      return Response.json({ error: "Unable to verify social login." }, { status: 401 });
+    }
 
     setSession(accessToken, refreshToken || undefined, expiresIn);
+    await notifyCustomerSignIn(user);
     return Response.json({ success: true });
   } catch {
     return Response.json({ error: "Unable to complete social login." }, { status: 500 });

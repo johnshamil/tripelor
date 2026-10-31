@@ -20,10 +20,11 @@ const session = () => ({
   access_token: 'test-access-secret', refresh_token: 'test-refresh-secret',
   expires_in: 3600, user: structuredClone(customer),
 });
-let authResult, authStatus, mailResults, cookies, calls, warnings;
+let authResult, authStatus, mailResults, cookies, calls, warnings, mailGate, mailStarted;
 function reset() {
   authResult = session(); authStatus = 200; mailResults = [200];
   cookies = []; calls = []; warnings = [];
+  mailGate = null; mailStarted = null;
   process.env.RESEND_API_KEY = 'test-mail-secret';
 }
 reset();
@@ -35,6 +36,8 @@ async function fetchMock(url, init) {
   assert.equal(url, 'https://api.resend.com/emails');
   assert.ok(cookies.some(([name]) => name === 'tripelor_access'), 'session must exist before sending');
   assert.ok(init.signal instanceof AbortSignal, 'mail attempts need a timeout');
+  if (mailStarted) mailStarted();
+  if (mailGate) await mailGate;
   const outcome = mailResults.length > 1 ? mailResults.shift() : mailResults[0];
   if (outcome === 'network') throw new Error('Network failed with test-access-secret');
   return Response.json({ id: 'email-test-id' }, { status: outcome });
@@ -60,13 +63,22 @@ const notification = moduleFor('lib/signin-notifications.ts', { '@/lib/auth-serv
 const dependencies = { '@/lib/auth-server': auth, '@/lib/signin-notifications': notification };
 const login = moduleFor('app/api/auth/login/route.ts', dependencies);
 const signup = moduleFor('app/api/auth/signup/route.ts', dependencies);
+const social = moduleFor('app/api/auth/social-session/route.ts', dependencies);
 const emails = () => calls.filter(call => call.url === 'https://api.resend.com/emails');
-async function post(route, body = {}) {
-  const response = await route.POST(new Request('https://www.tripelor.com/api/auth/login', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
+async function post(route, body = {}, options = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (options.origin) headers.Origin = options.origin;
+  const response = await route.POST(new Request(options.url || 'https://www.tripelor.com/api/auth/login', {
+    method: 'POST', headers,
     body: JSON.stringify({ email: 'request@example.test', password: 'test-password-secret', fullName: 'Untrusted request name', ...body }),
   }));
   return { status: response.status, body: await response.json() };
+}
+function socialPost(body = {}, origin = 'https://www.tripelor.com') {
+  return post(social, {
+    accessToken: 'test-google-access-secret', refreshToken: 'test-google-refresh-secret',
+    expiresIn: 3600, ...body,
+  }, { url: 'https://www.tripelor.com/api/auth/social-session', origin });
 }
 
 (async () => {
@@ -150,5 +162,78 @@ async function post(route, body = {}) {
   assert.equal((await post(signup)).status, 422);
   assert.equal(emails().length, 0);
 
-  console.log('PASS: successful logins and first sessions notify the established owner addresses; failed/admin/pending-confirmation sessions do not; trusted identity, escaped HTML, Maldives time, retry idempotency and email failure isolation verified. No live services called.');
+  reset(); authResult = structuredClone(customer);
+  result = await socialPost({ to: 'attacker@example.test', user: { id: 'spoof', email: 'spoof@example.test' } });
+  assert.equal(result.status, 200);
+  assert.equal(result.body.success, true);
+  assert.equal(emails().length, 1, 'a verified Google sign-in must notify the owner');
+  const socialMail = JSON.parse(emails()[0].init.body);
+  assert.deepEqual(socialMail.to, ['bookings@tripelor.com']);
+  assert.deepEqual(socialMail.bcc, ['johnshamil87@gmail.com']);
+  assert.match(socialMail.text, /customer@example\.test/);
+  assert.doesNotMatch(JSON.stringify(socialMail), /attacker@example|spoof@example|test-google-access-secret|test-google-refresh-secret/);
+  const verification = calls.find(call => call.url.endsWith('/auth/v1/user'));
+  assert.equal(verification.init.headers.Authorization, 'Bearer test-google-access-secret');
+  const socialKey = emails()[0].init.headers['Idempotency-Key'];
+  await socialPost();
+  assert.equal(emails()[1].init.headers['Idempotency-Key'], socialKey, 'callback retries share the verified sign-in event key');
+
+  // Hold the mail response open to ensure the serverless handler waits for it.
+  reset(); authResult = structuredClone(customer);
+  let releaseMail, startTimeout;
+  mailGate = new Promise(resolve => { releaseMail = resolve; });
+  const started = new Promise((resolve, reject) => {
+    mailStarted = resolve;
+    startTimeout = setTimeout(() => reject(new Error('Social notification was never started')), 1000);
+  });
+  let finished = false;
+  const pending = socialPost().then(response => { finished = true; return response; });
+  try {
+    await started;
+    assert.equal(finished, false, 'social login must await the bounded notification attempt');
+  } finally {
+    clearTimeout(startTimeout);
+    releaseMail();
+  }
+  assert.equal((await pending).status, 200);
+
+  for (const failure of ['network', 503]) {
+    reset(); authResult = structuredClone(customer); mailResults = [failure];
+    assert.equal((await socialPost()).status, 200, 'email failure must not break Google sign-in');
+    assert.equal(emails().length, 2);
+    assert.ok(cookies.some(([name]) => name === 'tripelor_access'));
+    assert.ok(warnings.length > 0);
+  }
+
+  reset(); authResult = structuredClone(customer); delete process.env.RESEND_API_KEY;
+  assert.equal((await socialPost()).status, 200);
+  assert.equal(emails().length, 0);
+  assert.ok(warnings.length > 0);
+
+  reset(); authResult = { ...customer, email: 'BOOKINGS@TRIPELOR.COM' };
+  assert.equal((await socialPost()).status, 200);
+  assert.equal(emails().length, 0, 'admin social sign-ins do not send customer alerts');
+
+  for (const [body, origin, status] of [
+    [{ accessToken: '' }, 'https://www.tripelor.com', 400],
+    [{ accessToken: 'x'.repeat(5001) }, 'https://www.tripelor.com', 400],
+    [{}, 'https://attacker.example.test', 403],
+  ]) {
+    reset(); authResult = structuredClone(customer);
+    assert.equal((await socialPost(body, origin)).status, status);
+    assert.equal(calls.length, 0);
+    assert.equal(cookies.length, 0);
+  }
+
+  reset(); authStatus = 401; authResult = { error: 'Invalid token' };
+  assert.equal((await socialPost()).status, 401);
+  assert.equal(emails().length, 0);
+  assert.equal(cookies.length, 0);
+
+  reset(); authResult = { email: customer.email };
+  assert.equal((await socialPost()).status, 401, 'a successful HTTP lookup still needs a verified user identity');
+  assert.equal(emails().length, 0);
+  assert.equal(cookies.length, 0);
+
+  console.log('PASS: password, first-session and verified Google sign-ins notify the established owner addresses; invalid/admin/pending-confirmation sessions do not. Trusted identity, HTML escaping, Maldives time, awaited delivery, retry idempotency and email failure isolation verified. No live services called.');
 })().catch(error => { console.error(error); process.exit(1); });

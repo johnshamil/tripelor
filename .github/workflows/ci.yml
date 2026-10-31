@@ -17,5 +17,7 @@ jobs:
           node-version: 20
       - name: Install
         run: npm install
+      - name: Test sign-in notifications
+        run: node tests/signin-notifications.cjs
       - name: Build
         run: npm run build
