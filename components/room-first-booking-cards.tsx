@@ -31,8 +31,8 @@ export default function PropertyCards({ managedProperties = [], featured = false
     name: "Nala Veli Maldives",
     location: "AA. Ukulhas, North Ari Atoll, Maldives",
     image: "https://drive.google.com/thumbnail?id=1BrzgnQ_5WEUwj5oqueAfDkv9wDTFGqMd&sz=w1200",
-    description: "Explore Nala Veli Villa and Nala Veli Beach & Spa on Ukulhas, with breakfast included and availability confirmed on request.",
-    startingFrom: 0,
+    description: "Explore Nala Veli Villa and Nala Veli Beach & Spa on Ukulhas. Starting rate includes breakfast for one guest; prices vary by dates and room type.",
+    startingFrom: 76.8,
   });
   const localizedDescriptions: Record<string, string> = {
     "uhoos-lavish-oasis": copy.uhoo,
@@ -62,7 +62,7 @@ export default function PropertyCards({ managedProperties = [], featured = false
               <h3>{property.name}</h3>
               <p className="coastal-property-description">{localizedDescriptions[property.slug] || property.description}</p>
               <div className="coastal-property-bottom">
-                <p>{property.startingFrom > 0 ? <>{copy.from}{" "}<strong>USD {property.startingFrom}</strong><small>{copy.perNight.replace(/^USD\s*\/?\s*/i, "")}</small></> : copy.ratesRequest}</p>
+                <p>{property.startingFrom > 0 ? <>{copy.from}{" "}<strong>USD {Number.isInteger(property.startingFrom) ? property.startingFrom : property.startingFrom.toFixed(2)}</strong><small>{copy.perNight.replace(/^USD\s*\/?\s*/i, "")}</small></> : copy.ratesRequest}</p>
                 <span aria-label={copy.exploreRooms}><ArrowUpRight aria-hidden="true" /></span>
               </div>
             </div>
