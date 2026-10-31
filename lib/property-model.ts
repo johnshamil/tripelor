@@ -37,6 +37,7 @@ const trustedPhotoHosts = new Set([
   "hotel.hardrock.com",
   "www.saiihotels.com",
   "unimagrand.com",
+  "drive.google.com",
 ]);
 
 export function isTrustedRemotePhotoUrl(value: string) {
