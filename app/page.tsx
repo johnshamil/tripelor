@@ -123,6 +123,7 @@ export default async function Home() {
       </Link>
     </section>
 
+    <section className="container py-8"><Link href="/stays/nala-veli-maldives" className="group block rounded-3xl border border-[#b9a276]/40 bg-[#092d37] p-8 text-white md:p-10"><p className="text-sm uppercase tracking-[.2em] text-[#d9bd7b]">New Ukulhas stays</p><h2 className="font-display mt-3 text-3xl md:text-4xl">Nala Veli Villa & Nala Veli Beach & Spa</h2><p className="mt-3 max-w-2xl text-white/70">Explore room choices, breakfast-inclusive prices and island transfers. Booking requests are confirmed by our team.</p><span className="mt-5 inline-flex items-center gap-2 text-[#d9bd7b]">Explore Nala Veli <ArrowUpRight className="h-4 w-4"/></span></Link></section>
     <HomeStoryPreview properties={managedProperties} locale={locale} copy={{ title: original.islandStoryTitle, body: original.islandStoryBody, cta: original.islandStoryCta }} />
 
     <section className="container coastal-personal-grid">
