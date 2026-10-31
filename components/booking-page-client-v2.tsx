@@ -269,6 +269,7 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
   const childOptions = Array.from({ length: Math.min(4, maxGuests) + 1 }, (_, index) => index);
 
   function handlePropertyChange(value: string) {
+    if (value === "Nala Veli Villa" || value === "Nala Veli Beach & Spa") { window.location.assign("/stays/nala-veli-maldives#nala-booking"); return; }
     const firstRoomValue = PROPERTY_ROOMS[value]?.[0]?.value || managedProperties.find((property) => property.name === value)?.rooms[0]?.name || "ROOM 101";
     setPropertyName(value);
     setRoomType(firstRoomValue);
@@ -484,6 +485,8 @@ export default function BookingPageClientV2({ locale = "en" }: { locale?: Profes
                     <option>Masfalhi View Inn</option>
                     <option>Rivethi Beach Hotel</option>
                     {managedProperties.map((property) => <option key={property.id} value={property.name}>{property.name}</option>)}
+                    <option value="Nala Veli Villa">Nala Veli Villa</option>
+                    <option value="Nala Veli Beach & Spa">Nala Veli Beach &amp; Spa</option>
                   </select>
                 </label>
                 <div className="premium-label">
