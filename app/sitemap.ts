@@ -40,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/island-adventures/reef-relax-escape`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/island-adventures/5-night-island-adventure`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/island-adventures/ocean-discovery-escape`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/tours/voyages-maldives`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/tours`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/tours/noah-safari-maldives`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${base}/speedboat`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
