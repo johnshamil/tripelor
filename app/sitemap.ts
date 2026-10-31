@@ -30,6 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/zh`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/fr`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${base}/es`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${base}/stays/nala-veli-maldives`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${base}/stays/uhoos-lavish-oasis`, lastModified: now, changeFrequency: "weekly", priority: 0.95 },
     { url: `${base}/stays/uhoos-lavish-oasis/room-101`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${base}/stays/uhoos-lavish-oasis/room-102`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
