@@ -26,6 +26,14 @@ export default function PropertyCards({ managedProperties = [], featured = false
       description: property.description, startingFrom: rates.length ? Math.min(...rates) : 0,
     });
   }
+  cards.set("nala-veli-maldives", {
+    slug: "nala-veli-maldives",
+    name: "Nala Veli Maldives",
+    location: "AA. Ukulhas, North Ari Atoll, Maldives",
+    image: "https://drive.google.com/thumbnail?id=1BrzgnQ_5WEUwj5oqueAfDkv9wDTFGqMd&sz=w1200",
+    description: "Explore Nala Veli Villa and Nala Veli Beach & Spa on Ukulhas, with breakfast included and availability confirmed on request.",
+    startingFrom: 0,
+  });
   const localizedDescriptions: Record<string, string> = {
     "uhoos-lavish-oasis": copy.uhoo,
     "masfalhi-view-inn": copy.masfalhi,
