@@ -5,7 +5,7 @@ import { publicStories } from "@/lib/trip-story-server";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://tripelor.com";
   const now = new Date();
-  const [managed, stories] = await Promise.all([publishedProperties(), publicStories(50)]);
+  const [managed, stories] = await Promise.all([publishedProperties(), publicStories(50).catch(() => [])]);
   return [
     {
       url: base,
