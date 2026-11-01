@@ -19,5 +19,7 @@ jobs:
         run: npm install
       - name: Test sign-in notifications
         run: node tests/signin-notifications.cjs
+      - name: Test Nala Veli pricing
+        run: node tests/nala-veli-pricing.cjs
       - name: Build
         run: npm run build
