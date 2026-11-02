@@ -8,8 +8,11 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     const user = await currentUser();
-    if (!user || !process.env.BML_UAT_TESTER_EMAIL || user.email?.toLowerCase() !== process.env.BML_UAT_TESTER_EMAIL.toLowerCase()) {
-      return Response.json({ error: "Not authorized for BML sandbox testing." }, { status: 403 });
+    if (!user) {
+      return Response.json({ error: "Please sign in to Tripelor on this Preview website before testing." }, { status: 401 });
+    }
+    if (!process.env.BML_UAT_TESTER_EMAIL || user.email?.toLowerCase() !== process.env.BML_UAT_TESTER_EMAIL.toLowerCase()) {
+      return Response.json({ error: "Use the authorized Tripelor tester account to continue." }, { status: 403 });
     }
     const origin = new URL(request.url).origin;
     if (request.headers.get("origin") !== origin) {
