@@ -451,7 +451,6 @@ body:has(.coastal-home) { padding-bottom: 0; }
   .tripelor-wordmark-tagline { margin-left: 1px; font-size: 5.6px; letter-spacing: .26em; }
   .brand-footer .tripelor-wordmark-name { font-size: 28px; }
   .brand-footer .tripelor-wordmark-tagline { font-size: 6.5px; }
-  .brand-signin { display: none; }
   .brand-navigation { height: 78px; }
   .brand-header { --brand-header-height: 107px; }
   .coastal-premium-hero { min-height: 570px; }
