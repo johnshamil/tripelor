@@ -25,6 +25,7 @@ import {
 import AdminCommandCenter from "@/components/admin-command-center";
 import AdminPreArrival from "@/components/admin-pre-arrival";
 import AdminBookingReminders from "@/components/admin-booking-reminders";
+import AdminBookingDetails, { BookingDetailsButton, bookingGuestCounts, type BookingDetailsRecord } from "@/components/admin-booking-details";
 import { bookingCurrencyTotals, bookingMoney } from "@/lib/manual-booking";
 
 type BookingFilter = "all" | "pending" | "confirmed" | "completed" | "cancelled";
@@ -48,6 +49,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("");
   const [busyId, setBusyId] = useState("");
+  const [selectedBooking, setSelectedBooking] = useState<BookingDetailsRecord | null>(null);
   const [query, setQuery] = useState("");
   const [bookingFilter, setBookingFilter] = useState<BookingFilter>("all");
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("all");
@@ -210,10 +212,13 @@ export default function AdminPage() {
         const text = [
           booking.guest_name,
           booking.guest_email,
+          booking.guest_phone,
           booking.property_name,
           booking.room_type,
           booking.booking_source,
           booking.booking_reference,
+          booking.external_reference,
+          booking.meal_plan,
           booking.package_name,
         ]
           .filter(Boolean)
@@ -511,8 +516,9 @@ export default function AdminPage() {
               <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
               <input
                 value={query}
+                aria-label="Search bookings"
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search guest, property, room, reference or source"
+                placeholder="Search guest, phone or booking reference"
                 className="min-h-[50px] w-full rounded-xl border border-white/10 bg-black/25 pl-11 pr-4 text-sm outline-none transition focus:border-gold/50"
               />
             </div>
@@ -556,6 +562,7 @@ export default function AdminPage() {
                 key={booking.id || index}
                 booking={booking}
                 busyId={busyId}
+                onViewDetails={setSelectedBooking}
                 changeStatus={changeStatus}
               />
             ))
@@ -586,6 +593,7 @@ export default function AdminPage() {
                     key={booking.id || index}
                     booking={booking}
                     busyId={busyId}
+                    onViewDetails={setSelectedBooking}
                     changeStatus={changeStatus}
                   />
                 ))
@@ -595,6 +603,7 @@ export default function AdminPage() {
         </div>
       </section>
 
+      <AdminBookingDetails booking={selectedBooking} onClose={() => setSelectedBooking(null)}/>
       <AdminPreArrival />
 
       <section className="mt-9 rounded-2xl border border-white/10 bg-white/[.02] p-5 md:p-6">
@@ -692,15 +701,18 @@ function BookingMobileCard({
   booking,
   busyId,
   changeStatus,
+  onViewDetails,
 }: {
   booking: any;
   busyId: string;
   changeStatus: (id: string, status: string) => void;
+  onViewDetails: (booking: BookingDetailsRecord) => void;
 }) {
   const bookingStatus = String(booking.status || "pending").toLowerCase();
   const paymentStatus = String(booking.payment_status || "unpaid").toLowerCase();
   const id = String(booking.id || "");
   const value = Number(booking.estimated_total || 0) + Number(booking.speedboat_total || 0);
+  const guests = bookingGuestCounts(booking);
 
   return (
     <article className="rounded-2xl border border-white/10 bg-white/[.025] p-4">
@@ -717,6 +729,8 @@ function BookingMobileCard({
       <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
         <InfoCell label="Stay" value={booking.property_name || "—"} sub={`${booking.rooms || 1} room(s) · ${booking.room_type || ""}`} />
         <InfoCell label="Dates" value={booking.check_in || "—"} sub={booking.check_out ? `to ${booking.check_out}` : ""} />
+        <InfoCell label="Guests" value={guests.label} sub={guests.breakdown} />
+        <InfoCell label="Meal plan" value={booking.meal_plan || "Not recorded"} />
         <InfoCell
           label="Payment"
           value={paymentStatus}
@@ -726,12 +740,10 @@ function BookingMobileCard({
         <InfoCell label="Source" value={booking.booking_source || "website"} sub={booking.booking_reference || ""} />
       </div>
 
-      <BookingActions
-        bookingStatus={bookingStatus}
-        id={id}
-        busyId={busyId}
-        changeStatus={changeStatus}
-      />
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <BookingDetailsButton booking={booking} onViewDetails={onViewDetails}/>
+        <BookingActions bookingStatus={bookingStatus} id={id} busyId={busyId} changeStatus={changeStatus} compact/>
+      </div>
     </article>
   );
 }
@@ -740,21 +752,26 @@ function BookingTableRow({
   booking,
   busyId,
   changeStatus,
+  onViewDetails,
 }: {
   booking: any;
   busyId: string;
   changeStatus: (id: string, status: string) => void;
+  onViewDetails: (booking: BookingDetailsRecord) => void;
 }) {
   const bookingStatus = String(booking.status || "pending").toLowerCase();
   const paymentStatus = String(booking.payment_status || "unpaid").toLowerCase();
   const id = String(booking.id || "");
   const value = Number(booking.estimated_total || 0) + Number(booking.speedboat_total || 0);
+  const guests = bookingGuestCounts(booking);
 
   return (
     <tr className="border-t border-white/10 align-top hover:bg-white/[.02]">
       <td className="p-4">
         <strong>{booking.guest_name || "Guest"}</strong>
         <div className="mt-1 text-xs text-gray-500">{booking.guest_email || ""}</div>
+        <div className="mt-2 text-xs font-semibold">{guests.label}</div>
+        <div className="mt-1 text-xs text-gray-500">{guests.breakdown}</div>
         {booking.booking_reference && (
           <div className="mt-1 text-[10px] uppercase tracking-[.08em] text-gold">{booking.booking_reference}</div>
         )}
@@ -781,13 +798,10 @@ function BookingTableRow({
         </span>
       </td>
       <td className="p-4">
-        <BookingActions
-          bookingStatus={bookingStatus}
-          id={id}
-          busyId={busyId}
-          changeStatus={changeStatus}
-          compact
-        />
+        <div className="space-y-3">
+          <BookingDetailsButton booking={booking} onViewDetails={onViewDetails}/>
+          <BookingActions bookingStatus={bookingStatus} id={id} busyId={busyId} changeStatus={changeStatus} compact/>
+        </div>
       </td>
     </tr>
   );
