@@ -45,3 +45,24 @@ Staging table creation was run through Supabase management. Production database 
 Preview only: `BML_UAT_API_KEY`, `BML_UAT_APPLICATION_ID`, and `BML_UAT_TESTER_EMAIL`.
 
 The Preview website currently uses the site's existing Supabase configuration for **read-only** readiness lookups; the new staging payment ledger is **not yet wired** to Preview. Add explicit staging-only BML database credentials through a secure server-side connection when implementing persistent UAT checkout. Never expose sensitive keys in `NEXT_PUBLIC_` variables or GitHub source.
+
+
+## BML compliance changes — 5 November 2026
+
+BML requested (a) payment-card transmission and security disclosure, (b) the exact customer-facing notice "You will be redirected to the BML Payment Gateway to process your transaction", and (c) webhook-based primary transaction notification before live approval.
+
+- The security and redirect notice have been updated in the UAT checkout and Tripelor's `/travel-info#payment-security`; the latter and merchant details/footer were also published separately to `main`.
+- The UAT webhook route verifies `X-Signature-Nonce`, `X-Signature-Timestamp` and `X-Signature` with SHA-256; it then retrieves the transaction from the BML UAT API and stores only the verified state, amount, currency and Tripelor UAT reference.
+- Deduplicated notifications are saved to the staging-only `public.bml_uat_webhook_notifications` table (composite primary key `transaction_id, verified_state`), with RLS on and grants only to `service_role`. No card data is saved.
+- The webhook uses server-only `BML_UAT_STAGING_URL` and `BML_UAT_STAGING_SERVICE_ROLE_KEY` scoped to the testing branch in Vercel. The separate server-only `BML_UAT_WEBHOOK_URL` contains a temporary protection-bypass secret because Vercel Preview deployments require authentication; **never print or expose this URL/secret**.
+- When `BML_UAT_WEBHOOK_URL` is configured, BML's UAT test transaction includes a webhook URL in its server-to-server request. Test receipt delivery with a fresh transaction and check the staging notification table. A successful browser redirect is not sufficient.
+- This is UAT only; it never marks a Tripelor reservation paid and cannot be represented as live checkout or production webhook approval.
+- After BML sign-off, revoke the temporary bypass secret and use a dedicated production HTTPS webhook endpoint with production keys and durable, booking-linked payment-intent reconciliation.
+
+### UAT acceptance check
+
+1. Build the `feature/bml-uat-checkout` branch with Preview environment credentials.
+2. Complete a fresh MVR 1.00 test transaction using only BML test cards.
+3. Confirm `bml_uat_webhook_notifications` contains a BML-verified `CONFIRMED` event for that transaction.
+4. Repeat a callback: it must remain a single row per transaction/state; invalid signatures must return 403.
+5. Submit proof to BML, with the statement that real booking settlement remains disabled.
