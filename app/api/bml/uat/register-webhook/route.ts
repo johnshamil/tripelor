@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 /**
  * One-time UAT registration of Tripelor's signed webhook URL with BML.
  * Never returns the callback URL, which embeds a temporary Vercel
- * deployment-protection bypass token. Admin/tester access only.
+ * is publicly reachable and requires BML's cryptographic signature. Admin/tester access only.
  * No real payments or booking updates are enabled here.
  */
 export async function POST(request: Request) {
@@ -20,17 +20,16 @@ export async function POST(request: Request) {
       return Response.json({ error: "Invalid request origin." }, { status: 403 });
     }
     const apiKey = process.env.BML_UAT_API_KEY;
-    const hook = process.env.BML_UAT_WEBHOOK_URL;
-    if (!apiKey || !hook) {
+    const hook = "https://www.tripelor.com/api/bml/uat/notify";
+    if (!apiKey) {
       return Response.json({ error: "BML UAT webhook configuration missing." }, { status: 503 });
     }
     let parsed: URL;
     try { parsed = new URL(hook); }
     catch { return Response.json({ error: "Invalid UAT webhook URL configuration." }, { status: 503 }); }
     if (parsed.protocol !== "https:" ||
-        parsed.hostname !== "tripelor-git-feature-bml-uat-checkout-saamils-projects-890c2cf6.vercel.app" ||
-        parsed.pathname !== "/api/bml/uat/webhook" ||
-        !parsed.searchParams.has("x-vercel-protection-bypass")) {
+        parsed.hostname !== "www.tripelor.com" ||
+        parsed.pathname !== "/api/bml/uat/notify" || parsed.search) {
       return Response.json({ error: "Unsafe UAT callback URL configuration." }, { status: 503 });
     }
 
