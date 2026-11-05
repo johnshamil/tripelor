@@ -15,6 +15,10 @@ export default function BmlUatTestPage() {
   const [verification, setVerification] = useState<Verification>({ status: "none" });
   const [returned, setReturned] = useState(false);
   const [accepted, setAccepted] = useState(false);
+  const [webhookStatus, setWebhookStatus] = useState("");
+  const [webhookConfirmed, setWebhookConfirmed] = useState(false);
+  const [webhookLoading, setWebhookLoading] = useState(false);
+
 
   useEffect(() => {
     fetch("/api/auth/me", { cache: "no-store" })
@@ -50,6 +54,28 @@ export default function BmlUatTestPage() {
   }, [auth.status, auth.email]);
 
   const authorized = auth.status === "signed-in" && auth.email?.toLowerCase() === testerEmail;
+
+  async function checkWebhook() {
+    const params = new URLSearchParams(window.location.search);
+    const transactionId = params.get("transactionId") || params.get("transaction_id") || "";
+    if (!transactionId) {
+      setWebhookStatus("The BML redirect did not include a transaction ID, so webhook receipt cannot be checked here.");
+      return;
+    }
+    setWebhookLoading(true);
+    try {
+      const r = await fetch(`/api/bml/uat/webhook-status?transactionId=${encodeURIComponent(transactionId)}`, { cache: "no-store" });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Unable to verify webhook receipt");
+      setWebhookStatus(data.message || "No webhook result available.");
+      setWebhookConfirmed(Boolean(data.confirmed));
+    } catch (error) {
+      setWebhookStatus(error instanceof Error ? error.message : "Unable to check BML webhook.");
+      setWebhookConfirmed(false);
+    } finally {
+      setWebhookLoading(false);
+    }
+  }
 
   async function start() {
     if (loading || !authorized || !accepted) return;
@@ -129,6 +155,16 @@ export default function BmlUatTestPage() {
           <p className="font-semibold">BML payment verification</p>
           <p className={verification.status === "verified" ? "mt-2 text-green-800" : "mt-2 text-amber-900"}>{verification.message || "The bank redirect has not been verified yet."}</p>
           <p className="mt-2 text-xs">This test does not modify a Tripelor booking or mark any customer payment paid.</p>
+          <div className="mt-4 border-t border-slate-300 pt-3">
+            <p className="text-sm font-semibold">Primary webhook receipt (separate from browser redirect)</p>
+            <p className={webhookConfirmed ? "mt-2 text-sm text-green-800" : "mt-2 text-sm text-amber-900"}>
+              {webhookStatus || "Check whether BML sent and Tripelor stored a signed callback."}
+            </p>
+            <button type="button" onClick={checkWebhook} disabled={webhookLoading}
+              className="mt-3 rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold disabled:opacity-50">
+              {webhookLoading ? "Checking webhook…" : "Check BML webhook"}
+            </button>
+          </div>
         </div>}
         {authorized && <button type="button" disabled={loading || !accepted} onClick={start} className="w-full rounded-xl bg-slate-900 px-5 py-4 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45">
           {loading ? "Opening BML secure payment page…" : "Accept terms and proceed to BML · MVR 1.00"}
