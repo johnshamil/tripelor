@@ -74,6 +74,12 @@ export async function POST(request: Request, context: { params: { token: string 
       { method: "PATCH", body: JSON.stringify(patch) },
     );
     if (!saved.length) throw new PartnerEnquiryError("This quotation has already been submitted.", 409);
+    if (saved[0].status === "quoted") {
+      await enquiryDB("partner_enquiries?id=eq." + quote.enquiry_id + "&status=neq.closed", {
+        method: "PATCH",
+        body: JSON.stringify({ status: "quoted", updated_at: new Date().toISOString() }),
+      });
+    }
     return apiJson({ success: true, status: saved[0].status });
   } catch (error) { return enquiryError(error); }
 }
