@@ -5,8 +5,8 @@ export const runtime = "nodejs";
 
 /**
  * One-time UAT registration of Tripelor's signed webhook URL with BML.
- * Never returns the callback URL, which embeds a temporary Vercel
- * is publicly reachable and requires BML's cryptographic signature. Admin/tester access only.
+ * Registers the public Tripelor callback URL, which requires BML's signed
+ * webhook headers. Only the authenticated UAT tester may invoke this action.
  * No real payments or booking updates are enabled here.
  */
 export async function POST(request: Request) {
@@ -51,14 +51,35 @@ export async function POST(request: Request) {
     );
 
     if (!response.ok) {
-      // No raw error: some provider errors echo request URL/secret.
+      // Return only a strict, safely filtered BML error category. Never echo
+      // the provider's raw response; it may include tokens, merchant details,
+      // or the callback URL. The tester can share this diagnostic safely.
+      let reason: string | null = null;
+      try {
+        const raw = (await response.text()).slice(0, 4000);
+        const parsed = JSON.parse(raw) as Record<string, unknown>;
+        const fields = [parsed.code, parsed.errorCode, parsed.error, parsed.message];
+        for (const field of fields) {
+          if (typeof field !== "string") continue;
+          const value = field.trim();
+          if (value.length >= 3 && value.length <= 180 &&
+              /^[A-Za-z0-9 _.,:;()\-]+$/.test(value) &&
+              !/(secret|key|token|password|authorization|credential|signature|https?|bypass|bearer)/i.test(value)) {
+            reason = value;
+            break;
+          }
+        }
+      } catch {
+        // Non-JSON/unsafe upstream data must not be shown.
+      }
       return Response.json({
         registered: false,
         error: response.status === 409
-          ? "The webhook may already be registered. Check BML UAT webhook settings."
-          : "BML did not accept webhook registration. Contact BML support with the HTTP status code.",
+          ? "BML reports a registration conflict. Check whether this webhook already exists."
+          : "BML rejected the webhook registration.",
         providerStatus: response.status,
-      }, { status: 502 });
+        providerReason: reason,
+      }, { status: 502, headers: { "Cache-Control": "no-store" } });
     }
     return Response.json({
       registered: true,
