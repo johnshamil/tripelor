@@ -15,6 +15,10 @@ export const dynamic = "force-dynamic";
 const PREVIEW_RECEIVER =
   "https://tripelor-git-feature-bml-uat-checkout-saamils-projects-890c2cf6.vercel.app/api/bml/uat/webhook";
 
+export function HEAD() {
+  return new Response(null, { status: 200, headers: { "Cache-Control": "no-store" } });
+}
+
 export function GET() {
   return Response.json(
     { service: "Tripelor BML webhook", environment: "uat", status: "reachable" },
