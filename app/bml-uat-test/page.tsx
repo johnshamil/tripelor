@@ -18,6 +18,9 @@ export default function BmlUatTestPage() {
   const [webhookStatus, setWebhookStatus] = useState("");
   const [webhookConfirmed, setWebhookConfirmed] = useState(false);
   const [webhookLoading, setWebhookLoading] = useState(false);
+  const [registeringWebhook, setRegisteringWebhook] = useState(false);
+  const [webhookRegistrationStatus, setWebhookRegistrationStatus] = useState("");
+
 
 
   useEffect(() => {
@@ -54,6 +57,29 @@ export default function BmlUatTestPage() {
   }, [auth.status, auth.email]);
 
   const authorized = auth.status === "signed-in" && auth.email?.toLowerCase() === testerEmail;
+
+  async function registerWebhook() {
+    if (registeringWebhook || !authorized) return;
+    setRegisteringWebhook(true);
+    setWebhookRegistrationStatus("");
+    try {
+      const r = await fetch("/api/bml/uat/register-webhook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      const data = await r.json();
+      if (!r.ok) {
+        const code = Number.isInteger(data.providerStatus) ? ` (BML HTTP ${data.providerStatus})` : "";
+        throw new Error((data.error || "Registration was not accepted.") + code);
+      }
+      setWebhookRegistrationStatus(data.message || "UAT webhook registration request accepted by BML.");
+    } catch (error) {
+      setWebhookRegistrationStatus(error instanceof Error ? error.message : "Webhook registration failed.");
+    } finally {
+      setRegisteringWebhook(false);
+    }
+  }
 
   async function checkWebhook() {
     const params = new URLSearchParams(window.location.search);
@@ -151,6 +177,17 @@ export default function BmlUatTestPage() {
           <p>Signed in as <strong>{auth.email}</strong></p>
           {!authorized && <p className="mt-2 text-red-700">This is not the authorized test account. Use {testerEmail}.</p>}
         </div>}
+        {authorized && <section className="rounded-xl border border-slate-300 bg-white p-4 text-sm">
+          <h2 className="font-semibold">BML UAT webhook registration</h2>
+          <p className="mt-2 text-slate-700">
+            Register Tripelor's signed callback with BML before the next test payment. This does not activate live payments.
+          </p>
+          <button type="button" onClick={registerWebhook} disabled={registeringWebhook}
+            className="mt-3 rounded-lg border border-slate-500 px-4 py-3 font-semibold disabled:opacity-50">
+            {registeringWebhook ? "Registering webhook…" : "Register BML UAT webhook"}
+          </button>
+          {webhookRegistrationStatus && <p role="status" className="mt-3 break-words text-slate-700">{webhookRegistrationStatus}</p>}
+        </section>}
         {returned && authorized && <div role="status" className="rounded-lg border border-amber-300 bg-white p-4">
           <p className="font-semibold">BML payment verification</p>
           <p className={verification.status === "verified" ? "mt-2 text-green-800" : "mt-2 text-amber-900"}>{verification.message || "The bank redirect has not been verified yet."}</p>
