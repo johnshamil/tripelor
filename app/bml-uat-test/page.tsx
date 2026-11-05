@@ -105,7 +105,7 @@ export default function BmlUatTestPage() {
         <div className="rounded-xl border border-slate-300 bg-white p-4 text-sm leading-6">
           <h2 className="font-bold">Terms, cancellation/refund rules and data protection</h2>
           <p className="mt-2">This is a single MVR 1.00 sandbox payment demonstration, not a purchase of accommodation or services. For customer bookings, Tripelor confirms availability, final price, payment schedule and applicable supplier-specific cancellation/refund terms before requesting payment.</p>
-          <p className="mt-2">Payment card details are entered on BML's secure hosted payment page over HTTPS. Tripelor does not ask customers to submit card numbers or CVV on this website.</p>
+          <p className="mt-2">You will be redirected to the BML Payment Gateway to process your transaction. Your card information is entered directly into BML's payment form over an encrypted HTTPS connection. Tripelor does not collect or store card numbers, card expiry dates or CVV security codes.</p>
           <p className="mt-2">Please retain a copy of your transaction record, receipt, purchase terms and cancellation/refund policy for your records.</p>
           <p className="mt-2">Review our <Link className="font-semibold underline" href="/travel-info#terms" target="_blank">Purchase Terms</Link>, <Link className="font-semibold underline" href="/travel-info#cancellation" target="_blank">Cancellation and Refund Policy</Link>, <Link className="font-semibold underline" href="/travel-info#privacy" target="_blank">Privacy Policy</Link> and <Link className="font-semibold underline" href="/travel-info#payment-security" target="_blank">Payment Security Policy</Link>.</p>
         </div>
