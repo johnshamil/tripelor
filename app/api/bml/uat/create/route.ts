@@ -18,6 +18,27 @@ export async function POST(request: Request) {
     if (request.headers.get("origin") !== origin) {
       return Response.json({ error: "Invalid origin." }, { status: 403 });
     }
+    // BML requires affirmative acceptance of disclosures before the hosted card page.
+    // This is a fixed-price UAT demonstration; production will also need a durable
+    // acceptance record linked to the real booking and payment intent.
+    if (!request.headers.get("content-type")?.includes("application/json")) {
+      return Response.json({ error: "Invalid payment request." }, { status: 415 });
+    }
+    if (Number(request.headers.get("content-length") || 0) > 1024) {
+      return Response.json({ error: "Payment request too large." }, { status: 413 });
+    }
+    const rawBody = await request.text();
+    if (rawBody.length > 1024) {
+      return Response.json({ error: "Payment request too large." }, { status: 413 });
+    }
+    let consent: any;
+    try { consent = JSON.parse(rawBody); } catch {
+      return Response.json({ error: "Invalid consent payload." }, { status: 400 });
+    }
+    if (consent?.acceptedTerms !== true || consent?.acceptedTermsVersion !== "tripelor-bml-uat-2026-11-05") {
+      return Response.json({ error: "You must accept the purchase terms and disclosures before payment." }, { status: 400 });
+    }
+
     const apiKey = process.env.BML_UAT_API_KEY;
     const appId = process.env.BML_UAT_APPLICATION_ID;
     if (!apiKey || !appId) return Response.json({ error: "BML UAT configuration missing." }, { status: 503 });
