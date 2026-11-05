@@ -287,6 +287,9 @@ export default function AdminPage() {
             <Link href="/admin/shared-excursions" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
               <Users className="h-4 w-4" /> Shared trips
             </Link>
+            <Link href="/admin/partner-enquiries" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
+              <Building2 className="h-4 w-4" /> Partner Enquiries
+            </Link>
             <Link href="/admin/matchmaker-leads" className="btn-outline min-h-[46px] gap-2 px-4 text-xs">
               <Sparkles className="h-4 w-4" /> Matchmaker Leads
             </Link>
