@@ -17,8 +17,8 @@ export default function Footer() {
       <div className="brand-footer-grid">
         <div><Link href="/" aria-label="Tripelor home"><TripelorWordmark /></Link><p className="brand-footer-intro">{copy.intro}</p></div>
         <div><h3>{copy.explore}</h3><Link href="/stays">{copy.ourStays}</Link><Link href="/island-adventures">{copy.islandPackages}</Link><Link href="/excursions">{brand.experiences}</Link><Link href="/speedboat">{copy.transfers}</Link><Link href="/reviews">{copy.guestReviews}</Link></div>
-        <div><h3>{copy.information}</h3><Link href="/about">{copy.about}</Link><Link href="/travel-info#faq">{copy.faq}</Link><Link href="/travel-info#terms">{copy.terms}</Link><Link href="/travel-info#cancellation">{copy.cancellation}</Link><Link href="/travel-info#privacy">{copy.privacy}</Link></div>
-        <div><h3>{copy.contact}</h3><a href="mailto:bookings@tripelor.com"><Mail />bookings@tripelor.com</a><a href="tel:+9609429403"><Phone />+960 942 9403</a><p><MapPin />Maldives</p><Link href="/contact" className="brand-footer-contact">{copy.enquiry}<ArrowUpRight /></Link></div>
+        <div><h3>{copy.information}</h3><Link href="/about">{copy.about}</Link><Link href="/travel-info#faq">{copy.faq}</Link><Link href="/travel-info#terms">{copy.terms}</Link><Link href="/travel-info#cancellation">{copy.cancellation}</Link><Link href="/travel-info#privacy">{copy.privacy}</Link><Link href="/travel-info#payment-security">Payment security</Link><Link href="/travel-info#merchant-details">Merchant details</Link></div>
+        <div><h3>{copy.contact}</h3><a href="mailto:bookings@tripelor.com"><Mail />bookings@tripelor.com</a><a href="tel:+9609429403"><Phone />+960 942 9403</a><p><MapPin />M. Metro Villa, 6th Floor, Shaariuvarudhee, Maafannu, Malé, Republic of Maldives</p><p className="text-xs text-white/60">Tripelor · Nexus Gaming Pvt Ltd (C03772023)</p><Link href="/contact" className="brand-footer-contact">{copy.enquiry}<ArrowUpRight /></Link></div>
       </div>
       <div className="brand-footer-trust">
         <span>Registered Maldives Travel Agency</span>
