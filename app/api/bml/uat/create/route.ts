@@ -49,17 +49,9 @@ export async function POST(request: Request) {
     const currency = "MVR";
     const signature = createHash("sha1").update(`amount=${amount}&currency=${currency}&apiKey=${apiKey}`).digest("hex");
     const localId = `TRP-UAT-${randomUUID()}`;
-    // The registered webhook receives primary transaction state notifications.
-    // Do not derive this URL from the browser Host header, and never expose
-    // any webhook bypass secret to the client.
-    const hook = process.env.BML_UAT_WEBHOOK_URL || "";
-    if (hook) {
-      const parsed = new URL(hook);
-      if (parsed.protocol !== "https:" || parsed.pathname !== "/api/bml/uat/webhook" ||
-          !(parsed.hostname.endsWith(".vercel.app") || parsed.hostname.endsWith(".tripelor.com"))) {
-        return Response.json({ error: "Invalid BML UAT webhook configuration." }, { status: 503 });
-      }
-    }
+    // Public merchant-domain callback, which relays signed BML UAT events
+    // to the protected Preview handler. No bypass tokens appear in the BML URL.
+    const hook = "https://www.tripelor.com/api/bml/uat/notify";
     const response = await fetch("https://api.uat.merchants.bankofmaldives.com.mv/public/transactions", {
       method: "POST",
       headers: { Authorization: apiKey, "Content-Type": "application/json", Accept: "application/json" },
