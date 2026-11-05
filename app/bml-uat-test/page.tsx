@@ -71,7 +71,9 @@ export default function BmlUatTestPage() {
       const data = await r.json();
       if (!r.ok) {
         const code = Number.isInteger(data.providerStatus) ? ` (BML HTTP ${data.providerStatus})` : "";
-        throw new Error((data.error || "Registration was not accepted.") + code);
+        const bankReason = typeof data.providerReason === "string" && data.providerReason.length <= 180
+          ? ` BML reason: ${data.providerReason}.` : "";
+        throw new Error((data.error || "Registration was not accepted.") + code + bankReason);
       }
       setWebhookRegistrationStatus(data.message || "UAT webhook registration request accepted by BML.");
     } catch (error) {
