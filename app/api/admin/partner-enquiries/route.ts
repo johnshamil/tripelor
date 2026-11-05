@@ -118,7 +118,9 @@ export async function POST(request: Request) {
 
     if (action === "forward") {
       const enquiryId = body?.enquiryId;
-      const partnerIds = Array.isArray(body?.partnerIds) ? [...new Set(body.partnerIds)] : [];
+      const partnerIds: string[] = Array.isArray(body?.partnerIds)
+        ? Array.from(new Set<string>(body.partnerIds.filter((value: unknown): value is string => typeof value === "string")))
+        : [];
       if (!validUuid(enquiryId) || partnerIds.length < 1 || partnerIds.length > 10 ||
           !partnerIds.every(validUuid)) {
         throw new PartnerEnquiryError("Select an enquiry and up to 10 partners.");
