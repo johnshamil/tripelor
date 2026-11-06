@@ -30,7 +30,7 @@ async function sendToPartner(
     "Please review this holiday enquiry and submit your best B2B quotation.",
     "",
     "Reference: " + enquiry.reference,
-    "Travel window: " + enquiry.start_date + " to " + enquiry.end_date,
+    "Travel window: " + (enquiry.dates_flexible ? "Dates flexible — please suggest your next available dates" : enquiry.start_date + " to " + enquiry.end_date),
     "Nights: " + enquiry.nights_min + "–" + enquiry.nights_max,
     "Guests: " + enquiry.adults + " adults, " + enquiry.children + " children",
     "Meals: " + enquiry.meal_plan,
@@ -86,8 +86,9 @@ export async function POST(request: Request) {
       const guestName = cleanText(body?.guestName, 120);
       const guestEmail = cleanText(body?.guestEmail, 250).toLowerCase();
       const guestPhone = cleanText(body?.guestPhone, 60);
-      const startDate = validDate(body?.startDate);
-      const endDate = validDate(body?.endDate);
+      const datesFlexible = body?.datesFlexible === true;
+      const startDate = datesFlexible ? "" : validDate(body?.startDate);
+      const endDate = datesFlexible ? "" : validDate(body?.endDate);
       const nightsMin = integer(body?.nightsMin, 1, 60);
       const nightsMax = integer(body?.nightsMax, 1, 60);
       const adults = integer(body?.adults, 1, 20);
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
       const budgetUsd = money(body?.budgetUsd || 0, 1000000);
       const mealPlan = cleanText(body?.mealPlan, 100);
       const requirements = cleanText(body?.requirements, 4000);
-      if (!guestName || !startDate || !endDate || endDate < startDate ||
+      if (!guestName || (!datesFlexible && (!startDate || !endDate || endDate < startDate)) ||
           nightsMax < nightsMin || requirements.length < 5) {
         throw new PartnerEnquiryError("Add the guest, valid date range, nights and requirements.");
       }
@@ -108,7 +109,8 @@ export async function POST(request: Request) {
         method: "POST",
         body: JSON.stringify({
           reference, guest_name: guestName, guest_email: guestEmail,
-          guest_phone: guestPhone, start_date: startDate, end_date: endDate,
+          guest_phone: guestPhone, start_date: startDate || null, end_date: endDate || null,
+          dates_flexible: datesFlexible,
           nights_min: nightsMin, nights_max: nightsMax, adults, children,
           budget_usd: budgetUsd, meal_plan: mealPlan || "Full Board", requirements,
         }),
