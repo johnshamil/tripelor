@@ -8,8 +8,9 @@ type Brief = {
   reference: string;
   partnerName: string;
   island: string;
-  startDate: string;
-  endDate: string;
+  startDate: string | null;
+  endDate: string | null;
+  datesFlexible: boolean;
   nightsMin: number;
   nightsMax: number;
   adults: number;
@@ -83,7 +84,7 @@ export default function PartnerQuotePage({ params }: { params: { token: string }
         <p className="mt-3 text-sm leading-6 text-gray-400">Tripelor requests your best wholesale quotation. Guest contact details are withheld. This is an enquiry, not a confirmed reservation.</p>
         <p className="mt-5 font-mono text-sm text-gold">{brief.reference}</p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <Detail label="Travel window" value={brief.startDate + " to " + brief.endDate} />
+          <Detail label="Travel window" value={brief.datesFlexible ? "Dates flexible — please propose next available dates" : brief.startDate + " to " + brief.endDate} />
           <Detail label="Length of stay" value={brief.nightsMin + "–" + brief.nightsMax + " nights"} />
           <Detail label="Guests" value={brief.adults + " adults · " + brief.children + " children"} />
           <Detail label="Meals" value={brief.mealPlan} />
