@@ -7,7 +7,7 @@ import { ArrowLeft, Building2, ClipboardCopy, FileText, Mail, Plus, Send, Shield
 type Partner = { id: string; name: string; island: string; email: string; active: boolean };
 type Enquiry = {
   id: string; reference: string; guest_name: string; guest_email: string; guest_phone: string;
-  start_date: string; end_date: string; nights_min: number; nights_max: number;
+  start_date: string | null; end_date: string | null; dates_flexible: boolean; nights_min: number; nights_max: number;
   adults: number; children: number; budget_usd: number; meal_plan: string;
   requirements: string; status: string; created_at: string;
 };
@@ -19,16 +19,16 @@ type Forward = {
 };
 type EnquiryForm = {
   guestName: string; guestEmail: string; guestPhone: string; startDate: string;
-  endDate: string; nightsMin: string; nightsMax: string; adults: string; children: string;
+  endDate: string; datesFlexible: boolean; nightsMin: string; nightsMax: string; adults: string; children: string;
   budgetUsd: string; mealPlan: string; requirements: string;
 };
 const blank: EnquiryForm = {
-  guestName: "", guestEmail: "", guestPhone: "", startDate: "", endDate: "",
+  guestName: "", guestEmail: "", guestPhone: "", startDate: "", endDate: "", datesFlexible: false,
   nightsMin: "7", nightsMax: "10", adults: "2", children: "0",
   budgetUsd: "", mealPlan: "Full Board", requirements: "",
 };
 const amy: EnquiryForm = {
-  guestName: "Amy", guestEmail: "", guestPhone: "", startDate: "2026-12-19",
+  guestName: "Amy", guestEmail: "", guestPhone: "", startDate: "2026-12-19", datesFlexible: false,
   endDate: "2027-01-02", nightsMin: "7", nightsMax: "10", adults: "2",
   children: "0", budgetUsd: "3297", mealPlan: "Half Board or Full Board",
   requirements: "Two adults travelling from Doha during school holidays. Budget covers international return flights, accommodation, meals, airport and island transfers, and snorkelling. Priority: beginner-friendly snorkelling from a good house reef, plus guided trips for nurse sharks, reef sharks, turtles, colourful coral reefs, and whale sharks or manta rays where available. Dates flexible within travel window.",
@@ -155,7 +155,7 @@ export default function PartnerEnquiriesAdminPage() {
             quantity: 1, unitPrice: guestPrice,
           }],
           notes: [
-            "Travel window: " + target.start_date + " to " + target.end_date,
+            "Travel window: " + (target.dates_flexible ? "Dates flexible — to be agreed" : target.start_date + " to " + target.end_date),
             "Nights: " + target.nights_min + "–" + target.nights_max,
             "Inclusions: " + request.inclusions,
             "Exclusions: " + request.exclusions,
@@ -201,8 +201,18 @@ export default function PartnerEnquiriesAdminPage() {
             <Input label="Guest email (admin only)" type="email" value={form.guestEmail} onChange={value => setForm({ ...form, guestEmail: value })} />
             <Input label="WhatsApp (admin only)" value={form.guestPhone} onChange={value => setForm({ ...form, guestPhone: value })} />
             <Input label="Total holiday budget, USD" type="number" min="0" value={form.budgetUsd} onChange={value => setForm({ ...form, budgetUsd: value })} />
-            <Input label="Earliest arrival" required type="date" value={form.startDate} onChange={value => setForm({ ...form, startDate: value })} />
-            <Input label="Latest departure" required type="date" value={form.endDate} onChange={value => setForm({ ...form, endDate: value })} />
+            <label className="sm:col-span-2 flex min-h-11 items-center gap-3 text-sm text-gray-300">
+              <input type="checkbox" checked={form.datesFlexible} onChange={event => setForm({
+                ...form, datesFlexible: event.target.checked,
+                startDate: event.target.checked ? "" : form.startDate,
+                endDate: event.target.checked ? "" : form.endDate,
+              })} className="h-4 w-4 accent-amber-400" />
+              Travel dates flexible / not confirmed
+            </label>
+            {!form.datesFlexible && <>
+              <Input label="Earliest arrival" required type="date" value={form.startDate} onChange={value => setForm({ ...form, startDate: value })} />
+              <Input label="Latest departure" required type="date" value={form.endDate} onChange={value => setForm({ ...form, endDate: value })} />
+            </>}
             <Input label="Minimum nights" required type="number" min="1" max="60" value={form.nightsMin} onChange={value => setForm({ ...form, nightsMin: value })} />
             <Input label="Maximum nights" required type="number" min="1" max="60" value={form.nightsMax} onChange={value => setForm({ ...form, nightsMax: value })} />
             <Input label="Adults" required type="number" min="1" value={form.adults} onChange={value => setForm({ ...form, adults: value })} />
@@ -253,7 +263,7 @@ export default function PartnerEnquiriesAdminPage() {
           <>
             <div className="mt-5 rounded-xl border border-gold/15 bg-gold/[.04] p-4">
               <div className="flex flex-wrap justify-between gap-3">
-                <p className="font-semibold">{selectedEnquiry.guest_name} · {selectedEnquiry.nights_min}–{selectedEnquiry.nights_max} nights · {selectedEnquiry.start_date} to {selectedEnquiry.end_date}</p>
+                <p className="font-semibold">{selectedEnquiry.guest_name} · {selectedEnquiry.nights_min}–{selectedEnquiry.nights_max} nights · {selectedEnquiry.dates_flexible ? "Dates flexible" : selectedEnquiry.start_date + " to " + selectedEnquiry.end_date}</p>
                 <span className="text-xs uppercase text-gold">{selectedEnquiry.status}</span>
               </div>
               <p className="mt-2 whitespace-pre-wrap text-sm text-gray-400">{selectedEnquiry.requirements}</p>
