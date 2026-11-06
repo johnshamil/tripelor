@@ -33,6 +33,38 @@ export async function POST(request: Request) {
       return Response.json({ error: "Unsafe UAT callback URL configuration." }, { status: 503 });
     }
 
+    // Diagnose public reachability before asking BML to validate the URL.
+    // A harmless unsigned UAT registration probe MUST receive HTTP 200.
+    // No secrets, transaction data, or callback body are sent.
+    let endpointStatus: number;
+    try {
+      const probe = await fetch(hook, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Originator": "Tripelor-UAT-registration-check",
+        },
+        body: "{}",
+        redirect: "manual",
+        cache: "no-store",
+        signal: AbortSignal.timeout(10000),
+      });
+      endpointStatus = probe.status;
+    } catch {
+      return Response.json({
+        registered: false,
+        error: "Tripelor callback URL is not reachable from the server. Registration was not attempted.",
+        endpointStatus: null,
+      }, { status: 503 });
+    }
+    if (endpointStatus !== 200) {
+      return Response.json({
+        registered: false,
+        error: "Tripelor's public callback must return HTTP 200 to BML's unsigned registration probe. Registration was not attempted.",
+        endpointStatus,
+      }, { status: 503 });
+    }
+
     // BML Connect API: register callback once, independent of the customer's
     // browser redirect. Never return the URL or provider response unchanged.
     const response = await fetch(
