@@ -34,7 +34,13 @@ export async function POST(request: Request) {
     const nonce = request.headers.get("x-signature-nonce") || "";
     const timestamp = request.headers.get("x-signature-timestamp") || "";
     const signature = request.headers.get("x-signature") || "";
-    if (!nonce && !timestamp && !signature) {
+    if (!signature) {
+      // BML's UAT registration may supply an originator/nonce/timestamp
+      // without X-Signature. Acknowledging the probe never updates state.
+      console.info("bml-uat-webhook-registration-probe", {
+        method: "POST", hasNonce: Boolean(nonce), hasTimestamp: Boolean(timestamp),
+        signed: false,
+      });
       return new Response(null, {
         status: 200,
         headers: { "Cache-Control": "no-store" },
@@ -72,7 +78,7 @@ export async function POST(request: Request) {
       cache: "no-store",
       signal: AbortSignal.timeout(12000),
     });
-    if (forwarded.ok) return new Response(null, { status: 204 });
+    if (forwarded.ok) return new Response(null, { status: 200 });
     // Do not expose provider responses or protected deployment data.
     if (forwarded.status === 401 || forwarded.status === 403) {
       return Response.json({ error: "Invalid or unauthorized UAT callback." }, { status: 403 });
