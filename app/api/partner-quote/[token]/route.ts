@@ -15,7 +15,7 @@ async function resolveRequest(token: string) {
   }
   const [enquiries, partners] = await Promise.all([
     enquiryDB("partner_enquiries?id=eq." + quote.enquiry_id +
-      "&select=reference,start_date,end_date,nights_min,nights_max,adults,children,meal_plan,requirements,status&limit=1"),
+      "&select=reference,start_date,end_date,dates_flexible,nights_min,nights_max,adults,children,meal_plan,requirements,status&limit=1"),
     enquiryDB("partner_contacts?id=eq." + quote.partner_id + "&select=name,island&limit=1"),
   ]);
   if (!enquiries[0] || enquiries[0].status === "closed" || !partners[0]) {
@@ -31,7 +31,7 @@ export async function GET(_request: Request, context: { params: { token: string 
     return apiJson({
       reference: enquiry.reference,
       partnerName: partner.name, island: partner.island,
-      startDate: enquiry.start_date, endDate: enquiry.end_date,
+      startDate: enquiry.start_date, endDate: enquiry.end_date, datesFlexible: enquiry.dates_flexible,
       nightsMin: enquiry.nights_min, nightsMax: enquiry.nights_max,
       adults: enquiry.adults, children: enquiry.children,
       mealPlan: enquiry.meal_plan, requirements: enquiry.requirements,
