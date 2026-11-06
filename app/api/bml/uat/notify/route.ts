@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
  * signature, rechecks the transaction with BML, and writes a deduplicated
  * record to Tripelor Staging. Never modifies production reservations.
  *
- * An invalid/unverified callback cannot be acknowledged as paid.
+ * BML UAT unsigned registration probes receive HTTP 200 without processing.\n * Actual callbacks still require verified BML signatures and bank API checks.
  */
 const PREVIEW_RECEIVER =
   "https://tripelor-git-feature-bml-uat-checkout-saamils-projects-890c2cf6.vercel.app/api/bml/uat/webhook";
@@ -28,6 +28,25 @@ export function GET() {
 
 export async function POST(request: Request) {
   try {
+    // During UAT, BML validates a newly registered hook with an *unsigned*
+    // HTTP request and requires a 200 response. A probe is not a transaction:
+    // never store, relay, or confirm anything from it.
+    const nonce = request.headers.get("x-signature-nonce") || "";
+    const timestamp = request.headers.get("x-signature-timestamp") || "";
+    const signature = request.headers.get("x-signature") || "";
+    if (!nonce && !timestamp && !signature) {
+      return new Response(null, {
+        status: 200,
+        headers: { "Cache-Control": "no-store" },
+      });
+    }
+
+    // Actual payment callbacks MUST carry all valid signature headers.
+    // Missing or malformed partial signatures remain forbidden.
+    if (!nonce || nonce.length > 256 || !/^[0-9]{10}$/.test(timestamp) ||
+        !/^[a-f0-9]{64}$/i.test(signature)) {
+      return Response.json({ error: "Invalid signed BML webhook." }, { status: 403 });
+    }
     const bypass = process.env.BML_UAT_PREVIEW_BYPASS;
     if (!bypass || !/^[A-Za-z0-9]{32}$/.test(bypass)) {
       return Response.json({ error: "UAT webhook relay not configured." }, { status: 503 });
@@ -35,16 +54,6 @@ export async function POST(request: Request) {
     if (!request.headers.get("content-type")?.includes("application/json") ||
         Number(request.headers.get("content-length") || 0) > 16000) {
       return Response.json({ error: "Invalid webhook payload." }, { status: 400 });
-    }
-
-    // The Preview endpoint verifies these BML-signed headers with the private
-    // BML API key. This relay cannot and does not bypass that verification.
-    const nonce = request.headers.get("x-signature-nonce") || "";
-    const timestamp = request.headers.get("x-signature-timestamp") || "";
-    const signature = request.headers.get("x-signature") || "";
-    if (!nonce || nonce.length > 256 || !/^[0-9]{10}$/.test(timestamp) ||
-        !/^[a-f0-9]{64}$/i.test(signature)) {
-      return Response.json({ error: "Signed BML webhook required." }, { status: 403 });
     }
     const raw = await request.text();
     if (raw.length > 16000) return Response.json({ error: "Payload exceeds limit." }, { status: 413 });
