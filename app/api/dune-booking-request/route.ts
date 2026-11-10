@@ -1,0 +1,14 @@
+import {randomUUID} from "node:crypto";
+const trips:Record<string,Record<string,number>>={
+"DUNE Theia":{"2026-11-17":3495,"2026-11-28":2695,"2027-01-02":2695,"2027-01-16":2695,"2027-01-23":2695,"2027-01-30":2695,"2027-02-06":2695,"2027-02-13":2695,"2027-03-13":2695,"2027-04-03":3795,"2027-04-24":2695},
+"DUNE Black Manta":{"2026-11-14":2795,"2026-11-21":2795,"2026-11-28":2795,"2026-12-05":2795,"2026-12-12":2795,"2026-12-19":2795,"2026-12-26":2795}};
+export async function POST(req:Request){try{const b=await req.json();const str=(x:unknown,max=200)=>typeof x==="string"?x.trim().slice(0,max):"";const vessel=str(b.vessel),departure=str(b.departure,10),name=str(b.name,120),email=str(b.email),phone=str(b.phone,60),cabin=str(b.cabin),notes=str(b.notes,1000),guests=Number(b.guests);
+if(!trips[vessel]?.[departure]||!name||!email.includes("@")||!phone||!Number.isInteger(guests)||guests<1||guests>30||departure<new Date().toISOString().slice(0,10))return Response.json({error:"Please enter valid booking details."},{status:400});
+const apiKey=process.env.RESEND_API_KEY;if(!apiKey)return Response.json({error:"Booking email service unavailable."},{status:503});
+const reference="TRP-DUNE-"+randomUUID().slice(0,8).toUpperCase();
+const text=`Reference: ${reference}\nVessel: ${vessel}\nDeparture: ${departure}\nGuests: ${guests}\nCabin preference: ${cabin}\nPublished fare per guest: USD ${trips[vessel][departure]} (subject to promotions and confirmation)\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nSpecial requests: ${notes}\nStatus: PENDING DUNE CONFIRMATION. No payment collected, no cabin held. Contact booking@dune-world.com to confirm.`;
+const headers={Authorization:"Bearer "+apiKey,"Content-Type":"application/json"};
+const admin=await fetch("https://api.resend.com/emails",{method:"POST",headers,body:JSON.stringify({from:"Tripelor Bookings <bookings@tripelor.com>",to:["bookings@tripelor.com"],reply_to:email,subject:reference+" · DUNE liveaboard booking request",text})});if(!admin.ok)return Response.json({error:"Unable to deliver request. Please contact Tripelor."},{status:502});
+await fetch("https://api.resend.com/emails",{method:"POST",headers,body:JSON.stringify({from:"Tripelor Bookings <bookings@tripelor.com>",to:[email],subject:reference+" · DUNE request received",text:"Dear "+name+",\n\nWe have received your DUNE liveaboard request.\n\n"+text+"\n\nThis is NOT a confirmed booking. We will check availability and final pricing with DUNE and contact you before any payment.\n\nTripelor"})}).catch(()=>{});
+return Response.json({success:true,reference,status:"pending_supplier_confirmation"});
+}catch{return Response.json({error:"Unable to process booking request."},{status:500});}}
