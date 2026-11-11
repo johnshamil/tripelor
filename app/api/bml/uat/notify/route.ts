@@ -49,8 +49,13 @@ export async function POST(request: Request) {
 
     // Actual payment callbacks MUST carry all valid signature headers.
     // Missing or malformed partial signatures remain forbidden.
-    if (!nonce || nonce.length > 256 || !/^[0-9]{10}$/.test(timestamp) ||
+    if (!nonce || nonce.length > 256 || !/^[0-9]{10,13}$/.test(timestamp) ||
         !/^[a-f0-9]{64}$/i.test(signature)) {
+      console.warn("bml-uat-webhook-rejected", {
+        stage: "relay-headers", hasNonce: Boolean(nonce), hasTimestamp: Boolean(timestamp),
+        timestampLength: timestamp.length, hasSignature: Boolean(signature),
+        signatureLength: signature.length, hasOriginator: Boolean(request.headers.get("x-originator")),
+      });
       return Response.json({ error: "Invalid signed BML webhook." }, { status: 403 });
     }
     const bypass = process.env.BML_UAT_PREVIEW_BYPASS;
@@ -69,6 +74,7 @@ export async function POST(request: Request) {
       redirect: "manual",
       headers: {
         "Content-Type": "application/json",
+        ...(request.headers.get("x-originator") ? { "x-originator": request.headers.get("x-originator")! } : {}),
         "x-signature-nonce": nonce,
         "x-signature-timestamp": timestamp,
         "x-signature": signature,
@@ -80,6 +86,11 @@ export async function POST(request: Request) {
     });
     if (forwarded.ok) return new Response(null, { status: 200 });
     // Do not expose provider responses or protected deployment data.
+    console.warn("bml-uat-webhook-rejected", {
+      stage: "preview-handler", upstreamStatus: forwarded.status,
+      hasOriginator: Boolean(request.headers.get("x-originator")),
+      timestampLength: timestamp.length,
+    });
     if (forwarded.status === 401 || forwarded.status === 403) {
       return Response.json({ error: "Invalid or unauthorized UAT callback." }, { status: 403 });
     }
