@@ -25,17 +25,30 @@ export async function POST(request: Request) {
     const nonce = request.headers.get("x-signature-nonce") || "";
     const timestamp = request.headers.get("x-signature-timestamp") || "";
     const signature = request.headers.get("x-signature") || "";
-    if (!nonce || nonce.length > 256 || !/^\d{10}$/.test(timestamp) ||
+    if (!nonce || nonce.length > 256 || !/^\d{10,13}$/.test(timestamp) ||
         !/^[a-f0-9]{64}$/i.test(signature)) {
+      console.warn("bml-uat-webhook-rejected", {
+        stage: "signature-headers", hasNonce: Boolean(nonce), timestampLength: timestamp.length,
+        hasSignature: Boolean(signature), signatureLength: signature.length,
+        hasOriginator: Boolean(request.headers.get("x-originator")),
+      });
       return Response.json({ error: "Invalid BML signature headers" }, { status: 403 });
     }
-    if (Math.abs(Math.floor(Date.now() / 1000) - Number(timestamp)) > 300) {
+    const stampSeconds = timestamp.length === 13 ? Number(timestamp) / 1000 : Number(timestamp);
+    if (Math.abs(Date.now() / 1000 - stampSeconds) > 300) {
+      console.warn("bml-uat-webhook-rejected", {
+        stage: "timestamp-expired", timestampLength: timestamp.length,
+      });
       return Response.json({ error: "Expired webhook timestamp" }, { status: 403 });
     }
     // BML Connect signature: SHA-256(nonce + timestamp + private API key).
     const expected = createHash("sha256").update(nonce + timestamp + apiKey).digest();
     const received = Buffer.from(signature, "hex");
     if (received.length !== expected.length || !timingSafeEqual(received, expected)) {
+      console.warn("bml-uat-webhook-rejected", {
+        stage: "signature-mismatch", timestampLength: timestamp.length,
+        hasOriginator: Boolean(request.headers.get("x-originator")),
+      });
       return Response.json({ error: "Invalid BML webhook signature" }, { status: 403 });
     }
     const raw = await request.text();
