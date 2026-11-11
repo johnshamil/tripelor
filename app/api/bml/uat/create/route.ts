@@ -49,17 +49,15 @@ export async function POST(request: Request) {
     const currency = "MVR";
     const signature = createHash("sha1").update(`amount=${amount}&currency=${currency}&apiKey=${apiKey}`).digest("hex");
     const localId = `TRP-UAT-${randomUUID()}`;
-    // Public merchant-domain callback, which relays signed BML UAT events
-    // to the protected Preview handler. No bypass tokens appear in the BML URL.
-    const hook = "https://www.tripelor.com/api/bml/uat/notify";
+    // BML already registered the production-domain webhook on 5 Nov 2026.
+    // Do not supply another per-transaction webhook; this duplicates events.
     const response = await fetch("https://api.uat.merchants.bankofmaldives.com.mv/public/transactions", {
       method: "POST",
       headers: { Authorization: apiKey, "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
         amount, currency, localId, signature, apiVersion: "2.0",
         appVersion: "tripelor-nextjs-uat", signMethod: "sha1",
-        redirectUrl: `${origin}/bml-uat-test?returned=1`,
-        ...(hook ? { webhook: hook } : {})
+        redirectUrl: `${origin}/bml-uat-test?returned=1`
       }),
       cache: "no-store",
       signal: AbortSignal.timeout(15000)
