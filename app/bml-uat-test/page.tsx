@@ -18,8 +18,8 @@ export default function BmlUatTestPage() {
   const [webhookStatus, setWebhookStatus] = useState("");
   const [webhookConfirmed, setWebhookConfirmed] = useState(false);
   const [webhookLoading, setWebhookLoading] = useState(false);
-  const [registeringWebhook, setRegisteringWebhook] = useState(false);
-  const [webhookRegistrationStatus, setWebhookRegistrationStatus] = useState("");
+  const [cleaningPreview, setCleaningPreview] = useState(false);
+  const [cleanupStatus, setCleanupStatus] = useState("");
 
 
 
@@ -58,30 +58,24 @@ export default function BmlUatTestPage() {
 
   const authorized = auth.status === "signed-in" && auth.email?.toLowerCase() === testerEmail;
 
-  async function registerWebhook() {
-    if (registeringWebhook || !authorized) return;
-    setRegisteringWebhook(true);
-    setWebhookRegistrationStatus("");
+  async function cleanupPreview() {
+    if (cleaningPreview || !authorized) return;
+    if (!window.confirm("Remove ONLY the old protected Vercel Preview webhook registration from BML UAT? The live-domain UAT webhook will remain registered.")) return;
+    setCleaningPreview(true);
+    setCleanupStatus("");
     try {
-      const r = await fetch("/api/bml/uat/register-webhook", {
+      const r = await fetch("/api/bml/uat/cleanup-preview-webhook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: "{}",
+        body: JSON.stringify({ confirm: "REMOVE_OLD_PREVIEW_WEBHOOK" }),
       });
       const data = await r.json();
-      if (!r.ok) {
-        const code = Number.isInteger(data.providerStatus) ? ` (BML HTTP ${data.providerStatus})` : "";
-        const preflight = Number.isInteger(data.endpointStatus)
-          ? ` (Tripelor callback HTTP ${data.endpointStatus})` : "";
-        const bankReason = typeof data.providerReason === "string" && data.providerReason.length <= 180
-          ? ` BML reason: ${data.providerReason}.` : "";
-        throw new Error((data.error || "Registration was not accepted.") + code + preflight + bankReason);
-      }
-      setWebhookRegistrationStatus(data.message || "UAT webhook registration request accepted by BML.");
+      if (!r.ok) throw new Error(data.error || "Unable to remove old Preview registration.");
+      setCleanupStatus(data.message || "BML accepted cleanup of the old Preview URL.");
     } catch (error) {
-      setWebhookRegistrationStatus(error instanceof Error ? error.message : "Webhook registration failed.");
+      setCleanupStatus(error instanceof Error ? error.message : "Cleanup failed.");
     } finally {
-      setRegisteringWebhook(false);
+      setCleaningPreview(false);
     }
   }
 
@@ -182,15 +176,14 @@ export default function BmlUatTestPage() {
           {!authorized && <p className="mt-2 text-red-700">This is not the authorized test account. Use {testerEmail}.</p>}
         </div>}
         {authorized && <section className="rounded-xl border border-slate-300 bg-white p-4 text-sm">
-          <h2 className="font-semibold">BML UAT webhook registration</h2>
-          <p className="mt-2 text-slate-700">
-            Register Tripelor's signed callback with BML before the next test payment. This does not activate live payments.
-          </p>
-          <button type="button" onClick={registerWebhook} disabled={registeringWebhook}
+          <h2 className="font-semibold">BML UAT webhook already registered</h2>
+          <p className="mt-2 text-slate-700">BML confirmed the public callback was registered on 5 November 2026. Do not register it again.</p>
+          <p className="mt-2 text-slate-700">BML also identified an old protected Preview webhook registration that causes duplicate notifications. Remove only that obsolete registration:</p>
+          <button type="button" onClick={cleanupPreview} disabled={cleaningPreview}
             className="mt-3 rounded-lg border border-slate-500 px-4 py-3 font-semibold disabled:opacity-50">
-            {registeringWebhook ? "Registering webhook…" : "Register BML UAT webhook"}
+            {cleaningPreview ? "Removing old Preview webhook…" : "Remove duplicate Preview webhook"}
           </button>
-          {webhookRegistrationStatus && <p role="status" className="mt-3 break-words text-slate-700">{webhookRegistrationStatus}</p>}
+          {cleanupStatus && <p role="status" className="mt-3 break-words text-slate-700">{cleanupStatus}</p>}
         </section>}
         {returned && authorized && <div role="status" className="rounded-lg border border-amber-300 bg-white p-4">
           <p className="font-semibold">BML payment verification</p>
