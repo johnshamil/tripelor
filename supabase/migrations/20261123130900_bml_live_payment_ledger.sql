@@ -17,11 +17,14 @@ create table public.bml_live_payment_intents (
   provider_transaction_id text unique check (provider_transaction_id is null or length(provider_transaction_id) between 4 and 120),
   status text not null default 'awaiting_payment'
     check (status in ('awaiting_payment','initiated','confirmed','failed','cancelled','refunded')),
+  customer_terms_version text check (customer_terms_version is null or length(customer_terms_version) between 5 and 120),
+  customer_terms_accepted_at timestamptz,
   confirmed_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint bml_live_intent_one_booking check (num_nonnulls(reservation_id,cart_booking_id) = 1),
-  constraint bml_live_intent_confirmed_timestamp check (status <> 'confirmed' or confirmed_at is not null)
+  constraint bml_live_intent_confirmed_timestamp check (status <> 'confirmed' or confirmed_at is not null),
+  constraint bml_live_intent_checkout_consent check (status = 'awaiting_payment' or (customer_terms_version is not null and customer_terms_accepted_at is not null))
 );
 comment on table public.bml_live_payment_intents is
   'Server-owned, administrator-approved final payment amounts. This is not a payment gateway or authorization for customer charging. No payment is confirmed by a browser redirect.';
@@ -60,6 +63,8 @@ begin
     or new.approved_by is distinct from old.approved_by
     or new.approved_at is distinct from old.approved_at
     or new.terms_version is distinct from old.terms_version
+    or (old.customer_terms_version is not null and new.customer_terms_version is distinct from old.customer_terms_version)
+    or (old.customer_terms_accepted_at is not null and new.customer_terms_accepted_at is distinct from old.customer_terms_accepted_at)
     or new.idempotency_key is distinct from old.idempotency_key
     or new.local_id is distinct from old.local_id
     or new.id is distinct from old.id then
