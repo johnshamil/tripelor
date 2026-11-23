@@ -88,3 +88,60 @@ revoke all on public.bml_live_payment_events from public,anon,authenticated;
 grant select,insert,update on public.bml_live_payment_intents to service_role;
 grant select,insert on public.bml_live_payment_events to service_role;
 revoke all on function public.prevent_bml_live_intent_terms_update() from public,anon,authenticated;
+
+
+-- The API MUST authenticate and independently verify the bank transaction
+-- (amount, USD currency, localId and provider ID) before invoking this RPC.
+-- Inside PostgreSQL a single transaction commits both the verified event and
+-- the payment status. Only service_role can execute.
+create function public.bml_record_verified_payment(
+  p_intent_id uuid, p_provider_transaction_id text,
+  p_provider_state text, p_event_type text, p_signature_timestamp bigint
+) returns table(payment_status text, booking_marked_paid boolean)
+language plpgsql security invoker set search_path = ''
+as $function$
+declare
+  v public.bml_live_payment_intents%rowtype;
+  v_new_status text;
+  v_booked boolean := false;
+begin
+  if p_provider_state not in ('INITIATED','CONFIRMED','CANCELLED','FAILED','EXPIRED','VOIDED','AUTHORIZED','REFUND_REQUESTED','REFUNDED')
+     or p_event_type <> 'NOTIFY_TRANSACTION_CHANGE'
+     or p_provider_transaction_id is null or length(p_provider_transaction_id) not between 4 and 100
+     or p_signature_timestamp is null or p_signature_timestamp <= 0
+  then raise exception using errcode='23514',message='BML_VERIFIED_EVENT_INVALID'; end if;
+
+  select * into v from public.bml_live_payment_intents where id = p_intent_id for update;
+  if not found or v.provider_transaction_id is distinct from p_provider_transaction_id
+    or v.customer_terms_accepted_at is null or v.customer_terms_version is null
+  then raise exception using errcode='23514',message='BML_PAYMENT_LINKAGE_INVALID'; end if;
+
+  insert into public.bml_live_payment_events(intent_id,provider_transaction_id,provider_state,event_type,signature_timestamp)
+  values(v.id,p_provider_transaction_id,p_provider_state,p_event_type,p_signature_timestamp)
+  on conflict (provider_transaction_id, provider_state) do nothing;
+
+  -- Confirm only after a server-verified bank CONFIRMED status. Never allow
+  -- late INITIATED/FAILED webhooks to undo a previously confirmed payment.
+  if p_provider_state = 'CONFIRMED' and v.status not in ('confirmed','refunded') then
+    update public.bml_live_payment_intents
+    set status = 'confirmed', confirmed_at = now() where id = v.id;
+    if v.reservation_id is not null then
+      update public.reservations
+      set payment_status = 'paid'
+      where id = v.reservation_id and status = 'confirmed'
+        and payment_status in ('unpaid','partial');
+      get diagnostics v_booked = row_count;
+    end if;
+  elsif p_provider_state = 'REFUNDED' and v.status = 'confirmed' then
+    update public.bml_live_payment_intents set status = 'refunded' where id = v.id;
+    -- Booking-side refund workflows require separate refund accounting.
+  elsif p_provider_state in ('CANCELLED','FAILED','EXPIRED','VOIDED') and v.status in ('awaiting_payment','initiated') then
+    v_new_status := case when p_provider_state = 'CANCELLED' then 'cancelled' else 'failed' end;
+    update public.bml_live_payment_intents set status = v_new_status where id = v.id;
+  end if;
+
+  return query select i.status, v_booked from public.bml_live_payment_intents i where i.id = v.id;
+end;
+$function$;
+revoke all on function public.bml_record_verified_payment(uuid,text,text,text,bigint) from public,anon,authenticated;
+grant execute on function public.bml_record_verified_payment(uuid,text,text,text,bigint) to service_role;
