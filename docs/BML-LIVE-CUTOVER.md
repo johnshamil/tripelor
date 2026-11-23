@@ -43,3 +43,26 @@ This document describes the controlled transition from the confirmed UAT proof o
 The new admin-only `GET /api/admin/bml-live/readiness` route returns check states and blockers without any credentials. It is deliberately **fail-closed**; until payment-intent processing and bank-verified webhook reconciliation have been implemented and tested it will never report ready. This route is not a working payment flow.
 
 BML application reference: MO-000698/2026. The BML activation email was received 23 November 2026.
+
+
+## 5. Prepared application routes (draft PR #125)
+
+- `/admin/payment-requests`: admins select a **confirmed USD reservation**, verify the actual final amount, and issue one idempotent payment link.
+- `POST /api/admin/bml-live/approve`: server-side admin authorization, immutable approved amount and booking reference.
+- `/pay/[id]`: signed-in guest can view their approved total and explicitly accept purchase/payment terms before attempting the BML redirect.
+- `GET/POST /api/bml/live/checkout`: read guest-owned payment intent or attempt exactly one server-side BML transaction when the launch flag is enabled.
+- `POST /api/bml/live/webhook`: verifies BML signature, calls bank API for authoritative state, compares the stored immutable localId/currency/amount and commits the event/payment status atomically using `bml_record_verified_payment`.
+
+**These routes are code-prepared only and have not been merged or activated in Production.** Bank live transaction initiation, production webhook registration, payment redirect results and a real test card charge are not yet verified.
+
+## 6. Verified staging checks — 23 November 2026
+
+- Installed the payment-intent / verified-event migration **only in Tripelor Staging**, not production.
+- Verified RLS is enabled on both tables, ordinary unauthenticated/authenticated roles cannot read them, and the service role has required write permissions.
+- Verified the record-payment RPC is executable only by the service role.
+- Tested an example signed-provider-verified state in a *rolled-back SQL transaction* (no actual bank request), then confirmed a subsequent duplicate state created no duplicate event.
+- Tested that a staged confirmed unpaid reservation becomes paid after the verified-event RPC (and no earlier); rolled back that transaction.
+- Confirmed there were zero test intents, zero test events and zero resulting confirmed staging reservations after rollback.
+- Vercel preview builds passed the Next.js build; these are not end-to-end BML tests.
+
+Remaining launch blockers: BML's confirmation that the screenshot-exposed original key was revoked; review/merge and production migration approval; production webhook registration and cryptographic testing; real transaction + return/reconciliation/refund/settlement smoke tests; explicit approval to turn on `BML_LIVE_PAYMENTS_ENABLED`.
