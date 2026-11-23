@@ -27,7 +27,16 @@ export async function POST(request: Request) {
       return safeJson({ error: "Select a confirmed booking, enter the approved USD amount and explicitly approve." }, 400);
     }
     const existing = await db(`bml_live_payment_intents?select=*&idempotency_key=eq.${encodeURIComponent(input.idempotencyKey)}&limit=1`);
-    if (existing?.length) return safeJson({ intentId: existing[0].id, paymentUrl: `/pay/${existing[0].id}`, existing: true });
+    if (existing?.length) {
+      const original = existing[0];
+      const matchingBooking = input.bookingType === "reservation"
+        ? original.reservation_id === input.bookingId
+        : original.cart_booking_id === input.bookingId;
+      if (!matchingBooking || Number(original.approved_amount_minor) !== input.finalAmountMinor) {
+        return safeJson({ error: "This request key belongs to a different booking or approved amount." }, 409);
+      }
+      return safeJson({ intentId: original.id, paymentUrl: `/pay/${original.id}`, existing: true });
+    }
     const table = input.bookingType === "reservation" ? "reservations" : "cart_booking_requests";
     const rows = await db(`${table}?select=*&id=eq.${encodeURIComponent(input.bookingId)}&limit=1`);
     const booking = rows?.[0];
@@ -38,6 +47,20 @@ export async function POST(request: Request) {
     if (input.bookingType === "reservation" &&
       (booking.currency !== "USD" || booking.payment_status === "paid")) {
       return safeJson({ error: "Only unpaid USD reservations can be charged through this application." }, 409);
+    }
+    // During the initial rollout there can be only one payment request per
+    // booking, even after a failed/cancelled bank state. Do not make a second
+    // attempt until the bank has reconciled the first transaction.
+    const bookingKey = input.bookingType === "reservation" ? "reservation_id" : "cart_booking_id";
+    const byBooking = await db(
+      `bml_live_payment_intents?select=*&${bookingKey}=eq.${encodeURIComponent(input.bookingId)}&limit=1`
+    );
+    if (byBooking?.length) {
+      const original = byBooking[0];
+      if (Number(original.approved_amount_minor) !== input.finalAmountMinor) {
+        return safeJson({ error: "This booking already has a payment request for a different approved amount. Reconcile that request before editing the price." }, 409);
+      }
+      return safeJson({ intentId: original.id, paymentUrl: `/pay/${original.id}`, existing: true });
     }
     const payload = {
       reservation_id: input.bookingType === "reservation" ? input.bookingId : null,
