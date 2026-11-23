@@ -21,5 +21,7 @@ jobs:
         run: node tests/signin-notifications.cjs
       - name: Test Nala Veli pricing
         run: node tests/nala-veli-pricing.cjs
+      - name: Test BML live payment integrity (offline only)
+        run: node --test tests/bml-live.test.cjs
       - name: Build
         run: npm run build
