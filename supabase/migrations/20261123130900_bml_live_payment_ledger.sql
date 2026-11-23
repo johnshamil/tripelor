@@ -121,9 +121,19 @@ begin
   then raise exception using errcode='23514',message='BML_VERIFIED_EVENT_INVALID'; end if;
 
   select * into v from public.bml_live_payment_intents where id = p_intent_id for update;
-  if not found or v.provider_transaction_id is distinct from p_provider_transaction_id
-    or v.customer_terms_accepted_at is null or v.customer_terms_version is null
+  if not found or v.customer_terms_accepted_at is null or v.customer_terms_version is null
   then raise exception using errcode='23514',message='BML_PAYMENT_LINKAGE_INVALID'; end if;
+
+  -- A legitimate signed webhook may beat the HTTP create-transaction reply.
+  -- The server already verified transaction currency, amount and local ID
+  -- against BML before calling this function. Claim the provider ID exactly
+  -- once under row lock; never attach a bank ID to an unstarted payment.
+  if v.provider_transaction_id is null and v.status = 'initiated' then
+    update public.bml_live_payment_intents
+    set provider_transaction_id = p_provider_transaction_id where id = v.id;
+  elsif v.provider_transaction_id is distinct from p_provider_transaction_id then
+    raise exception using errcode='23514',message='BML_PAYMENT_LINKAGE_INVALID';
+  end if;
 
   insert into public.bml_live_payment_events(intent_id,provider_transaction_id,provider_state,event_type,signature_timestamp)
   values(v.id,p_provider_transaction_id,p_provider_state,p_event_type,p_signature_timestamp)
