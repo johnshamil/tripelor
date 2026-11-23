@@ -104,6 +104,7 @@ declare
   v public.bml_live_payment_intents%rowtype;
   v_new_status text;
   v_booked boolean := false;
+  v_updated_count bigint := 0;
 begin
   if p_provider_state not in ('INITIATED','CONFIRMED','CANCELLED','FAILED','EXPIRED','VOIDED','AUTHORIZED','REFUND_REQUESTED','REFUNDED')
      or p_event_type <> 'NOTIFY_TRANSACTION_CHANGE'
@@ -130,7 +131,8 @@ begin
       set payment_status = 'paid'
       where id = v.reservation_id and status = 'confirmed'
         and payment_status in ('unpaid','partial');
-      get diagnostics v_booked = row_count;
+      get diagnostics v_updated_count = row_count;
+      v_booked := v_updated_count > 0;
     end if;
   elsif p_provider_state = 'REFUNDED' and v.status = 'confirmed' then
     update public.bml_live_payment_intents set status = 'refunded' where id = v.id;
