@@ -127,10 +127,10 @@ begin
     update public.bml_live_payment_intents
     set status = 'confirmed', confirmed_at = now() where id = v.id;
     if v.reservation_id is not null then
-      update public.reservations
+      update public.reservations r
       set payment_status = 'paid'
-      where id = v.reservation_id and status = 'confirmed'
-        and payment_status in ('unpaid','partial');
+      where r.id = v.reservation_id and r.status = 'confirmed'
+        and r.payment_status in ('unpaid','partial');
       get diagnostics v_updated_count = row_count;
       v_booked := v_updated_count > 0;
     end if;
