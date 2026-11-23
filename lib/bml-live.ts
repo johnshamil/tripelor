@@ -63,12 +63,13 @@ export function bankSignature(amount: number, currency: "USD", key: string) {
   return createHash("sha1").update(`amount=${amount}&currency=${currency}&apiKey=${key}`).digest("hex");
 }
 export async function bankCreate(intent: PaymentIntent, redirectUrl: string) {
-  const { apiKey } = requireBankConfig();
+  const { apiKey, appId } = requireBankConfig();
   const response = await fetch(BML_API, {
     method: "POST", headers: { Authorization: apiKey, Accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify({
       amount: intent.approved_amount_minor,
       currency: intent.currency,
+      deviceId: appId,
       localId: intent.local_id,
       customerReference: intent.booking_reference,
       redirectUrl,
@@ -108,7 +109,11 @@ export async function bankGet(id: string) {
 }
 export function matchesVerifiedTransaction(intent: PaymentIntent, bank: any, id: string) {
   return (
-    intent.provider_transaction_id === id &&
+    (
+      intent.provider_transaction_id === id ||
+      (intent.provider_transaction_id === null && intent.status === "initiated" &&
+        Boolean(intent.customer_terms_accepted_at))
+    ) &&
     (!bank?.id || String(bank.id) === id) &&
     bank?.localId === intent.local_id &&
     bank?.currency === intent.currency &&
