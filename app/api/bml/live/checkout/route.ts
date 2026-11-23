@@ -77,7 +77,13 @@ export async function POST(request: Request) {
       { method: "PATCH", body: JSON.stringify({ provider_transaction_id: bml.id }) }
     );
     if (!updated || updated.length !== 1) {
-      return safeJson({ error: "Bank checkout was initiated but reconciliation is required. Contact Tripelor; do not retry." }, 503);
+      // A verified BML webhook can be processed before bankCreate returns.
+      // Do not overwrite that update, and never create a second transaction.
+      const reconciled = await findIntent(intent.id);
+      if (!reconciled || reconciled.provider_transaction_id !== bml.id ||
+          !["initiated", "confirmed"].includes(reconciled.status)) {
+        return safeJson({ error: "Bank checkout was initiated but reconciliation is required. Contact Tripelor; do not retry." }, 503);
+      }
     }
     return safeJson({ checkoutUrl: bml.url }, 200);
   } catch (error) {
