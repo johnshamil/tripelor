@@ -89,3 +89,61 @@ test("BML signed request does not require card credentials in browser", () => {
   assert.equal(bml.paymentId.test("11111111-1111-4111-8111-111111111111"), true);
   assert.equal(bml.paymentId.test("../admin"), false);
 });
+
+
+test("early confirmed webhook matches only an initiated, consented bank transaction", () => {
+  const bank = { id: "txn_confirmed_001", localId: "TRP-LIVE-early", amount: 500, currency: "USD" };
+  const base = {
+    local_id: bank.localId,
+    approved_amount_minor: 500,
+    currency: "USD",
+    provider_transaction_id: null,
+    status: "initiated",
+    customer_terms_accepted_at: new Date().toISOString(),
+  };
+  assert.equal(bml.matchesVerifiedTransaction(base, bank, bank.id), true);
+  assert.equal(bml.matchesVerifiedTransaction({ ...base, status: "awaiting_payment" }, bank, bank.id), false);
+  assert.equal(bml.matchesVerifiedTransaction({ ...base, customer_terms_accepted_at: null }, bank, bank.id), false);
+  assert.equal(bml.matchesVerifiedTransaction({ ...base, approved_amount_minor: 501 }, bank, bank.id), false);
+  assert.equal(bml.matchesVerifiedTransaction({ ...base, provider_transaction_id: "other_bank_id" }, bank, bank.id), false);
+});
+
+test("bank transaction request uses app ID and never sends the key in body", async () => {
+  const fetchBefore = global.fetch;
+  const keyBefore = process.env.BML_LIVE_API_KEY;
+  const appBefore = process.env.BML_LIVE_APPLICATION_ID;
+  process.env.BML_LIVE_API_KEY = "offline-fake-bml-secret";
+  process.env.BML_LIVE_APPLICATION_ID = "11111111-1111-4111-8111-111111111111";
+  try {
+    let called = 0;
+    global.fetch = async (url, options) => {
+      called += 1;
+      assert.equal(url, "https://api.merchants.bankofmaldives.com.mv/public/transactions");
+      assert.equal(options.headers.Authorization, process.env.BML_LIVE_API_KEY);
+      const payload = JSON.parse(options.body);
+      assert.equal(payload.deviceId, process.env.BML_LIVE_APPLICATION_ID);
+      assert.equal(payload.amount, 250);
+      assert.equal(payload.currency, "USD");
+      assert.equal(payload.localId, "TRP-LIVE-offline");
+      assert.equal(JSON.stringify(payload).includes(process.env.BML_LIVE_API_KEY), false);
+      return Response.json({
+        id: "bank_txn_12345",
+        url: "https://checkout.merchants.bankofmaldives.com.mv/checkout/test",
+      });
+    };
+    const result = await bml.bankCreate({
+      approved_amount_minor: 250,
+      currency: "USD",
+      local_id: "TRP-LIVE-offline",
+      booking_reference: "TRP-TEST",
+    }, "https://www.tripelor.com/pay/test");
+    assert.equal(result.id, "bank_txn_12345");
+    assert.equal(called, 1);
+  } finally {
+    global.fetch = fetchBefore;
+    if (keyBefore === undefined) delete process.env.BML_LIVE_API_KEY;
+    else process.env.BML_LIVE_API_KEY = keyBefore;
+    if (appBefore === undefined) delete process.env.BML_LIVE_APPLICATION_ID;
+    else process.env.BML_LIVE_APPLICATION_ID = appBefore;
+  }
+});
