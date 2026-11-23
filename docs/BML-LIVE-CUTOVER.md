@@ -66,3 +66,16 @@ BML application reference: MO-000698/2026. The BML activation email was received
 - Vercel preview builds passed the Next.js build; these are not end-to-end BML tests.
 
 Remaining launch blockers: BML's confirmation that the screenshot-exposed original key was revoked; review/merge and production migration approval; production webhook registration and cryptographic testing; real transaction + return/reconciliation/refund/settlement smoke tests; explicit approval to turn on `BML_LIVE_PAYMENTS_ENABLED`.
+
+
+## 7. Final preparation review — early callbacks and retry safety
+
+- Confirmed BML's published SDK examples use the production `/public/transactions` endpoint, signed amount/currency and application identification; added `deviceId` from the configured `BML_LIVE_APPLICATION_ID` to the **draft** transaction request. BML must still confirm the current production contract for this merchant and whether any later v2 variant applies.
+- Fixed the callback race: a valid, bank-verified signed webhook arriving before the create response is saved may claim the bank transaction ID atomically, **only** for a previously initiated, guest-consented payment intent, and only after checking immutable amount/currency/local ID.
+- Checkout now recognizes a bank ID already saved by a verified webhook rather than overwriting it or starting a duplicate payment.
+- Initial rollout now enforces **one payment intent per booking for its lifetime**, not merely one active intent. Even if a prior attempt appears FAILED, staff must reconcile it with BML before further payments. An alternative retry/refund workflow can be developed and reviewed later.
+- Admin endpoint returns an already-created payment link for the same booking and amount, and rejects attempts to change its amount or reuse an idempotency key across different bookings.
+- Staging SQL tests used transaction rollback and confirmed that an early provider ID is linked securely, the matching confirmed reservation is paid once, mismatched provider IDs are blocked, and a second request after FAILED status cannot be created.
+- Offline unit tests run with **fake** keys and a mocked BML HTTP response. They do not contact live BML, charge cards, or reveal credentials.
+
+**Production release remains BLOCKED** while old-key revocation, live webhook registration, real provider response compatibility, refund handling and reconciliation tests are outstanding.
