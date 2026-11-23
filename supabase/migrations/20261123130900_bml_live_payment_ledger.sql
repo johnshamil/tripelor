@@ -43,6 +43,14 @@ create table public.bml_live_payment_events (
   verified_at timestamptz not null default now(),
   unique (provider_transaction_id, provider_state)
 );
+-- Prevent multiple chargeable requests for the same booking, even when
+-- separate admin browser tabs submit different idempotency keys.
+create unique index bml_live_one_active_reservation
+  on public.bml_live_payment_intents(reservation_id)
+  where reservation_id is not null and status in ('awaiting_payment','initiated','confirmed');
+create unique index bml_live_one_active_cart
+  on public.bml_live_payment_intents(cart_booking_id)
+  where cart_booking_id is not null and status in ('awaiting_payment','initiated','confirmed');
 create index bml_live_intents_reservation_idx on public.bml_live_payment_intents(reservation_id) where reservation_id is not null;
 create index bml_live_intents_cart_idx on public.bml_live_payment_intents(cart_booking_id) where cart_booking_id is not null;
 create index bml_live_intents_status_idx on public.bml_live_payment_intents(status, created_at desc);
